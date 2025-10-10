@@ -2,3 +2,7 @@ backend/venv/
 backend/*/__pycache__/
 *.pyc
 backend/jcu_library.db
+
+/build
+*.log
+.idea/
