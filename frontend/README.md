@@ -24,9 +24,6 @@
 │   │   │   └── index.tsx           # returned from /src/app/index.tsx
 │   │   ├── Events.tsx              # returned from /src/app/events.tsx
 │   │   └── Settings.tsx            # returned from /src/app/settings.tsx
-│   ├── server/                     # code used in /api
-│   │   ├── auth.ts
-│   │   └── db.ts
 │   ├── utils/                      # reusable utilities
 │   │   ├── formatDate.ts
 │   │   ├── formatDate.test.ts      # unit test next to the file being tested
