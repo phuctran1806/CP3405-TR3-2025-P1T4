@@ -51,7 +51,7 @@ export default function LocationCard({
             <Image
               source={image}
               alt={name}
-              style={{ width: '100%', height: '100%', resizeMode: 'contain' }}
+              style={{ width: '100%', height: '100%', resizeMode: 'cover' }}
             />
           </Box>
         </Box>

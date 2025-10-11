@@ -2,6 +2,7 @@ import studyHubEImage from '../../assets/study-hub-e.jpg';
 import studyHubAImage from '../../assets/study-hub-a.jpg';
 import libraryImage from '../../assets/library.jpg';
 import studyPodsImage from '../../assets/study-pods.jpg';
+import yardImage from '../../assets/yard.jpg';
 import { ImageSourcePropType } from 'react-native';
 
 export interface Location {
@@ -44,11 +45,11 @@ export const locations: Location[] = [
       coordinates: { latitude: 1.3518, longitude: 103.8195 },
       accessibility: ['power', 'wifi'],
     },
-  // {
-  //   id: '5',
-  //   name: 'Courtyard',
-  //   image: 'placeholder',
-  //   coordinates: { latitude: 1.3515, longitude: 103.8190 },
-  //   accessibility: ['wifi'],
-  // },
+  {
+    id: '5',
+    name: 'Courtyard',
+    image: yardImage,
+    coordinates: { latitude: 1.3515, longitude: 103.8190 },
+    accessibility: ['wifi'],
+  },
 ];
