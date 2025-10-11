@@ -1,5 +1,6 @@
 import React from 'react';
 import { Box, HStack, VStack, Text, Avatar, AvatarImage } from '@gluestack-ui/themed';
+import { Image } from 'react-native';
 
 export default function Header() {
   return (
@@ -33,9 +34,11 @@ export default function Header() {
           justifyContent="center"
           alignItems="center"
         >
-          <Text fontSize="$xs" color="$gray600" textAlign="center">
-            School Logo
-          </Text>
+          <Image
+            source={require('../../../assets/jcu-logo.png')}
+            alt="JCU Logo"
+            style={{ width: 200, height: 200, resizeMode: 'contain' }}
+          />
         </Box>
       </HStack>
     </Box>

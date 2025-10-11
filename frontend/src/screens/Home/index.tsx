@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ScrollView, RefreshControl, Alert } from 'react-native';
+import { ScrollView, RefreshControl, Alert, ImageSourcePropType } from 'react-native';
 import { Box, VStack, Text, Spinner } from '@gluestack-ui/themed';
 import * as Location from 'expo-location';
 import Header from './Header';
@@ -10,7 +10,7 @@ import { calculateDistance, formatDistance } from '../../utils/calculateDistance
 interface LocationWithDistance {
   id: string;
   name: string;
-  image: string;
+  image: ImageSourcePropType;
   accessibility: ('power' | 'cool' | 'wifi' | 'quiet')[];
   distance: string;
 }
@@ -108,7 +108,9 @@ export default function Home() {
 
         <VStack space="md">
           {locationsWithDistance.length > 0 ? (
-            locationsWithDistance.map((location) => (
+            locationsWithDistance.map((location) => {
+              console.log(location.image);
+              return (
               <LocationCard
                 key={location.id}
                 name={location.name}
@@ -117,7 +119,7 @@ export default function Home() {
                 accessibility={location.accessibility}
                 onPress={() => handleLocationPress(location.name)}
               />
-            ))
+            )})
           ) : (
             locations.map((location) => (
               <LocationCard

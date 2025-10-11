@@ -4,16 +4,16 @@ import {
   HStack,
   VStack,
   Text,
-  Image,
   Icon,
   Pressable,
 } from '@gluestack-ui/themed';
 import { MapPin } from 'lucide-react-native';
 import { accessibilityMapping, AccessibilityFeature } from '../utils/accessibilityIcons';
+import { Image, ImageSourcePropType } from 'react-native';
 
 interface LocationCardProps {
   name: string;
-  image: string;
+  image: ImageSourcePropType;
   distance: string;
   accessibility: AccessibilityFeature[];
   onPress?: () => void;
@@ -38,6 +38,8 @@ export default function LocationCard({
         shadowRadius={8}
         elevation={3}
         mb="$4"
+        width={272}
+        alignSelf='center'
       >
         <Box height={180} bg="$gray200">
           <Box
@@ -46,9 +48,11 @@ export default function LocationCard({
             alignItems="center"
             bg="$blue100"
           >
-            <Text color="$blue600" fontSize="$sm">
-              {name} Image
-            </Text>
+            <Image
+              source={image}
+              alt={name}
+              style={{ width: '100%', height: '100%', resizeMode: 'contain' }}
+            />
           </Box>
         </Box>
 
