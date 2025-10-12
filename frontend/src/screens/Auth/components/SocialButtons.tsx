@@ -1,7 +1,8 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { Image, View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { colors } from '@/constants/colors';
 import { spacing } from '@/constants/spacing';
+
 
 interface SocialButtonsProps {
   onSocialLogin: (provider: string) => void;
@@ -9,10 +10,26 @@ interface SocialButtonsProps {
 
 const SocialButtons: React.FC<SocialButtonsProps> = ({ onSocialLogin }) => {
   const socialProviders = [
-    { id: 'google', icon: 'G', label: 'Google' },
-    { id: 'facebook', icon: 'f', label: 'Facebook' },
-    { id: 'apple', icon: '🍎', label: 'Apple' },
-    { id: 'github', icon: '⚙', label: 'GitHub' },
+    {
+      id: 'google',
+      icon: <Image source={require('assets/icons/google.png')} style={{ width: 24, height: 24 }} />,
+      label: 'Google',
+    },
+    {
+      id: 'facebook',
+      icon: <Image source={require('assets/icons/facebook.png')} style={{ width: 24, height: 24 }} />,
+      label: 'Facebook',
+    },
+    {
+      id: 'apple',
+      icon: <Image source={require('assets/icons/apple.png')} style={{ width: 24, height: 24 }} />,
+      label: 'Apple',
+    },
+    {
+      id: 'github',
+      icon: <Image source={require('assets/icons/github.png')} style={{ width: 24, height: 24 }} />,
+      label: 'GitHub',
+    },
   ];
 
   return (

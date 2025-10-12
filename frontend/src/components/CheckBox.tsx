@@ -1,59 +1,45 @@
 import React from 'react';
-import { TouchableOpacity, Text, StyleSheet, ViewStyle } from 'react-native';
-import { colors } from '@/constants/colors';
+import {
+  Checkbox as GSCheckbox,
+  CheckboxIndicator,
+  CheckboxLabel,
+  CheckboxIcon,
+} from '@/components/ui/checkbox';
+import { CheckIcon } from '@/components/ui/icon';
 
-interface CustomButtonProps {
-  title: string;
-  onPress: () => void;
-  style?: ViewStyle;
-  variant?: 'primary' | 'secondary';
+interface CheckBoxProps {
+  checked: boolean;
+  onToggle: () => void;
+  label: string;
+  disabled?: boolean;
+  invalid?: boolean;
+  size?: 'sm' | 'md' | 'lg';
 }
 
-const CustomButton: React.FC<CustomButtonProps> = ({ 
-  title, 
-  onPress, 
-  style,
-  variant = 'primary' 
+const CheckBox: React.FC<CheckBoxProps> = ({
+  checked,
+  onToggle,
+  label,
+  disabled = false,
+  invalid = false,
+  size = 'md',
 }) => {
   return (
-    <TouchableOpacity 
-      style={[
-        styles.button, 
-        variant === 'secondary' && styles.secondaryButton,
-        style
-      ]}
-      onPress={onPress}
+    <GSCheckbox
+      isChecked={checked}
+      onChange={onToggle}
+      isDisabled={disabled}
+      isInvalid={invalid}
+      size={size}
+      value={label}
     >
-      <Text style={[
-        styles.buttonText,
-        variant === 'secondary' && styles.secondaryButtonText
-      ]}>
-        {title}
-      </Text>
-    </TouchableOpacity>
+      <CheckboxIndicator>
+        <CheckboxIcon as={CheckIcon} />
+      </CheckboxIndicator>
+      <CheckboxLabel>{label}</CheckboxLabel>
+    </GSCheckbox>
   );
 };
 
-const styles = StyleSheet.create({
-  button: {
-    backgroundColor: colors.blue500,
-    borderRadius: 8,
-    padding: 16,
-    alignItems: 'center',
-  },
-  buttonText: {
-    color: colors.white,
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  secondaryButton: {
-    backgroundColor: 'transparent',
-    borderWidth: 1,
-    borderColor: colors.blue500,
-  },
-  secondaryButtonText: {
-    color: colors.blue500,
-  },
-});
+export default CheckBox;
 
-export default CustomButton;

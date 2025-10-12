@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Image, StyleSheet } from 'react-native';
 import { colors } from '@/constants/colors';
 import { spacing } from '@/constants/spacing';
 
@@ -7,7 +7,11 @@ const LogoPlaceholder = () => {
   return (
     <View style={styles.logoContainer}>
       <View style={styles.logoPlaceholder}>
-        <Text style={styles.logoText}>LOGO</Text>
+        <Image
+          source={require("assets/logo.png")}
+          style={styles.logoImage}
+          resizeMode="contain"
+        />
       </View>
     </View>
   );
@@ -18,17 +22,17 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xl,
   },
   logoPlaceholder: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
+    width: 200,
+    height: 200,
+    borderRadius: 100,
     backgroundColor: colors.white,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  logoText: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#1A2942',
+  logoImage: {
+    width: 150,
+    height: 150,
+    borderRadius: 75,
   },
 });
 

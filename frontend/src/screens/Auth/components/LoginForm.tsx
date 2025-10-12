@@ -1,8 +1,9 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import CheckBox from '@/components/CheckBox';
+import SocialButtons from './SocialButtons';
 import CustomInput from '@/components/CustomInput';
 import CustomButton from '@/components/CustomButton';
-import Checkbox from '@/components/CheckBox';
 import { colors } from '@/constants/colors';
 import { spacing } from '@/constants/spacing';
 
@@ -16,6 +17,7 @@ interface LoginFormProps {
   onLogin: () => void;
   onForgotPassword: () => void;
   onSignUp: () => void;
+  onSocialLogin: (provider: string) => void;
 }
 
 const LoginForm: React.FC<LoginFormProps> = ({
@@ -28,6 +30,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
   onLogin,
   onForgotPassword,
   onSignUp,
+  onSocialLogin,
 }) => {
   return (
     <View style={styles.loginCard}>
@@ -53,7 +56,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
       />
 
       <View style={styles.optionsRow}>
-        <Checkbox
+        <CheckBox
           checked={rememberMe}
           onToggle={onRememberMeToggle}
           label="Remember me"
@@ -64,8 +67,8 @@ const LoginForm: React.FC<LoginFormProps> = ({
         </TouchableOpacity>
       </View>
 
-      <CustomButton 
-        title="Log in" 
+      <CustomButton
+        title="Log in"
         onPress={onLogin}
         style={styles.loginButton}
       />
@@ -76,8 +79,10 @@ const LoginForm: React.FC<LoginFormProps> = ({
         <View style={styles.dividerLine} />
       </View>
 
+      <SocialButtons onSocialLogin={onSocialLogin} />
+
       <View style={styles.signUpContainer}>
-        <Text style={styles.signUpText}>Don't have an account? </Text>
+        <Text style={styles.signUpText}>Don&apos;t have an account? </Text>
         <TouchableOpacity onPress={onSignUp}>
           <Text style={styles.signUpLink}>Sign Up</Text>
         </TouchableOpacity>

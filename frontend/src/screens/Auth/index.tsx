@@ -6,7 +6,6 @@ import {
   ScrollView
 } from 'react-native';
 import LoginForm from './components/LoginForm';
-import SocialButtons from './components/SocialButtons';
 import AuthFooter from './components/AuthFooter';
 import LogoPlaceholder from '@/components/LogoPlaceholder';
 
@@ -57,9 +56,8 @@ const LoginScreen = () => {
           onLogin={handleLogin}
           onForgotPassword={handleForgotPassword}
           onSignUp={handleSignUp}
+          onSocialLogin={handleSocialLogin}
         />
-
-        <SocialButtons onSocialLogin={handleSocialLogin} />
 
         <AuthFooter onGuestLogin={handleGuestLogin} />
       </ScrollView>
