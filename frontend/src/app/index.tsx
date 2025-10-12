@@ -1,10 +1,11 @@
 import React from 'react';
-import { GluestackUIProvider } from '@/components/ui/gluestack-ui-provider';
+import { GluestackUIProvider } from "@gluestack-ui/themed";
+import { config } from "@gluestack-ui/config";
 import LoginScreen from '@/screens/Auth';
 
 export default function App() {
   return (
-    <GluestackUIProvider>
+    <GluestackUIProvider config={config}>
       <LoginScreen />
     </GluestackUIProvider>
   );

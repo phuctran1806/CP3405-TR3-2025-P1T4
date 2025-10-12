@@ -4,7 +4,9 @@ import {
   CheckboxIndicator,
   CheckboxLabel,
   CheckboxIcon,
-} from '@/components/ui/checkbox';
+  Box,
+  HStack,
+} from "@gluestack-ui/themed";
 import { CheckIcon } from '@/components/ui/icon';
 
 interface CheckBoxProps {
@@ -22,22 +24,25 @@ const CheckBox: React.FC<CheckBoxProps> = ({
   label,
   disabled = false,
   invalid = false,
-  size = 'md',
+  size = 'sm',
 }) => {
   return (
-    <GSCheckbox
-      isChecked={checked}
-      onChange={onToggle}
-      isDisabled={disabled}
-      isInvalid={invalid}
-      size={size}
-      value={label}
-    >
-      <CheckboxIndicator>
-        <CheckboxIcon as={CheckIcon} />
-      </CheckboxIndicator>
-      <CheckboxLabel>{label}</CheckboxLabel>
-    </GSCheckbox>
+    <HStack>
+      <GSCheckbox
+        isChecked={checked}
+        onChange={onToggle}
+        isDisabled={disabled}
+        isInvalid={invalid}
+        size={size}
+        value={label}
+        mr="$3"
+      >
+        <CheckboxIndicator>
+          <CheckboxIcon as={CheckIcon} />
+        </CheckboxIndicator>
+        <CheckboxLabel>{label}</CheckboxLabel>
+      </GSCheckbox>
+    </HStack>
   );
 };
 
