@@ -1,13 +1,8 @@
-import React from 'react';
-import { GluestackUIProvider } from "@gluestack-ui/themed";
-import { config } from "@gluestack-ui/config";
-import LoginScreen from '@/screens/Auth';
+// src/app/index.tsx
+import { Text } from "@react-navigation/elements";
+import React from "react";
+import Home from "../screens/Home";
 
-export default function App() {
-  return (
-    <GluestackUIProvider config={config}>
-      <LoginScreen />
-    </GluestackUIProvider>
-  );
+export default function Index() {
+  return <Home />;
 }
-
