@@ -1,5 +1,11 @@
-import NavigationLayout from '@/layouts/NavigationLayout';
+import NavigationLayout from '@/layouts/navigation';
+import { GluestackUIProvider } from '@gluestack-ui/themed';
+import { config } from '@gluestack-ui/config';
 
 export default function Layout() {
-  return <NavigationLayout />;
+  return (
+    <GluestackUIProvider config={config}>
+      <NavigationLayout />
+    </GluestackUIProvider>
+  );
 }

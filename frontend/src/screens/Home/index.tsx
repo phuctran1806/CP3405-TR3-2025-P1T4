@@ -1,4 +1,3 @@
-import Header from './Header';
 import React, { useState, useEffect } from 'react';
 import { ScrollView, RefreshControl, Alert } from 'react-native';
 import type { ImageSourcePropType } from 'react-native';
@@ -94,10 +93,9 @@ export default function Home() {
 
   return (
     <Box flex={1} bg="$gray50">
-      <Header />
       
       <ScrollView
-        contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 100 }}
+        contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 16}}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
