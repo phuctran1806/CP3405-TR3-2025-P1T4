@@ -1,8 +1,8 @@
-import studyHubEImage from 'assets/study-hub-e.jpg';
-import studyHubAImage from 'assets/study-hub-a.jpg';
-import libraryImage from 'assets/library.jpg';
-import studyPodsImage from 'assets/study-pods.jpg';
-import yardImage from 'assets/yard.jpg';
+import studyHubEImage from 'assets/locations/study-hub-e.jpg';
+import studyHubAImage from 'assets/locations/study-hub-a.jpg';
+import libraryImage from 'assets/locations/library.jpg';
+import studyPodsImage from 'assets/locations/study-pods.jpg';
+import yardImage from 'assets/locations/yard.jpg';
 import type { ImageSourcePropType } from 'react-native';
 
 export interface Location {
@@ -14,6 +14,15 @@ export interface Location {
     longitude: number;
   };
   accessibility: ('power' | 'cool' | 'wifi' | 'quiet')[];
+  occupancyPercentage: number;
+  averageOccupancy: {
+    monday: number;
+    tuesday: number;
+    wednesday: number;
+    thursday: number;
+    friday: number;
+    saturday: number;
+  };
 }
 
 export const locations: Location[] = [
@@ -23,6 +32,15 @@ export const locations: Location[] = [
     image: studyHubEImage,
     coordinates: { latitude: 1.3521, longitude: 103.8198 },
     accessibility: ['power', 'cool', 'wifi'],
+    occupancyPercentage: 72,
+    averageOccupancy: {
+      monday: 70,
+      tuesday: 75,
+      wednesday: 78,
+      thursday: 80,
+      friday: 65,
+      saturday: 60,
+    },
   },
   {
     id: '2',
@@ -30,6 +48,15 @@ export const locations: Location[] = [
     image: studyHubAImage,
     coordinates: { latitude: 1.3525, longitude: 103.8200 },
     accessibility: ['power', 'quiet'],
+    occupancyPercentage: 54,
+    averageOccupancy: {
+      monday: 55,
+      tuesday: 60,
+      wednesday: 62,
+      thursday: 58,
+      friday: 52,
+      saturday: 40,
+    },
   },
   {
     id: '3',
@@ -37,19 +64,46 @@ export const locations: Location[] = [
     image: libraryImage,
     coordinates: { latitude: 1.3530, longitude: 103.8205 },
     accessibility: ['power', 'cool', 'wifi', 'quiet'],
-  },
-    {
-      id: '4',
-      name: 'Study Pods',
-      image: studyPodsImage,
-      coordinates: { latitude: 1.3518, longitude: 103.8195 },
-      accessibility: ['power', 'wifi'],
+    occupancyPercentage: 85,
+    averageOccupancy: {
+      monday: 80,
+      tuesday: 82,
+      wednesday: 88,
+      thursday: 90,
+      friday: 75,
+      saturday: 68,
     },
+  },
+  {
+    id: '4',
+    name: 'Study Pods',
+    image: studyPodsImage,
+    coordinates: { latitude: 1.3518, longitude: 103.8195 },
+    accessibility: ['power', 'wifi'],
+    occupancyPercentage: 45,
+    averageOccupancy: {
+      monday: 50,
+      tuesday: 48,
+      wednesday: 52,
+      thursday: 55,
+      friday: 43,
+      saturday: 35,
+    },
+  },
   {
     id: '5',
     name: 'Courtyard',
     image: yardImage,
     coordinates: { latitude: 1.3515, longitude: 103.8190 },
     accessibility: ['wifi'],
+    occupancyPercentage: 28,
+    averageOccupancy: {
+      monday: 30,
+      tuesday: 32,
+      wednesday: 28,
+      thursday: 25,
+      friday: 20,
+      saturday: 18,
+    },
   },
 ];

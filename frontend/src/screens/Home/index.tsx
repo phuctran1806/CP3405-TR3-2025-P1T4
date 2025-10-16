@@ -6,6 +6,7 @@ import * as Location from 'expo-location';
 import LocationCard from '@/components/LocationCard';
 import { locations } from '@/utils/locationData';
 import { calculateDistance, formatDistance } from '@/utils/calculateDistance';
+import { useRouter } from 'expo-router';
 
 interface LocationWithDistance {
   id: string;
@@ -23,6 +24,7 @@ export default function Home() {
   const [locationsWithDistance, setLocationsWithDistance] = useState<LocationWithDistance[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const router = useRouter();
 
   const getUserLocation = async () => {
     try {
@@ -77,7 +79,7 @@ export default function Home() {
   };
 
   const handleLocationPress = (locationName: string) => {
-    Alert.alert('Location Selected', `You selected ${locationName}`);
+    router.push(`/dashboard/${locationName}`);
   };
 
   if (loading) {
@@ -116,7 +118,7 @@ export default function Home() {
                 image={location.image}
                 distance={location.distance}
                 accessibility={location.accessibility}
-                onPress={() => handleLocationPress(location.name)}
+                onPress={() => handleLocationPress(location.id)}
               />
             )})
           ) : (
@@ -127,7 +129,7 @@ export default function Home() {
                 image={location.image}
                 distance="Location unavailable"
                 accessibility={location.accessibility}
-                onPress={() => handleLocationPress(location.name)}
+                onPress={() => handleLocationPress(location.id)}
               />
             ))
           )}

@@ -2,12 +2,10 @@ import React from 'react';
 import { Tabs } from 'expo-router';
 import { Home } from 'lucide-react-native';
 
-// TODO: put style in its corresponding component
-
-export default function TabLayout() {
+export default function MainLayout() {
   return (
-      <Tabs
-        screenOptions={{
+    <Tabs
+      screenOptions={{
         headerShown: false,
         tabBarStyle: {
           height: 65,
@@ -31,12 +29,22 @@ export default function TabLayout() {
         },
       }}
     >
+      
       <Tabs.Screen
-        name="index"
+        name="home/index"
         options={{
           title: 'Home',
           tabBarIcon: ({ color, size }) => <Home size={size} color={color} />,
         }}
       />
-    </Tabs>)
+
+      {/* Dashboard (hidden) */}
+      <Tabs.Screen
+        name="dashboard/[location]"
+        options={{
+          href: null, // Hides it from the tab bar
+        }}
+      />
+    </Tabs>
+  );
 }

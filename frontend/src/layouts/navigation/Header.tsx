@@ -15,7 +15,7 @@ export default function HeaderLayout() {
 
         <View>
           <Text style={styles.subtitle}>Welcome back</Text>
-          <Text style={styles.title}>Explore seats</Text>
+          <Text style={styles.title}>User</Text>
         </View>
       </View>
 
