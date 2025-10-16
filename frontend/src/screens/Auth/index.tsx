@@ -7,7 +7,7 @@ import {
 } from 'react-native';
 import LoginForm from './components/LoginForm';
 import AuthFooter from './components/AuthFooter';
-import LogoPlaceholder from '@/components/LogoPlaceholder';
+import LogoPlaceholder from '@/components/containers/LogoPlaceholder';
 
 const LoginScreen = () => {
   const [email, setEmail] = useState('');

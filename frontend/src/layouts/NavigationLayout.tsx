@@ -5,6 +5,8 @@ import { View, StyleSheet } from 'react-native';
 import { GluestackUIProvider } from '@gluestack-ui/themed';
    import { config } from '@gluestack-ui/config';
 
+// TODO: put style in its corresponding component
+
 export default function TabLayout() {
   return (
   <GluestackUIProvider config={config}>

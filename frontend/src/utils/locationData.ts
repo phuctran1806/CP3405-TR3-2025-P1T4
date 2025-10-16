@@ -1,9 +1,9 @@
-import studyHubEImage from '../../assets/study-hub-e.jpg';
-import studyHubAImage from '../../assets/study-hub-a.jpg';
-import libraryImage from '../../assets/library.jpg';
-import studyPodsImage from '../../assets/study-pods.jpg';
-import yardImage from '../../assets/yard.jpg';
-import { ImageSourcePropType } from 'react-native';
+import studyHubEImage from 'assets/study-hub-e.jpg';
+import studyHubAImage from 'assets/study-hub-a.jpg';
+import libraryImage from 'assets/library.jpg';
+import studyPodsImage from 'assets/study-pods.jpg';
+import yardImage from 'assets/yard.jpg';
+import type { ImageSourcePropType } from 'react-native';
 
 export interface Location {
   id: string;

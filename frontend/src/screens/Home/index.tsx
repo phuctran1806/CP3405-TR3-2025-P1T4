@@ -1,11 +1,12 @@
+import Header from './Header';
 import React, { useState, useEffect } from 'react';
-import { ScrollView, RefreshControl, Alert, ImageSourcePropType } from 'react-native';
+import { ScrollView, RefreshControl, Alert } from 'react-native';
+import type { ImageSourcePropType } from 'react-native';
 import { Box, VStack, Text, Spinner } from '@gluestack-ui/themed';
 import * as Location from 'expo-location';
-import Header from './Header';
-import LocationCard from '../../components/LocationCard';
-import { locations } from '../../utils/locationData';
-import { calculateDistance, formatDistance } from '../../utils/calculateDistance';
+import LocationCard from '@/components/LocationCard';
+import { locations } from '@/utils/locationData';
+import { calculateDistance, formatDistance } from '@/utils/calculateDistance';
 
 interface LocationWithDistance {
   id: string;

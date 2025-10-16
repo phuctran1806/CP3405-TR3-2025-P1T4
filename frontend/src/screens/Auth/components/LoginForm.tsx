@@ -1,9 +1,9 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import CheckBox from '@/components/CheckBox';
+import CheckBox from '@/components/buttons/CheckBox';
 import SocialButtons from './SocialButtons';
-import CustomInput from '@/components/CustomInput';
-import CustomButton from '@/components/CustomButton';
+import CustomInput from '@/components/forms/CustomInput';
+import CustomButton from '@/components/buttons/CustomButton';
 import { colors } from '@/constants/colors';
 import { spacing } from '@/constants/spacing';
 

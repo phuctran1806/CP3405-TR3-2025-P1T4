@@ -35,7 +35,7 @@ export default function Header() {
           alignItems="center"
         >
           <Image
-            source={require('../../../assets/jcu-logo.png')}
+            source={require('assets/jcu-logo.png')}
             alt="JCU Logo"
             style={{ width: 200, height: 200, resizeMode: 'contain' }}
           />
