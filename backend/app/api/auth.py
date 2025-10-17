@@ -9,8 +9,11 @@ from datetime import timedelta
 import uuid
 
 from app.database import get_db
-from app.models.user import User
-from app.schemas.user import UserCreate, UserLogin, UserResponse, Token
+from app.models.user import User, UserRole
+from app.schemas.user import (
+    UserCreate, UserLogin, UserResponse, Token,
+    RoleSelectRequest, QuickLoginResponse
+)
 from app.utils.security import verify_password, get_password_hash, create_access_token, decode_access_token
 from app.config import settings
 
@@ -117,9 +120,88 @@ async def login(
     )
 
 
+@router.post("/quick-login", response_model=QuickLoginResponse)
+async def quick_login(role_data: RoleSelectRequest):
+    """
+    Quick login by role selection (no password required).
+    
+    This endpoint allows users to login by simply selecting a role:
+    - Student
+    - Lecturer
+    - Guest
+    
+    Admin role requires traditional password login via /login endpoint.
+    
+    Returns a JWT token with a unique tracking ID for session tracking.
+    """
+    # Prevent admin role from using quick login
+    if role_data.role == UserRole.ADMIN:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin role requires password authentication. Please use /login endpoint."
+        )
+    
+    # Generate unique tracking ID for this session
+    tracking_id = str(uuid.uuid4())
+    
+    # Create access token with tracking ID and role
+    access_token = create_access_token(
+        data={
+            "sub": tracking_id,  # Use tracking_id as subject
+            "role": role_data.role.value,
+            "name": role_data.name,
+            "tracking_id": tracking_id,
+            "quick_login": True  # Flag to identify quick login sessions
+        }
+    )
+    
+    return QuickLoginResponse(
+        access_token=access_token,
+        tracking_id=tracking_id,
+        role=role_data.role,
+        name=role_data.name
+    )
+
+
+@router.get("/session")
+async def get_session_info(token: str = Depends(oauth2_scheme)):
+    """
+    Get current session information (supports both quick login and traditional login).
+    
+    Returns different information based on login type:
+    - Quick login: tracking_id, role, name, session type
+    - Traditional login: full user information
+    """
+    payload = decode_access_token(token)
+    if payload is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired token",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    # Check if this is a quick login session
+    if payload.get("quick_login"):
+        return {
+            "session_type": "quick_login",
+            "tracking_id": payload.get("tracking_id"),
+            "role": payload.get("role"),
+            "name": payload.get("name", "Anonymous User"),
+            "authenticated": True
+        }
+    
+    # Traditional login - return user ID
+    return {
+        "session_type": "traditional",
+        "user_id": payload.get("sub"),
+        "email": payload.get("email"),
+        "authenticated": True
+    }
+
+
 @router.get("/me", response_model=UserResponse)
 async def get_me(current_user: User = Depends(get_current_user)):
-    """Get current user information."""
+    """Get current user information (traditional login only)."""
     return UserResponse.from_orm(current_user)
 
 

@@ -6,26 +6,31 @@
 echo "🎓 JCU Smart Seats System - Quick Start"
 echo "======================================================"
 
-# Check if virtual environment exists
-if [ ! -d "venv" ]; then
+if [ -f "/.dockerenv" ] || [ -f "/run/.containerenv" ]; then
+    set -e
+    source /opt/venv/bin/activate
+else
+    # Check if virtual environment exists
+    if [ ! -d "venv" ]; then
+        echo ""
+        echo "📦 Creating virtual environment..."
+        python3 -m venv venv
+        echo "✓ Virtual environment created"
+    fi
+
+    # Activate virtual environment
     echo ""
-    echo "📦 Creating virtual environment..."
-    python3 -m venv venv
-    echo "✓ Virtual environment created"
+    echo "🔌 Activating virtual environment..."
+    source venv/bin/activate
+    echo "✓ Virtual environment activated"
+
+    # Install dependencies
+    echo ""
+    echo "📥 Installing dependencies..."
+    pip install -q --upgrade pip
+    pip install -q -r requirements.txt
+    echo "✓ Dependencies installed"
 fi
-
-# Activate virtual environment
-echo ""
-echo "🔌 Activating virtual environment..."
-source venv/bin/activate
-echo "✓ Virtual environment activated"
-
-# Install dependencies
-echo ""
-echo "📥 Installing dependencies..."
-pip install -q --upgrade pip
-pip install -q -r requirements.txt
-echo "✓ Dependencies installed"
 
 # Create .env file if it doesn't exist
 if [ ! -f ".env" ]; then
