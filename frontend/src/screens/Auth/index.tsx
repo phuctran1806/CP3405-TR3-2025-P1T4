@@ -8,11 +8,13 @@ import {
 import LoginForm from './components/LoginForm';
 import AuthFooter from './components/AuthFooter';
 import LogoPlaceholder from '@/components/containers/LogoPlaceholder';
+import { useRouter } from 'expo-router';
 
 const LoginScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
+  const router = useRouter();
 
   // TODO: call the apis here
   const handleLogin = () => {
@@ -32,7 +34,9 @@ const LoginScreen = () => {
   };
 
   const handleGuestLogin = () => {
-    console.log('Guest login pressed');
+    setTimeout(() => {
+      router.replace('/(main)/home');
+    }, 1000);
   };
 
   return (
