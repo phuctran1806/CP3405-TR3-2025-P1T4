@@ -3,7 +3,7 @@
 # API Testing Script for JCU Library Backend
 # This script tests all major API endpoints
 
-BASE_URL="http://localhost:8000"
+BASE_URL=$(1)
 
 echo "🧪 JCU Library Backend API Test Suite"
 echo "======================================"
