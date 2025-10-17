@@ -3,7 +3,7 @@ import { Tabs } from 'expo-router';
 import { Home, BarChart3, QrCode, Settings } from 'lucide-react-native';
 import { View, StyleSheet } from 'react-native';
 import { GluestackUIProvider } from '@gluestack-ui/themed';
-   import { config } from '@gluestack-ui/config';
+import { config } from '@gluestack-ui/config';
 
 // TODO: put style in its corresponding component
 
