@@ -50,8 +50,8 @@ class Seat(Base):
     capacity = Column(Integer, default=1, nullable=False)
     
     # Position on floor map
-    x_coordinate = Column(Numeric(10, 2), nullable=True)
-    y_coordinate = Column(Numeric(10, 2), nullable=True)
+    x_coordinate = Column(Numeric(5, 4), nullable=False)
+    y_coordinate = Column(Numeric(5, 4), nullable=False)
     
     # Status
     status = Column(Enum(SeatStatus), nullable=False, default=SeatStatus.AVAILABLE)

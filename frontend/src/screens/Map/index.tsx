@@ -10,6 +10,7 @@ interface Chair {
   y: number; // normalized 0–1 relative to SVG viewBox
 }
 
+// TODO: import the data on backend
 // Example chairs
 const chairs: Chair[] = [
   { id: "chair1", x: 0.25, y: 0.25 },
