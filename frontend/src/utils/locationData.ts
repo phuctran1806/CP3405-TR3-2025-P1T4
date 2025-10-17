@@ -23,6 +23,9 @@ export interface Location {
     friday: number;
     saturday: number;
   };
+
+  lineChartData?: { time: string; value: number }[];
+  occupancyBreakdown?: { label: string; value: number }[];
 }
 
 export const locations: Location[] = [
@@ -41,6 +44,19 @@ export const locations: Location[] = [
       friday: 65,
       saturday: 60,
     },
+    occupancyBreakdown: [
+      { label: 'Occupied', value: 72 },
+      { label: 'Available', value: 28 },
+    ],
+    lineChartData: [
+      { time: '08:00', value: 30 },
+      { time: '10:00', value: 55 },
+      { time: '12:00', value: 70 },
+      { time: '14:00', value: 75 },
+      { time: '16:00', value: 68 },
+      { time: '18:00', value: 50 },
+      { time: '20:00', value: 35 },
+    ],
   },
   {
     id: '2',
@@ -57,6 +73,19 @@ export const locations: Location[] = [
       friday: 52,
       saturday: 40,
     },
+    occupancyBreakdown: [
+      { label: 'Occupied', value: 54 },
+      { label: 'Available', value: 46 },
+    ],
+    lineChartData: [
+      { time: '08:00', value: 20 },
+      { time: '10:00', value: 40 },
+      { time: '12:00', value: 55 },
+      { time: '14:00', value: 60 },
+      { time: '16:00', value: 58 },
+      { time: '18:00', value: 45 },
+      { time: '20:00', value: 30 },
+    ],
   },
   {
     id: '3',
@@ -73,6 +102,19 @@ export const locations: Location[] = [
       friday: 75,
       saturday: 68,
     },
+    occupancyBreakdown: [
+      { label: 'Occupied', value: 85 },
+      { label: 'Available', value: 15 },
+    ],
+    lineChartData: [
+      { time: '08:00', value: 50 },
+      { time: '10:00', value: 70 },
+      { time: '12:00', value: 85 },
+      { time: '14:00', value: 90 },
+      { time: '16:00', value: 88 },
+      { time: '18:00', value: 75 },
+      { time: '20:00', value: 60 },
+    ],
   },
   {
     id: '4',
@@ -89,6 +131,19 @@ export const locations: Location[] = [
       friday: 43,
       saturday: 35,
     },
+    occupancyBreakdown: [
+      { label: 'Occupied', value: 45 },
+      { label: 'Available', value: 55 },
+    ],
+    lineChartData: [
+      { time: '08:00', value: 15 },
+      { time: '10:00', value: 30 },
+      { time: '12:00', value: 45 },
+      { time: '14:00', value: 50 },
+      { time: '16:00', value: 48 },
+      { time: '18:00', value: 40 },
+      { time: '20:00', value: 25 },
+    ],
   },
   {
     id: '5',
@@ -105,5 +160,18 @@ export const locations: Location[] = [
       friday: 20,
       saturday: 18,
     },
+    occupancyBreakdown: [
+      { label: 'Occupied', value: 28 },
+      { label: 'Available', value: 72 },
+    ],
+    lineChartData: [
+      { time: '08:00', value: 10 },
+      { time: '10:00', value: 15 },
+      { time: '12:00', value: 25 },
+      { time: '14:00', value: 30 },
+      { time: '16:00', value: 28 },
+      { time: '18:00', value: 20 },
+      { time: '20:00', value: 12 },
+    ],
   },
 ];
