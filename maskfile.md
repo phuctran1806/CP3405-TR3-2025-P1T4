@@ -4,7 +4,7 @@ This is a [Mask](https://github.com/jacobdeichert/mask) file for running project
 
 ## backend
 
-> Build and run backend container from Dockerfile
+> Build and run backend container from Dockerfile (checks Docker/Podman availability)
 
 **OPTIONS**
 
@@ -13,30 +13,61 @@ This is a [Mask](https://github.com/jacobdeichert/mask) file for running project
     * type: string
     * desc: Which container runtime to use
     * choices: podman, docker
+* detached
+    * flags: -d --detached
+    * type: bool
+    * desc: Run backend container in detached mode (for "mask all")
 
 ~~~bash
 CONTAINER_RUNTIME=${container_runtime:-docker}
-echo "Building backend container using $CONTAINER_RUNTIME..."
-$CONTAINER_RUNTIME build -t backend_image $MASKFILE_DIR/backend
-echo "Running backend container..."
-$CONTAINER_RUNTIME run --rm -it -p 8000:8000 backend_image
+CONTAINER_NAME="smartback"
+
+echo "🔍 Checking if $CONTAINER_RUNTIME is running..."
+if ! $CONTAINER_RUNTIME info >/dev/null 2>&1; then
+  echo "❌ $CONTAINER_RUNTIME is not running. Please start it first."
+  exit 1
+fi
+
+echo "✅ $CONTAINER_RUNTIME is running."
+echo "🏗️  Building backend container..."
+$CONTAINER_RUNTIME build -t $CONTAINER_NAME $MASKFILE_DIR/backend
+
+# --- If detached mode, ensure no old container with same name exists ---
+if [ "${detached}" = "true" ]; then
+  if $CONTAINER_RUNTIME ps -a --format '{{.Names}}' | grep -w "$CONTAINER_NAME" >/dev/null 2>&1; then
+    echo "🧹 Removing old container named '$CONTAINER_NAME'..."
+    $CONTAINER_RUNTIME rm -f $CONTAINER_NAME >/dev/null 2>&1 || true
+  fi
+
+  echo "🚀 Running backend container in detached mode..."
+  $CONTAINER_RUNTIME run -d -p 8000:8000 --name $CONTAINER_NAME $CONTAINER_NAME
+  echo "✅ Backend container started in background."
+else
+  echo "🚀 Running backend container interactively..."
+  $CONTAINER_RUNTIME run --rm -it -p 8000:8000 --name $CONTAINER_NAME $CONTAINER_NAME
+fi
 ~~~
+
+---
 
 ## frontend
 
-> Start frontend dev server
+> Start frontend dev server (waits for backend readiness)
 
 ~~~bash
-pushd $MASKFILE_DIR/frontend >/dev/null
 echo "Starting frontend..."
+
+pushd $MASKFILE_DIR/frontend >/dev/null
 npm install
 npm run start
 popd >/dev/null
 ~~~
 
+---
+
 ## all
 
-> Run both backend and frontend (backend first)
+> Run both backend and frontend (safe parallel mode + cleanup on exit)
 
 **OPTIONS**
 
@@ -48,23 +79,32 @@ popd >/dev/null
 
 ~~~bash
 CONTAINER_RUNTIME=${container_runtime:-docker}
+CONTAINER_NAME="smartback"
 
-# Start backend in background
-echo "Building backend container..."
-$CONTAINER_RUNTIME build -t backend_image $MASKFILE_DIR/backend
+cleanup() {
+  echo ""
+  echo "🧹 Cleaning up..."
+  echo "Stopping backend container..."
+  $CONTAINER_RUNTIME stop $CONTAINER_NAME >/dev/null 2>&1 || true
+  echo "✅ Cleanup complete."
+  exit 0
+}
 
-echo "Starting backend container in background..."
-$CONTAINER_RUNTIME run --rm -d -p 8000:8000 --name backend_temp backend_image
+# --- Trap for SIGINT/SIGTERM ---
+trap cleanup SIGINT SIGTERM
 
-# Start frontend
-pushd $MASKFILE_DIR/frontend >/dev/null
-echo "Starting frontend..."
-npm install
-npm run start
-popd >/dev/null
+echo "=== 🐳 Starting backend (detached mode) ==="
+mask backend -c $CONTAINER_RUNTIME -d
 
-# Stop backend when frontend exits
-echo "Stopping backend container..."
-$CONTAINER_RUNTIME stop backend_temp || true
+echo "=== 💻 Starting frontend (after backend readiness) ==="
+mask frontend &
+
+FRONTEND_PID=$!
+
+# Wait for frontend to exit or be interrupted
+wait $FRONTEND_PID
+
+# Cleanup when frontend exits
+cleanup
 ~~~
-
+---
