@@ -52,3 +52,37 @@ class TokenData(BaseModel):
     user_id: Optional[str] = None
     email: Optional[str] = None
 
+
+class RoleSelectRequest(BaseModel):
+    """Schema for quick login by role selection (no password needed)."""
+    role: UserRole = Field(..., description="User role: student, lecturer, or guest")
+    name: Optional[str] = Field("Anonymous User", max_length=100, description="Optional display name")
+    
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "role": "student",
+                "name": "John Doe"
+            }
+        }
+
+
+class QuickLoginResponse(BaseModel):
+    """Response for quick login with tracking ID."""
+    access_token: str
+    token_type: str = "bearer"
+    tracking_id: str = Field(..., description="Unique tracking ID for this session")
+    role: UserRole
+    name: str
+    
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "access_token": "eyJ0eXAiOiJKV1QiLCJhbGc...",
+                "token_type": "bearer",
+                "tracking_id": "550e8400-e29b-41d4-a716-446655440000",
+                "role": "student",
+                "name": "John Doe"
+            }
+        }
+

@@ -1,12 +1,12 @@
-import Header from './Header';
 import React, { useState, useEffect } from 'react';
-import { ScrollView, RefreshControl, Alert } from 'react-native';
+import { ScrollView, RefreshControl, Alert, View, Text as RNText, ActivityIndicator } from 'react-native';
 import type { ImageSourcePropType } from 'react-native';
 import { Box, VStack, Text, Spinner } from '@gluestack-ui/themed';
 import * as Location from 'expo-location';
 import LocationCard from '@/components/LocationCard';
 import { locations } from '@/utils/locationData';
 import { calculateDistance, formatDistance } from '@/utils/calculateDistance';
+import { useRouter } from 'expo-router';
 
 interface LocationWithDistance {
   id: string;
@@ -24,6 +24,13 @@ export default function Home() {
   const [locationsWithDistance, setLocationsWithDistance] = useState<LocationWithDistance[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const router = useRouter();
+
+  // Ensure component is mounted before rendering GlueStack components
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const getUserLocation = async () => {
     try {
@@ -78,8 +85,17 @@ export default function Home() {
   };
 
   const handleLocationPress = (locationName: string) => {
-    Alert.alert('Location Selected', `You selected ${locationName}`);
+    router.push(`/dashboard/${locationName}`);
   };
+
+  // Show native loading before GlueStack components are ready
+  if (!mounted) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#f9fafb' }}>
+        <ActivityIndicator size="large" color="#3b82f6" />
+      </View>
+    );
+  }
 
   if (loading) {
     return (
@@ -94,10 +110,8 @@ export default function Home() {
 
   return (
     <Box flex={1} bg="$gray50">
-      <Header />
-      
       <ScrollView
-        contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 100 }}
+        contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 16}}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
@@ -112,15 +126,16 @@ export default function Home() {
             locationsWithDistance.map((location) => {
               console.log(location.image);
               return (
-              <LocationCard
-                key={location.id}
-                name={location.name}
-                image={location.image}
-                distance={location.distance}
-                accessibility={location.accessibility}
-                onPress={() => handleLocationPress(location.name)}
-              />
-            )})
+                <LocationCard
+                  key={location.id}
+                  name={location.name}
+                  image={location.image}
+                  distance={location.distance}
+                  accessibility={location.accessibility}
+                  onPress={() => handleLocationPress(location.id)}
+                />
+              );
+            })
           ) : (
             locations.map((location) => (
               <LocationCard
@@ -129,7 +144,7 @@ export default function Home() {
                 image={location.image}
                 distance="Location unavailable"
                 accessibility={location.accessibility}
-                onPress={() => handleLocationPress(location.name)}
+                onPress={() => handleLocationPress(location.id)}
               />
             ))
           )}
