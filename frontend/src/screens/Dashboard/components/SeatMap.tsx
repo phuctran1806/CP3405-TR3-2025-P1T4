@@ -1,7 +1,7 @@
 import React from 'react';
 import { VStack, Box } from '@gluestack-ui/themed';
 import { Image } from 'react-native';
-import InteractiveMap from '@/components/InteractiveMap';
+import InteractiveMap from '@/components/map/InteractiveMap';
 
 const SeatMap = ({ location }: any) => (
   <VStack space="md">
