@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ScrollView, RefreshControl, Alert, View, Text as RNText, ActivityIndicator } from 'react-native';
+import { ScrollView, RefreshControl, Alert, View, ActivityIndicator } from 'react-native';
 import type { ImageSourcePropType } from 'react-native';
 import { Box, VStack, Text, Spinner } from '@gluestack-ui/themed';
 import * as Location from 'expo-location';
