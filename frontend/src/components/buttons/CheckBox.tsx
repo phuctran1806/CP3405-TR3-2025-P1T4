@@ -1,13 +1,12 @@
-import React from 'react';
+import { CheckIcon } from '@/components/ui/icon';
 import {
-  Checkbox as GSCheckbox,
+  CheckboxIcon,
   CheckboxIndicator,
   CheckboxLabel,
-  CheckboxIcon,
-  Box,
+  Checkbox as GSCheckbox,
   HStack,
 } from "@gluestack-ui/themed";
-import { CheckIcon } from '@/components/ui/icon';
+import React from 'react';
 
 interface CheckBoxProps {
   checked: boolean;

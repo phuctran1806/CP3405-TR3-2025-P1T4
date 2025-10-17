@@ -1,5 +1,3 @@
-import React from 'react';
-import { Icon } from '@gluestack-ui/themed';
 import { Zap, Wind, Wifi, Volume2 } from 'lucide-react-native';
 
 export type AccessibilityFeature = 'power' | 'cool' | 'wifi' | 'quiet';

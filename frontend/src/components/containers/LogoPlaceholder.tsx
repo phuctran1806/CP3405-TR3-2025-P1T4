@@ -8,7 +8,7 @@ const LogoPlaceholder = () => {
     <View style={styles.logoContainer}>
       <View style={styles.logoPlaceholder}>
         <Image
-          source={require("assets/logo.png")}
+          source={require("assets/jcu-logo.png")}
           style={styles.logoImage}
           resizeMode="contain"
         />

@@ -1,15 +1,17 @@
-import React from 'react';
 import {
   Box,
   HStack,
-  VStack,
-  Text,
   Icon,
   Pressable,
+  Text,
+  VStack,
 } from '@gluestack-ui/themed';
 import { MapPin } from 'lucide-react-native';
-import { accessibilityMapping, AccessibilityFeature } from '../utils/accessibilityIcons';
-import { Image, ImageSourcePropType } from 'react-native';
+import React from 'react';
+import type { ImageSourcePropType } from 'react-native';
+import { Image } from 'react-native';
+import { accessibilityMapping } from '@/utils/accessibilityIcons';
+import type { AccessibilityFeature } from '@/utils/accessibilityIcons';
 
 interface LocationCardProps {
   name: string;

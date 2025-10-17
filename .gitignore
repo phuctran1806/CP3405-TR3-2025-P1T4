@@ -6,3 +6,5 @@ backend/jcu_library.db
 /build
 *.log
 .idea/
+
+**/node_modules
