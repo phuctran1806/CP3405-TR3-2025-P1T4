@@ -1,7 +1,8 @@
 import React from 'react';
 import { Box, VStack, Text } from '@gluestack-ui/themed';
 import { PieChart } from 'react-native-chart-kit';
-import { Dimensions } from 'react-native';
+import { Dimensions, Image } from 'react-native';
+import { lectureHallImage } from 'assets/lecture-hall.jpg';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -79,6 +80,11 @@ const Statistics = ({ location }: any) => {
               center={[0, 0]}
               hasLegend={true}
               absolute
+            />
+            <Image
+              source={require('assets/lecture-hall.jpg')}
+              style={{ width: 300, height: 300, marginTop: 16 }}
+              resizeMode="contain"
             />
           </Box>
         </VStack>
