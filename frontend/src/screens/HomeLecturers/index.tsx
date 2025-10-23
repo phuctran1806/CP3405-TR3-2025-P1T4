@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { ScrollView, RefreshControl, View, ActivityIndicator, type ImageSourcePropType } from 'react-native';
-import { Box, VStack, Text, Spinner, Badge, HStack } from '@gluestack-ui/themed';
-import { lecturerVenues } from '@/utils/locationDataLecturers'; // <-- your new mock data
+import { Box, VStack, Text, Spinner } from '@gluestack-ui/themed';
+import { lecturerVenues } from '@/utils/locationDataLecturers';
 import { useRouter } from 'expo-router';
-import LocationCard from '@/components/LocationCard'; // ...existing code...
+import LocationCard from '@/components/LocationCard';
 
 interface VenueDisplay {
   id: string;
