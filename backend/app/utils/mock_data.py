@@ -237,8 +237,8 @@ def create_floors_and_seats(db, locations):
                 has_monitor=(seat_type == SeatType.COMPUTER),
                 accessibility=(i % 10 == 0),  # Every 10th seat is accessible
                 capacity=1,
-                x_coordinate=float(random.randint(10, 90)),
-                y_coordinate=float(random.randint(10, 90)),
+                x_coordinate=float(random.random()),
+                y_coordinate=float(random.random()),
                 status=random.choice([SeatStatus.AVAILABLE, SeatStatus.OCCUPIED])
             )
             all_seats.append(seat)
