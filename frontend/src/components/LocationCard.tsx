@@ -15,16 +15,20 @@ import type { AccessibilityFeature } from '@/utils/accessibilityIcons';
 
 interface LocationCardProps {
   name: string;
+  subject?: string;
   image: ImageSourcePropType;
-  distance: string;
-  accessibility: AccessibilityFeature[];
-  onPress?: () => void;
+  distance?: string;
+  schedule?: string;
+  accessibility: AccessibilityFeature[] | null;
+  onPress: () => void;
 }
 
 export default function LocationCard({
   name,
+  subject,
   image,
   distance,
+  schedule,
   accessibility,
   onPress,
 }: LocationCardProps) {
@@ -59,18 +63,25 @@ export default function LocationCard({
         </Box>
 
         <VStack p="$4" space="sm">
+          {/* Location name */}
           <Text fontSize="$lg" fontWeight="$bold" color="$black">
             {name}
           </Text>
 
+          {/* Subject for lecturers */}
+          <Text fontSize="$md" color="$gray700">
+            {subject}
+          </Text>
+
+          {/* Show distance for students, schedule for lecturers */}
           <HStack space="xs" alignItems="center">
             <Icon as={MapPin} size="sm" color="$gray600" />
             <Text fontSize="$sm" color="$gray600">
-              {distance}
+              {distance ? distance : schedule} 
             </Text>
           </HStack>
 
-          {accessibility.length > 0 && (
+          {accessibility && accessibility.length > 0 && (
             <HStack space="md" flexWrap="wrap" mt="$2">
               {accessibility.map((feature) => {
                 const accessInfo = accessibilityMapping[feature];

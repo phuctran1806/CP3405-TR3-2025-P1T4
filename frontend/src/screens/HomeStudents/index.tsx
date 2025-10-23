@@ -4,7 +4,7 @@ import type { ImageSourcePropType } from 'react-native';
 import { Box, VStack, Text, Spinner } from '@gluestack-ui/themed';
 import * as Location from 'expo-location';
 import LocationCard from '@/components/LocationCard';
-import { locations } from '@/utils/locationData';
+import { locations } from '@/utils/locationDataStudents';
 import { calculateDistance, formatDistance } from '@/utils/calculateDistance';
 import { useRouter } from 'expo-router';
 
@@ -16,7 +16,7 @@ interface LocationWithDistance {
   distance: string;
 }
 
-export default function Home() {
+export default function HomeStudents() {
   const [userLocation, setUserLocation] = useState<{
     latitude: number;
     longitude: number;
