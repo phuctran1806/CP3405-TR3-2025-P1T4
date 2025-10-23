@@ -3,7 +3,7 @@ import it_subjectImage from 'assets/subjects/it-subject.jpg';
 import business_subjectImage from 'assets/subjects/business-subject.jpg';
 import psychology_subjectImage from 'assets/subjects/psychology-subject.jpg';
 
-export interface LecturerVenue {
+export interface LocationLecturers {
   id: string;
   code: string;
   name: string;
@@ -11,7 +11,7 @@ export interface LecturerVenue {
   capacity: number;
   subject: string;
   schedule: string; // e.g. "Monday 10:00–12:00"
-  liveOccupancy?: number | null; // percentage during lecture time
+  liveOccupancy: number | null; // percentage during lecture time
 }
 
 // Utility: check if current time falls within the scheduled range
@@ -37,7 +37,7 @@ const getLiveOccupancy = (schedule: string): number | null => {
   return isLectureOngoing(schedule) ? Math.floor(70 + Math.random() * 30) : null;
 };
 
-export const lecturerVenues: LecturerVenue[] = [
+export const locations: LocationLecturers[] = [
   {
     id: 'L1',
     code: 'A1-03',
@@ -85,8 +85,8 @@ export const lecturerVenues: LecturerVenue[] = [
     image: it_subjectImage,
     capacity: 120,
     subject: 'Database Systems',
-    schedule: 'Friday 17:00–19:00',
-    liveOccupancy: getLiveOccupancy('Friday 17:00–19:00'),
+    schedule: 'Thursday 17:00–19:00',
+    liveOccupancy: getLiveOccupancy('Thursday 17:00–19:00'),
   },
   {
     id: 'L6',

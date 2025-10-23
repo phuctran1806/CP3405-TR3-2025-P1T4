@@ -1,6 +1,9 @@
 import React from "react";
-import Dashboard from "@/screens/Dashboard";
+import DashboardStudents from "@/screens/DashboardStudents";
+import { useLocalSearchParams } from "expo-router";
+import DashboardLecturers from "@/screens/DashboardLecturers";
 
 export default function Index() {
-  return <Dashboard />
+  const { role } = useLocalSearchParams();
+  return role === 'student' ? <DashboardStudents /> : <DashboardLecturers />;
 }

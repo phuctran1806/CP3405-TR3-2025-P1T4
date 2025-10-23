@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ScrollView, RefreshControl, View, ActivityIndicator, type ImageSourcePropType } from 'react-native';
 import { Box, VStack, Text, Spinner } from '@gluestack-ui/themed';
-import { lecturerVenues } from '@/utils/locationDataLecturers';
+import { locations } from '@/utils/locationDataLecturers';
 import { useRouter } from 'expo-router';
 import LocationCard from '@/components/LocationCard';
 
@@ -31,7 +31,7 @@ export default function HomeLecturers() {
     try {
       // Simulate fetching updated live occupancy
       setLoading(true);
-      const refreshedVenues = lecturerVenues.map((v) => ({
+      const refreshedVenues = locations.map((v) => ({
         ...v,
         // Randomize live occupancy again (simulate data refresh)
         liveOccupancy: v.liveOccupancy
@@ -55,7 +55,7 @@ export default function HomeLecturers() {
   };
 
   const handleVenuePress = (venueId: string) => {
-    console.log('Navigating to venue:', venueId);
+    router.push(`/dashboard/${venueId}?role=lecturer`);
   };
 
   if (!mounted) {

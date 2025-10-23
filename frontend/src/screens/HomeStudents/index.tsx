@@ -85,7 +85,7 @@ export default function HomeStudents() {
   };
 
   const handleLocationPress = (locationName: string) => {
-    router.push(`/dashboard/${locationName}`);
+    router.push(`/dashboard/${locationName}?role=student`);
   };
 
   // Show native loading before GlueStack components are ready

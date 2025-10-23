@@ -11,7 +11,7 @@ export default function LocationDashboard() {
   const { location: locationId } = useLocalSearchParams();
   const location = locations.find((loc) => loc.id === locationId);
   const [view, setView] = useState<'seatmap' | 'statistics'>('seatmap');
-
+  console.log('Location ID from params:', locationId); // Debug log
   useEffect(() => setView('seatmap'), [locationId]);
 
   if (!location) {
