@@ -2,7 +2,7 @@ import React from 'react';
 import { Box, VStack, Text, HStack, Badge, Icon } from '@gluestack-ui/themed';
 import { accessibilityMapping } from '@/utils/accessibilityIcons';
 import type { AccessibilityFeature } from '@/utils/accessibilityIcons';
-import SegmentedControl from './SegmentedControl';
+import SegmentedControl from '@/components/dashboard/SegmentedControl';
 
 const Header = ({ location, occupancyStatus, view, setView }: any) => (
   <Box

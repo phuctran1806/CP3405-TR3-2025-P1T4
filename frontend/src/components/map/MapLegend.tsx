@@ -10,7 +10,7 @@ export const MapLegend: React.FC = () => (
       </Text>
     </HStack>
     <HStack space="xs" alignItems="center">
-      <Box w={16} h={16} bg="#E5E7EB" borderRadius="$sm" />
+      <Box w={16} h={16} bg="#ef4444" borderRadius="$sm" />
       <Text fontSize="$xs" color="$gray600">
         Occupied
       </Text>

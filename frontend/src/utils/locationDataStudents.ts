@@ -5,7 +5,7 @@ import studyPodsImage from 'assets/locations/study-pods.jpg';
 import yardImage from 'assets/locations/yard.jpg';
 import type { ImageSourcePropType } from 'react-native';
 
-export interface Location {
+export interface LocationStudents {
   id: string;
   name: string;
   image: ImageSourcePropType;
@@ -28,7 +28,7 @@ export interface Location {
   occupancyBreakdown?: { label: string; value: number }[];
 }
 
-export const locations: Location[] = [
+export const locations: LocationStudents[] = [
   {
     id: '1',
     name: 'Study Hub E',
