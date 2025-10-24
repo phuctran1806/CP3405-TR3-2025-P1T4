@@ -9,7 +9,6 @@ const Statistics = ({ location }: any) => {
   const liveOccupancy = location.liveOccupancy;
   console.log('Live Occupancy:', liveOccupancy);
 
-  // Define chart style configuration (same style as student dashboard)
   const chartConfig = {
     backgroundGradientFrom: '#ffffff',
     backgroundGradientTo: '#ffffff',
@@ -36,7 +35,7 @@ const Statistics = ({ location }: any) => {
     {
       name: 'Available',
       population: 100 - liveOccupancy,
-      color: '#10b981', // green
+      color: '#10b981',
       legendFontColor: '#374151',
       legendFontSize: 13,
     },
@@ -59,23 +58,36 @@ const Statistics = ({ location }: any) => {
           </Text>
 
           <Box alignItems="center">
-            {liveOccupancy ? (<PieChart
-              data={pieData}
-              width={screenWidth - 64}
-              height={220}
-              chartConfig={chartConfig}
-              accessor="population"
-              backgroundColor="transparent"
-              paddingLeft="20"
-              center={[0, 0]}
-              hasLegend={true}
-              absolute
-            />) : (
+            {liveOccupancy !== null && liveOccupancy !== undefined ? (
+              <PieChart
+                data={pieData}
+                width={screenWidth - 64}
+                height={220}
+                chartConfig={chartConfig}
+                accessor="population"
+                backgroundColor="transparent"
+                paddingLeft="20"
+                center={[0, 0]}
+                hasLegend={true}
+                absolute={false}
+              />
+            ) : (
               <Text fontSize="$md" color="$gray600">
                 No lecture scheduled at this time.
               </Text>
             )}
           </Box>
+
+          {liveOccupancy !== null && liveOccupancy !== undefined && (
+            <Text
+              textAlign="center"
+              fontSize="$md"
+              color="$gray700"
+              mt="$2"
+            >
+              {liveOccupancy}% occupied
+            </Text>
+          )}
         </VStack>
       </Box>
     </VStack>
