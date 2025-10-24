@@ -8,6 +8,7 @@ export const colors = {
   
   // Grayscale
   white: '#FFFFFF',
+  black: '#000000',
   gray50: '#F7FAFC',
   gray200: '#E2E8F0',
   gray300: '#CBD5E0',
@@ -15,4 +16,7 @@ export const colors = {
   gray600: '#718096',
   gray700: '#4A5568',
   gray900: '#1A202C',
+
+  // Redscale
+  red500: '#FF0000',
 };
