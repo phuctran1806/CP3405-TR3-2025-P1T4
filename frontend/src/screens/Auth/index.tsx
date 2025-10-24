@@ -4,12 +4,10 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  View,
-  TouchableOpacity,
-  Text
 } from 'react-native';
 import LoginForm from './components/LoginForm';
 import AuthFooter from './components/AuthFooter';
+import RoleToggle from './components/RoleToggle';
 import LogoPlaceholder from '@/components/containers/LogoPlaceholder';
 import { useRouter } from 'expo-router';
 
@@ -17,7 +15,7 @@ const LoginScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
-  const [role, setRole] = useState<'student' | 'lecturer'>('student');
+  const [role, setRole] = useState<'student' | 'lecturer' | 'admin'>('student');
   const router = useRouter();
 
   // TODO: call the apis here
@@ -57,37 +55,6 @@ const LoginScreen = () => {
       >
         <LogoPlaceholder />
 
-        <View style={{ flexDirection: 'row', marginVertical: 12, alignItems: 'center' }}>
-          <Text style={{ color: '#fff', marginRight: 12 }}>Sign in as</Text>
-          <TouchableOpacity
-            onPress={() => setRole('student')}
-            style={{
-              paddingVertical: 6,
-              paddingHorizontal: 12,
-              borderRadius: 8,
-              backgroundColor: role === 'student' ? '#3b82f6' : 'transparent',
-              marginRight: 8,
-              borderWidth: 1,
-              borderColor: '#fff',
-            }}
-          >
-            <Text style={{ color: role === 'student' ? '#fff' : '#fff' }}>Student</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => setRole('lecturer')}
-            style={{
-              paddingVertical: 6,
-              paddingHorizontal: 12,
-              borderRadius: 8,
-              backgroundColor: role === 'lecturer' ? '#3b82f6' : 'transparent',
-              borderWidth: 1,
-              borderColor: '#fff',
-            }}
-          >
-            <Text style={{ color: role === 'lecturer' ? '#fff' : '#fff' }}>Lecturer</Text>
-          </TouchableOpacity>
-        </View>
-
         <LoginForm
           email={email}
           password={password}
@@ -100,6 +67,8 @@ const LoginScreen = () => {
           onSignUp={handleSignUp}
           onSocialLogin={handleSocialLogin}
         />
+
+        <RoleToggle selectedRole={role} onSelect={setRole} />
 
         <AuthFooter onGuestLogin={handleGuestLogin} />
       </ScrollView>
