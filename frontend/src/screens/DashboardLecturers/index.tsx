@@ -5,6 +5,7 @@ import { useLocalSearchParams } from 'expo-router';
 import { locations } from '@/utils/locationDataLecturers';
 import Header from './components/Header';
 import Statistics from './components/Statistics';
+import { LectureRoomMap } from './components/LectureRoomMap';
 
 export default function DashboardLecturer() {
   const { location: locationId } = useLocalSearchParams();
@@ -23,7 +24,7 @@ export default function DashboardLecturer() {
   }
 
   const getOccupancyStatus = (percentage: number | null) => {
-    if (percentage === null) return { label: 'No Lecture', color: '$gray500', bg: '$gray100' };
+    if (percentage === null) return { label: 'Empty', color: '$gray500', bg: '$gray100' };
     if (percentage >= 80) return { label: 'High', color: '$red500', bg: '$red100' };
     if (percentage >= 50) return { label: 'Medium', color: '$amber500', bg: '$amber100' };
     return { label: 'Low', color: '$green500', bg: '$green100' };
@@ -42,9 +43,11 @@ export default function DashboardLecturer() {
         {view === 'statistics' ? (
           <Statistics location={location} />
         ) : (
-          <Text color="$gray600" textAlign="center" mt="$10">
-            Seat Map view is not available for now.
-          </Text>
+          <LectureRoomMap
+            capacity={location.capacity}
+            liveOccupancy={location.liveOccupancy}
+            columns={10} // Assuming 10 columns for lecture room seating
+          />
         )}
       </ScrollView>
     </Box>

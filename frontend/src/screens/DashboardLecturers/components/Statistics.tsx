@@ -2,12 +2,12 @@ import React from 'react';
 import { Box, VStack, Text } from '@gluestack-ui/themed';
 import { PieChart } from 'react-native-chart-kit';
 import { Dimensions, Image } from 'react-native';
-import { lectureHallImage } from 'assets/lecture-hall.jpg';
 
 const screenWidth = Dimensions.get('window').width;
 
 const Statistics = ({ location }: any) => {
   const liveOccupancy = location.liveOccupancy;
+  console.log('Live Occupancy:', liveOccupancy);
 
   // Define chart style configuration (same style as student dashboard)
   const chartConfig = {
@@ -25,32 +25,22 @@ const Statistics = ({ location }: any) => {
     },
   };
 
-  const pieData = liveOccupancy
-    ? [
-        {
-          name: 'Occupied',
-          population: liveOccupancy,
-          color: '#ef4444', // red
-          legendFontColor: '#374151',
-          legendFontSize: 13,
-        },
-        {
-          name: 'Available',
-          population: 100 - liveOccupancy,
-          color: '#10b981', // green
-          legendFontColor: '#374151',
-          legendFontSize: 13,
-        },
-      ]
-    : [
-        {
-          name: 'No Lecture Ongoing',
-          population: 100,
-          color: '#9ca3af', // gray
-          legendFontColor: '#374151',
-          legendFontSize: 13,
-        },
-      ];
+  const pieData = [
+    {
+      name: 'Occupied',
+      population: liveOccupancy,
+      color: '#9e9e9e',
+      legendFontColor: '#374151',
+      legendFontSize: 13,
+    },
+    {
+      name: 'Available',
+      population: 100 - liveOccupancy,
+      color: '#10b981', // green
+      legendFontColor: '#374151',
+      legendFontSize: 13,
+    },
+  ];
 
   return (
     <VStack space="md">
@@ -69,7 +59,7 @@ const Statistics = ({ location }: any) => {
           </Text>
 
           <Box alignItems="center">
-            <PieChart
+            {liveOccupancy ? (<PieChart
               data={pieData}
               width={screenWidth - 64}
               height={220}
@@ -80,12 +70,11 @@ const Statistics = ({ location }: any) => {
               center={[0, 0]}
               hasLegend={true}
               absolute
-            />
-            <Image
-              source={require('assets/lecture-hall.jpg')}
-              style={{ width: 300, height: 300, marginTop: 16 }}
-              resizeMode="contain"
-            />
+            />) : (
+              <Text fontSize="$md" color="$gray600">
+                No lecture scheduled at this time.
+              </Text>
+            )}
           </Box>
         </VStack>
       </Box>

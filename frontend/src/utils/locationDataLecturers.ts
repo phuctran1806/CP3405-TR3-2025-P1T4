@@ -22,7 +22,6 @@ const isLectureOngoing = (schedule: string): boolean => {
   const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   const currentDay = days[now.getDay()];
   if (currentDay !== dayName) return false;
-
   const toMinutes = (t: string) => {
     const [h, m] = t.split(':').map(Number);
     return h * 60 + m;
@@ -44,7 +43,7 @@ export const locations: LocationLecturers[] = [
     name: 'Lecture Room A1-03',
     image: it_subjectImage,
     capacity: 60,
-    subject: 'Introduction to Programming',
+    subject: 'CP1010',
     schedule: 'Monday 10:00–12:00',
     liveOccupancy: getLiveOccupancy('Monday 10:00–12:00'),
   },
@@ -54,7 +53,7 @@ export const locations: LocationLecturers[] = [
     name: 'Lecture Room B2-12',
     image: business_subjectImage,
     capacity: 80,
-    subject: 'Business Communication',
+    subject: 'BU2201',
     schedule: 'Tuesday 14:00–16:00',
     liveOccupancy: getLiveOccupancy('Tuesday 14:00–16:00'),
   },
@@ -64,7 +63,7 @@ export const locations: LocationLecturers[] = [
     name: 'Lecture Room C3-07',
     image: it_subjectImage,
     capacity: 100,
-    subject: 'Data Structures and Algorithms',
+    subject: 'CP2048',
     schedule: 'Wednesday 09:00–11:00',
     liveOccupancy: getLiveOccupancy('Wednesday 09:00–11:00'),
   },
@@ -74,7 +73,7 @@ export const locations: LocationLecturers[] = [
     name: 'Lecture Room E2-05',
     image: psychology_subjectImage,
     capacity: 50,
-    subject: 'Psychology of Learning',
+    subject: 'PY2111',
     schedule: 'Thursday 13:00–15:00',
     liveOccupancy: getLiveOccupancy('Thursday 13:00–15:00'),
   },
@@ -84,9 +83,9 @@ export const locations: LocationLecturers[] = [
     name: 'Lecture Room C4-10',
     image: it_subjectImage,
     capacity: 120,
-    subject: 'Database Systems',
-    schedule: 'Thursday 17:00–19:00',
-    liveOccupancy: getLiveOccupancy('Thursday 17:00–19:00'),
+    subject: 'CP2405',
+    schedule: 'Friday 17:00–19:00',
+    liveOccupancy: getLiveOccupancy('Friday 17:00–19:00'),
   },
   {
     id: 'L6',
@@ -94,7 +93,7 @@ export const locations: LocationLecturers[] = [
     name: 'Lecture Room B3-02',
     image: business_subjectImage,
     capacity: 40,
-    subject: 'Professional Ethics',
+    subject: 'BX2405',
     schedule: 'Monday 15:00–17:00',
     liveOccupancy: getLiveOccupancy('Monday 15:00–17:00'),
   },
