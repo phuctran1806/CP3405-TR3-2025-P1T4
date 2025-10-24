@@ -54,7 +54,7 @@ export const LectureRoomMap: React.FC<LectureRoomMapProps> = ({
                   key={colIdx}
                   style={[
                     styles.seat,
-                    { backgroundColor: taken ? '#9e9e9e' : '#4CAF50' },
+                    { backgroundColor: taken ? '#ef4444' : '#4CAF50' },
                   ]}
                 />
               );
@@ -67,7 +67,7 @@ export const LectureRoomMap: React.FC<LectureRoomMapProps> = ({
       <View style={styles.legend}>
         <View style={[styles.legendItem, { backgroundColor: '#4CAF50' }]} />
         <Text style={styles.legendText}>Available</Text>
-        <View style={[styles.legendItem, { backgroundColor: '#9e9e9e' }]} />
+        <View style={[styles.legendItem, { backgroundColor: '#ef4444' }]} />
         <Text style={styles.legendText}>Taken</Text>
       </View>
     </View>

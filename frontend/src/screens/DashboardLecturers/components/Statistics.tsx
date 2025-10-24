@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, VStack, Text } from '@gluestack-ui/themed';
 import { PieChart } from 'react-native-chart-kit';
-import { Dimensions, Image } from 'react-native';
+import { Dimensions } from 'react-native';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -29,7 +29,7 @@ const Statistics = ({ location }: any) => {
     {
       name: 'Occupied',
       population: liveOccupancy,
-      color: '#9e9e9e',
+      color: '#ef4444',
       legendFontColor: '#374151',
       legendFontSize: 13,
     },
