@@ -1,6 +1,9 @@
 import React from "react";
-import Home from "@/screens/Home";
+import HomeStudents from "@/screens/HomeStudents";
+import HomeLecturers from "@/screens/HomeLecturers";
+import { useLocalSearchParams } from "expo-router";
 
 export default function Index() {
-  return <Home />
+  const { role } = useLocalSearchParams();
+  return role === 'student' ? <HomeStudents /> : <HomeLecturers />;
 }
