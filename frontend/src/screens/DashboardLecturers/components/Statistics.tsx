@@ -77,17 +77,6 @@ const Statistics = ({ location }: any) => {
               </Text>
             )}
           </Box>
-
-          {liveOccupancy !== null && liveOccupancy !== undefined && (
-            <Text
-              textAlign="center"
-              fontSize="$md"
-              color="$gray700"
-              mt="$2"
-            >
-              {liveOccupancy}% occupied
-            </Text>
-          )}
         </VStack>
       </Box>
     </VStack>
