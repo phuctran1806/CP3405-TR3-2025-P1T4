@@ -4,8 +4,9 @@ import { Box, Text } from '@gluestack-ui/themed';
 import { useLocalSearchParams } from 'expo-router';
 import { locations } from '@/utils/locationDataStudents';
 import Header from './components/Header';
-import SeatMap from './components/SeatMap';
+import SeatMap from '../../components/dashboard/SeatMap';
 import Statistics from './components/Statistics';
+import InteractiveMap from '@/components/map/InteractiveMap';
 
 export default function LocationDashboard() {
   const { location: locationId } = useLocalSearchParams();
@@ -87,7 +88,7 @@ export default function LocationDashboard() {
         contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 40 }}
       >
         {view === 'seatmap' ? (
-          <SeatMap location={location} />
+          <SeatMap location={location} map={<InteractiveMap />} />
         ) : (
           <Statistics
             location={location}

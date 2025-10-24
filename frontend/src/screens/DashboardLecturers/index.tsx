@@ -5,7 +5,6 @@ import { useLocalSearchParams } from 'expo-router';
 import { locations } from '@/utils/locationDataLecturers';
 import Header from './components/Header';
 import Statistics from './components/Statistics';
-import Schedule from './components/Schedule';
 
 export default function DashboardLecturer() {
   const { location: locationId } = useLocalSearchParams();
@@ -43,7 +42,9 @@ export default function DashboardLecturer() {
         {view === 'statistics' ? (
           <Statistics location={location} />
         ) : (
-          <Schedule location={location} />
+          <Text color="$gray600" textAlign="center" mt="$10">
+            Seat Map view is not available for now.
+          </Text>
         )}
       </ScrollView>
     </Box>

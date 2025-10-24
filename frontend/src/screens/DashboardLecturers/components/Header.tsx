@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, VStack, Text, HStack, Badge } from '@gluestack-ui/themed';
-import SegmentedControl from './SegmentedControl';
+import SegmentedControl from '@/components/dashboard/SegmentedControl'
 
 const Header = ({ location, occupancyStatus, view, setView }: any) => (
   <Box
