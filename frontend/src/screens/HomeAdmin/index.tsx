@@ -23,6 +23,8 @@ import { calculateDistance, formatDistance } from '@/utils/calculateDistance';
 import SummaryCard from './components/SummaryCard';
 import LocationCardAdmin from '@/components/cards/LocationCardAdmin';
 import DropDownMenu, { type TabType } from '@/components/DropDownMenu';
+import BookingRequestCard from './components/BookingRequestCard';
+import { bookingRequests } from '@/utils/mockData/bookingData';
 
 interface CombinedLocation {
     id: string;
@@ -173,16 +175,27 @@ export default function HomeAdmin() {
                     </VStack>
                 )}
 
-                {activeTab === 'Requests' && (
-                    <Box mt="$6" p="$4" borderRadius="$lg" bg="$white">
-                        <Text fontWeight="$bold" mb="$2">
-                            Booking Requests
-                        </Text>
-                        <Text color="$gray600">3 pending approval requests...</Text>
-                    </Box>
+                {activeTab === 'Booking Requests' && (
+                    <VStack mt="$4" space="md">
+                        {bookingRequests.map((req) => (
+                            <BookingRequestCard
+                                key={req.id}
+                                venue={req.venue}
+                                lecturerName={req.lecturerName}
+                                lecturerRole={req.lecturerRole}
+                                purpose={req.purpose}
+                                date={req.date}
+                                startTime={req.startTime}
+                                endTime={req.endTime}
+                                status={req.status}
+                                onApprove={() => console.log(`Approved ${req.id}`)}
+                                onReject={() => console.log(`Rejected ${req.id}`)}
+                            />
+                        ))}
+                    </VStack>
                 )}
 
-                {activeTab === 'Lecturers' && (
+                {activeTab === 'Lecturers Assignments' && (
                     <Box mt="$6" p="$4" borderRadius="$lg" bg="$white">
                         <Text fontWeight="$bold" mb="$2">
                             Lecturer Assignment
