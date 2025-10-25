@@ -6,7 +6,7 @@ import { View } from 'react-native';
 interface LocationCardAdminProps {
   name: string;
   block: string;
-  status: 'active' | 'maintenance' | 'closed';
+  status: 'active' | 'maintenance';
   current: number;
   capacity: number;
   onAnalytics: () => void;
@@ -22,9 +22,11 @@ export default function LocationCardAdmin({
   onAnalytics,
   onEdit,
 }: LocationCardAdminProps) {
-  const occupancyPercentage = Math.round((current / capacity) * 100) || 0;
+  // Maintenance = no occupancy allowed
+  const safeCurrent = status === 'maintenance' ? 0 : current;
+  const occupancyPercentage = Math.round((safeCurrent / capacity) * 100) || 0;
 
-  // Color based on occupancy thresholds
+  // Bar color thresholds
   let barColor = '#22c55e'; // green
   if (occupancyPercentage > 75) barColor = '#ef4444'; // red
   else if (occupancyPercentage > 50) barColor = '#facc15'; // yellow
@@ -60,14 +62,9 @@ export default function LocationCardAdmin({
           </VStack>
         </HStack>
 
+        {/* Status Tag */}
         <Box
-          bg={
-            status === 'active'
-              ? '$green100'
-              : status === 'maintenance'
-              ? '$yellow100'
-              : '$gray200'
-          }
+          bg={status === 'active' ? '$green100' : '$yellow100'}
           px="$2"
           py="$1"
           borderRadius="$md"
@@ -75,13 +72,7 @@ export default function LocationCardAdmin({
           <Text
             fontSize="$xs"
             fontWeight="$semibold"
-            color={
-              status === 'active'
-                ? '$green700'
-                : status === 'maintenance'
-                ? '$yellow700'
-                : '$gray700'
-            }
+            color={status === 'active' ? '$green700' : '$yellow700'}
           >
             {status}
           </Text>
@@ -94,7 +85,7 @@ export default function LocationCardAdmin({
           Current Occupancy
         </Text>
         <Text fontWeight="$bold" fontSize="$md" color="$black">
-          {`${current} / ${capacity} (${occupancyPercentage}%)`}
+          {`${safeCurrent} / ${capacity} (${occupancyPercentage}%)`}
         </Text>
 
         {/* Occupancy Bar */}
@@ -127,10 +118,15 @@ export default function LocationCardAdmin({
           p="$2"
           alignItems="center"
           justifyContent="center"
+          disabled={status !== 'active'}
         >
           <HStack space="xs" alignItems="center">
             <Icon as={BarChart2} size="sm" color="$gray700" />
-            <Text fontSize="$sm" color="$gray700" fontWeight="$medium">
+            <Text
+              fontSize="$sm"
+              color={status === 'active' ? '$gray700' : '$gray400'}
+              fontWeight="$medium"
+            >
               View Analytics
             </Text>
           </HStack>
