@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ScrollView } from 'react-native';
 import { Box, Text } from '@gluestack-ui/themed';
 import { useLocalSearchParams } from 'expo-router';
-import { locations } from '@/utils/locationDataStudents';
+import { locations } from '@/utils/mockData/locationDataStudents';
 import Header from './components/Header';
 import SeatMap from '../../components/dashboard/SeatMap';
 import Statistics from './components/Statistics';
@@ -12,7 +12,6 @@ export default function LocationDashboard() {
   const { location: locationId } = useLocalSearchParams();
   const location = locations.find((loc) => loc.id === locationId);
   const [view, setView] = useState<'seatmap' | 'statistics'>('seatmap');
-  console.log('Location ID from params:', locationId); // Debug log
   useEffect(() => setView('seatmap'), [locationId]);
 
   if (!location) {
@@ -29,7 +28,8 @@ export default function LocationDashboard() {
     return { label: 'Low', color: '$green500', bg: '$green100' };
   };
 
-  const occupancyStatus = getOccupancyStatus(location.occupancyPercentage);
+  const occupancyPercentage = (location.occupancy / location.capacity) * 100;
+  const occupancyStatus = getOccupancyStatus(occupancyPercentage);
 
   const chartConfig = {
     backgroundGradientFrom: '#ffffff',
@@ -49,14 +49,14 @@ export default function LocationDashboard() {
   const pieData = [
     {
       name: 'Occupied',
-      population: location.occupancyPercentage,
+      population: occupancyPercentage,
       color: '#ef4444',
       legendFontColor: '#374151',
       legendFontSize: 13,
     },
     {
       name: 'Available',
-      population: 100 - location.occupancyPercentage,
+      population: 100 - occupancyPercentage,
       color: '#10b981',
       legendFontColor: '#374151',
       legendFontSize: 13,

@@ -12,6 +12,7 @@ export interface LocationLecturers {
   subject: string;
   schedule: string; // e.g. "Monday 10:00–12:00"
   liveOccupancy: number | null; // percentage during lecture time
+  state: 'active' | 'maintenance';
 }
 
 // Utility: check if current time falls within the scheduled range
@@ -46,6 +47,7 @@ export const locations: LocationLecturers[] = [
     subject: 'CP1010',
     schedule: 'Monday 10:00–12:00',
     liveOccupancy: getLiveOccupancy('Monday 10:00–12:00'),
+    state: 'active',
   },
   {
     id: 'L2',
@@ -56,6 +58,7 @@ export const locations: LocationLecturers[] = [
     subject: 'BU2201',
     schedule: 'Tuesday 14:00–16:00',
     liveOccupancy: getLiveOccupancy('Tuesday 14:00–16:00'),
+    state: 'active',
   },
   {
     id: 'L3',
@@ -66,6 +69,7 @@ export const locations: LocationLecturers[] = [
     subject: 'CP2048',
     schedule: 'Wednesday 09:00–11:00',
     liveOccupancy: getLiveOccupancy('Wednesday 09:00–11:00'),
+    state: 'maintenance',
   },
   {
     id: 'L4',
@@ -76,6 +80,7 @@ export const locations: LocationLecturers[] = [
     subject: 'PY2111',
     schedule: 'Thursday 13:00–15:00',
     liveOccupancy: getLiveOccupancy('Thursday 13:00–15:00'),
+    state: 'active',
   },
   {
     id: 'L5',
@@ -86,6 +91,7 @@ export const locations: LocationLecturers[] = [
     subject: 'CP2405',
     schedule: 'Friday 17:00–19:00',
     liveOccupancy: getLiveOccupancy('Friday 17:00–19:00'),
+    state: 'active',
   },
   {
     id: 'L6',
@@ -96,5 +102,6 @@ export const locations: LocationLecturers[] = [
     subject: 'BX2405',
     schedule: 'Monday 15:00–17:00',
     liveOccupancy: getLiveOccupancy('Monday 15:00–17:00'),
+    state: 'active',
   },
 ];
