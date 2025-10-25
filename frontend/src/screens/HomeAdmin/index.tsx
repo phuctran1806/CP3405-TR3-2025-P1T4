@@ -169,7 +169,7 @@ export default function HomeAdmin() {
                                     status={source.state || 'active'}
                                     current={parseInt(loc.occupancy) || 0}
                                     capacity={source.capacity || 0}
-                                    onAnalytics={() => router.push(`/analytics/${loc.id}`)}
+                                    onAnalytics={() => router.push(`/analytics/${loc.id}`)} // TODO: These pages will be implemented later
                                     onEdit={() => router.push(`/edit/${loc.id}`)}
                                 />
                             );
@@ -207,7 +207,7 @@ export default function HomeAdmin() {
                                 totalVenues={lect.totalVenues}
                                 subjects={lect.subjects}
                                 venues={lect.venues}
-                                onEdit={() => router.push(`/edit-assignment/${lect.id}`)}
+                                onEdit={() => router.push(`/edit-assignment/${lect.id}`)} // TODO: Implement this page later
                             />
                         ))}
                     </VStack>
