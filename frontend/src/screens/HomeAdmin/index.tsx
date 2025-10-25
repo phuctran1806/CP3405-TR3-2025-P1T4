@@ -25,6 +25,8 @@ import LocationCardAdmin from '@/components/cards/LocationCardAdmin';
 import DropDownMenu, { type TabType } from '@/components/DropDownMenu';
 import BookingRequestCard from './components/BookingRequestCard';
 import { bookingRequests } from '@/utils/mockData/bookingData';
+import LecturerAssignmentCard from './components/LectureAssignmentCard';
+import { lecturerAssignments } from '@/utils/mockData/lectureAssignmentData';
 
 interface CombinedLocation {
     id: string;
@@ -196,12 +198,19 @@ export default function HomeAdmin() {
                 )}
 
                 {activeTab === 'Lecturers Assignments' && (
-                    <Box mt="$6" p="$4" borderRadius="$lg" bg="$white">
-                        <Text fontWeight="$bold" mb="$2">
-                            Lecturer Assignment
-                        </Text>
-                        <Text color="$gray600">Manage lecturer–venue allocations here.</Text>
-                    </Box>
+                    <VStack mt="$4" space="md">
+                        {lecturerAssignments.map((lect) => (
+                            <LecturerAssignmentCard
+                                key={lect.id}
+                                lecturerName={lect.lecturerName}
+                                totalSubjects={lect.totalSubjects}
+                                totalVenues={lect.totalVenues}
+                                subjects={lect.subjects}
+                                venues={lect.venues}
+                                onEdit={() => router.push(`/edit-assignment/${lect.id}`)}
+                            />
+                        ))}
+                    </VStack>
                 )}
             </ScrollView>
         </Box>
