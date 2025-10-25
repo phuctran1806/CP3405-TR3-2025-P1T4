@@ -112,7 +112,7 @@ export default function HomeAdmin() {
             studentLocations.reduce((sum, s) => sum + s.occupancy, 0) / studentLocations.length
         ) || 0;
 
-    const pendingRequests = 3;
+    const pendingRequests = bookingRequests.filter((req) => req.status === 'pending').length;
 
     if (!mounted) {
         return (
