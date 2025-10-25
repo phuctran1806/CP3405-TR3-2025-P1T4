@@ -14,7 +14,8 @@ export interface LocationStudents {
     longitude: number;
   };
   accessibility: ('power' | 'cool' | 'wifi' | 'quiet')[];
-  occupancyPercentage: number;
+  occupancy: number;
+  capacity: number;
   averageOccupancy: {
     monday: number;
     tuesday: number;
@@ -35,7 +36,8 @@ export const locations: LocationStudents[] = [
     image: studyHubEImage,
     coordinates: { latitude: 1.3521, longitude: 103.8198 },
     accessibility: ['power', 'cool', 'wifi'],
-    occupancyPercentage: 72,
+    occupancy: 94,
+    capacity: 130,
     averageOccupancy: {
       monday: 70,
       tuesday: 75,
@@ -45,8 +47,8 @@ export const locations: LocationStudents[] = [
       saturday: 60,
     },
     occupancyBreakdown: [
-      { label: 'Occupied', value: 72 },
-      { label: 'Available', value: 28 },
+      { label: 'Occupied', value: 94 },
+      { label: 'Available', value: 36 },
     ],
     lineChartData: [
       { time: '08:00', value: 30 },
@@ -62,9 +64,10 @@ export const locations: LocationStudents[] = [
     id: '2',
     name: 'Study Hub A',
     image: studyHubAImage,
-    coordinates: { latitude: 1.3525, longitude: 103.8200 },
+    coordinates: { latitude: 1.3525, longitude: 103.82 },
     accessibility: ['power', 'quiet'],
-    occupancyPercentage: 54,
+    occupancy: 65,
+    capacity: 120,
     averageOccupancy: {
       monday: 55,
       tuesday: 60,
@@ -74,8 +77,8 @@ export const locations: LocationStudents[] = [
       saturday: 40,
     },
     occupancyBreakdown: [
-      { label: 'Occupied', value: 54 },
-      { label: 'Available', value: 46 },
+      { label: 'Occupied', value: 65 },
+      { label: 'Available', value: 55 },
     ],
     lineChartData: [
       { time: '08:00', value: 20 },
@@ -91,9 +94,10 @@ export const locations: LocationStudents[] = [
     id: '3',
     name: 'Library',
     image: libraryImage,
-    coordinates: { latitude: 1.3530, longitude: 103.8205 },
+    coordinates: { latitude: 1.353, longitude: 103.8205 },
     accessibility: ['power', 'cool', 'wifi', 'quiet'],
-    occupancyPercentage: 85,
+    occupancy: 85,
+    capacity: 100,
     averageOccupancy: {
       monday: 80,
       tuesday: 82,
@@ -122,7 +126,8 @@ export const locations: LocationStudents[] = [
     image: studyPodsImage,
     coordinates: { latitude: 1.3518, longitude: 103.8195 },
     accessibility: ['power', 'wifi'],
-    occupancyPercentage: 45,
+    occupancy: 18,
+    capacity: 40,
     averageOccupancy: {
       monday: 50,
       tuesday: 48,
@@ -132,8 +137,8 @@ export const locations: LocationStudents[] = [
       saturday: 35,
     },
     occupancyBreakdown: [
-      { label: 'Occupied', value: 45 },
-      { label: 'Available', value: 55 },
+      { label: 'Occupied', value: 18 },
+      { label: 'Available', value: 22 },
     ],
     lineChartData: [
       { time: '08:00', value: 15 },
@@ -149,9 +154,10 @@ export const locations: LocationStudents[] = [
     id: '5',
     name: 'Courtyard',
     image: yardImage,
-    coordinates: { latitude: 1.3515, longitude: 103.8190 },
+    coordinates: { latitude: 1.3515, longitude: 103.819 },
     accessibility: ['wifi'],
-    occupancyPercentage: 28,
+    occupancy: 7,
+    capacity: 24,
     averageOccupancy: {
       monday: 30,
       tuesday: 32,
@@ -161,8 +167,8 @@ export const locations: LocationStudents[] = [
       saturday: 18,
     },
     occupancyBreakdown: [
-      { label: 'Occupied', value: 28 },
-      { label: 'Available', value: 72 },
+      { label: 'Occupied', value: 7 },
+      { label: 'Available', value: 17 },
     ],
     lineChartData: [
       { time: '08:00', value: 10 },
