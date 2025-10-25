@@ -27,6 +27,7 @@ export interface LocationStudents {
 
   lineChartData?: { time: string; value: number }[];
   occupancyBreakdown?: { label: string; value: number }[];
+  state: ('active' | 'maintenance');
 }
 
 export const locations: LocationStudents[] = [
@@ -59,6 +60,7 @@ export const locations: LocationStudents[] = [
       { time: '18:00', value: 50 },
       { time: '20:00', value: 35 },
     ],
+    state: 'active',
   },
   {
     id: '2',
@@ -89,6 +91,7 @@ export const locations: LocationStudents[] = [
       { time: '18:00', value: 45 },
       { time: '20:00', value: 30 },
     ],
+    state: 'active',
   },
   {
     id: '3',
@@ -119,6 +122,7 @@ export const locations: LocationStudents[] = [
       { time: '18:00', value: 75 },
       { time: '20:00', value: 60 },
     ],
+    state: 'active',
   },
   {
     id: '4',
@@ -149,6 +153,7 @@ export const locations: LocationStudents[] = [
       { time: '18:00', value: 40 },
       { time: '20:00', value: 25 },
     ],
+    state: 'active',
   },
   {
     id: '5',
@@ -179,5 +184,6 @@ export const locations: LocationStudents[] = [
       { time: '18:00', value: 20 },
       { time: '20:00', value: 12 },
     ],
+    state: 'maintenance',
   },
 ];
