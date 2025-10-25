@@ -24,7 +24,7 @@ const Header = ({ location, occupancyStatus, view, setView }: any) => (
         </VStack>
         <VStack alignItems="flex-end">
           <Text fontSize="$xl" fontWeight="$bold" color="$blue600">
-            {location.occupancyPercentage}% Occupied
+            {Math.round((location.occupancy / location.capacity) * 100)}% Occupied
           </Text>
           <Badge
             action="error"
