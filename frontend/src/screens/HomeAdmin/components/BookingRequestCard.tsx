@@ -29,7 +29,6 @@ export default function BookingRequestCard({
 }: BookingRequestCardProps) {
   const isPending = status === 'pending';
   const isApproved = status === 'approved';
-  const isRejected = status === 'rejected';
 
   return (
     <Box
