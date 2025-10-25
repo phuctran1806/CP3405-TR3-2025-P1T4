@@ -3,8 +3,8 @@ import { ScrollView, RefreshControl, Alert, View, ActivityIndicator } from 'reac
 import type { ImageSourcePropType } from 'react-native';
 import { Box, VStack, Text, Spinner } from '@gluestack-ui/themed';
 import * as Location from 'expo-location';
-import LocationCard from '@/components/LocationCard';
-import { locations } from '@/utils/locationDataStudents';
+import LocationCard from '@/components/cards/LocationCard';
+import { locations } from '@/utils/mockData/locationDataStudents';
 import { calculateDistance, formatDistance } from '@/utils/calculateDistance';
 import { useRouter } from 'expo-router';
 

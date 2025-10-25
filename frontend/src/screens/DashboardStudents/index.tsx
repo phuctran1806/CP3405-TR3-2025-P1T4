@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ScrollView } from 'react-native';
 import { Box, Text } from '@gluestack-ui/themed';
 import { useLocalSearchParams } from 'expo-router';
-import { locations } from '@/utils/locationDataStudents';
+import { locations } from '@/utils/mockData/locationDataStudents';
 import Header from './components/Header';
 import SeatMap from '../../components/dashboard/SeatMap';
 import Statistics from './components/Statistics';
