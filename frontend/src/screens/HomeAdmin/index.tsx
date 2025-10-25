@@ -151,20 +151,20 @@ export default function HomeAdmin() {
                 {activeTab === 'All Venues' && (
                     <VStack mt="$4" space="md">
                         {combinedLocations.map((loc) => {
-                            // find actual capacity from source
-                            const capacity =
-                                loc.type === 'Student Space'
-                                    ? studentLocations.find((s) => s.id === loc.id)?.capacity || 0
-                                    : lecturerLocations.find((l) => l.id === loc.id)?.capacity || 0;
+                            const studentData = studentLocations.find((s) => s.id === loc.id);
+                            const lecturerData = lecturerLocations.find((l) => l.id === loc.id);
+                            const source = studentData || lecturerData;
+
+                            if (!source) return null;
 
                             return (
                                 <LocationCardAdmin
                                     key={loc.id}
                                     name={loc.name}
                                     block={loc.type === 'Student Space' ? 'Student Study Area' : 'Academic Building'}
-                                    status={Math.random() > 0.9 ? 'maintenance' : 'active'}
+                                    status={source.state || 'active'}
                                     current={parseInt(loc.occupancy) || 0}
-                                    capacity={capacity}
+                                    capacity={source.capacity || 0}
                                     onAnalytics={() => router.push(`/analytics/${loc.id}`)}
                                     onEdit={() => router.push(`/edit/${loc.id}`)}
                                 />
@@ -172,8 +172,6 @@ export default function HomeAdmin() {
                         })}
                     </VStack>
                 )}
-
-
 
                 {activeTab === 'Requests' && (
                     <Box mt="$6" p="$4" borderRadius="$lg" bg="$white">
