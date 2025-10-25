@@ -1,6 +1,7 @@
 import React from 'react';
-import { Box, VStack, HStack, Text, Pressable, Icon, Button } from '@gluestack-ui/themed';
+import { Box, VStack, HStack, Text, Pressable, Icon } from '@gluestack-ui/themed';
 import { Building2, MapPin, BarChart2, Edit3 } from 'lucide-react-native';
+import { View } from 'react-native';
 
 interface LocationCardAdminProps {
   name: string;
@@ -23,6 +24,11 @@ export default function LocationCardAdmin({
 }: LocationCardAdminProps) {
   const occupancyPercentage = Math.round((current / capacity) * 100) || 0;
 
+  // Color based on occupancy thresholds
+  let barColor = '#22c55e'; // green
+  if (occupancyPercentage > 75) barColor = '#ef4444'; // red
+  else if (occupancyPercentage > 50) barColor = '#facc15'; // yellow
+
   return (
     <Box
       bg="$white"
@@ -35,7 +41,7 @@ export default function LocationCardAdmin({
       mb="$5"
       p="$4"
     >
-      {/* Top row */}
+      {/* Header */}
       <HStack justifyContent="space-between" alignItems="center" mb="$3">
         <HStack space="sm" alignItems="center">
           <Box bg="$green100" borderRadius="$lg" p="$2">
@@ -55,7 +61,13 @@ export default function LocationCardAdmin({
         </HStack>
 
         <Box
-          bg={status === 'active' ? '$green100' : status === 'maintenance' ? '$yellow100' : '$gray200'}
+          bg={
+            status === 'active'
+              ? '$green100'
+              : status === 'maintenance'
+              ? '$yellow100'
+              : '$gray200'
+          }
           px="$2"
           py="$1"
           borderRadius="$md"
@@ -76,7 +88,7 @@ export default function LocationCardAdmin({
         </Box>
       </HStack>
 
-      {/* Occupancy */}
+      {/* Occupancy Info */}
       <VStack space="xs" mb="$3">
         <Text fontSize="$sm" color="$gray600">
           Current Occupancy
@@ -84,9 +96,28 @@ export default function LocationCardAdmin({
         <Text fontWeight="$bold" fontSize="$md" color="$black">
           {`${current} / ${capacity} (${occupancyPercentage}%)`}
         </Text>
+
+        {/* Occupancy Bar */}
+        <View
+          style={{
+            marginTop: 6,
+            height: 6,
+            borderRadius: 6,
+            backgroundColor: '#e5e7eb',
+            overflow: 'hidden',
+          }}
+        >
+          <View
+            style={{
+              width: `${occupancyPercentage}%`,
+              height: '100%',
+              backgroundColor: barColor,
+            }}
+          />
+        </View>
       </VStack>
 
-      {/* Buttons */}
+      {/* Action Buttons */}
       <HStack space="sm" justifyContent="space-between">
         <Pressable
           flex={1}
