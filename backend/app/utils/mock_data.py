@@ -22,7 +22,59 @@ from app.models.seat import Seat, SeatType, SeatStatus
 from app.models.reservation import Reservation, ReservationStatus
 from app.models.occupancy_history import OccupancyHistory
 from app.models.operating_hours import OperatingHours
+from app.models.lecturer_location import LecturerLocation, LocationState
 from app.utils.security import get_password_hash
+
+
+def main():
+    """Main function to generate all mock data."""
+    print("=" * 60)
+    print("🎯 JCU Library Mock Data Generator")
+    print("=" * 60)
+    
+    # Initialize database
+    print("\n📦 Initializing database...")
+    init_db()
+    print("✓ Database initialized")
+    
+    # Create session
+    db = SessionLocal()
+    
+    try:
+        # Clear existing data
+        clear_database(db)
+        
+        # Create data
+        users = create_users(db)
+        locations = create_locations(db)
+        lecturer_locations = create_lecturer_locations(db)
+        create_operating_hours(db, locations)
+        seats = create_floors_and_seats(db, locations)
+        create_occupancy_history(db, locations)
+        
+        print("\n" + "=" * 60)
+        print("✅ Mock data generation completed successfully!")
+        print("=" * 60)
+        print("\n📋 Summary:")
+        print(f"   • Users: {len(users)}")
+        print(f"   • Locations: {len(locations)}")
+        print(f"   • Lecturer Locations: {len(lecturer_locations)}")
+        print(f"   • Seats: {len(seats)}")
+        print("\n🔐 Default Login Credentials:")
+        print("   Admin:    admin@jcu.edu.au / admin123")
+        print("   Lecturer: lecturer@jcu.edu.au / lecturer123")
+        print("   Student:  student@jcu.edu.au / student123")
+        print("   Guest:    guest@jcu.edu.au / guest123")
+        print("\n🚀 Start the server with:")
+        print("   uvicorn app.main:app --reload")
+        print("=" * 60)
+        
+    except Exception as e:
+        print(f"\n❌ Error: {e}")
+        db.rollback()
+        raise
+    finally:
+        db.close()
 
 
 def clear_database(db):
@@ -98,6 +150,71 @@ def create_users(db):
     db.commit()
     print(f"✓ Created {len(users)} users")
     return users
+
+
+def create_lecturer_locations(db):
+    """Create sample lecturer locations."""
+    print("\n📚 Creating lecturer locations...")
+    
+    locations = [
+        LecturerLocation(
+            id=str(uuid.uuid4()),
+            code="C4-14",
+            name="Auditorium C4-14",
+            image_url=None,
+            capacity=150,
+            subject="CP2414",
+            start_time=datetime.utcnow() + timedelta(days=1, hours=9),
+            end_time=datetime.utcnow() + timedelta(days=1, hours=11),
+            live_occupancy=0,
+            state=LocationState.ACTIVE,
+            lecturer_email="petteri@jcu.edu.au"
+        ),
+        LecturerLocation(
+            id=str(uuid.uuid4()),
+            code="A1-02",
+            name="Lecture Room A1-02",
+            image_url=None,
+            capacity=40,
+            subject="CP1403",
+            start_time=datetime.utcnow() + timedelta(days=1, hours=13),
+            end_time=datetime.utcnow() + timedelta(days=1, hours=15),
+            live_occupancy=0,
+            state=LocationState.ACTIVE,
+            lecturer_email="petteri@jcu.edu.au"
+        ),
+        LecturerLocation(
+            id=str(uuid.uuid4()),
+            code="C2-15",
+            name="Auditorium C2-15",
+            image_url=None,
+            capacity=30,
+            subject="CP2408",
+            start_time=datetime.utcnow() + timedelta(days=2, hours=13),
+            end_time=datetime.utcnow() + timedelta(days=2, hours=15),
+            live_occupancy=0,
+            state=LocationState.ACTIVE,
+            lecturer_email="andrew@jcu.edu.au"
+        ),
+        LecturerLocation(
+            id=str(uuid.uuid4()),
+            code="B1-05",
+            name="Lecture Room B1-05",
+            image_url=None,
+            capacity=50,
+            subject="CP3405",
+            start_time=datetime.utcnow() + timedelta(days=3, hours=10),
+            end_time=datetime.utcnow() + timedelta(days=3, hours=12),
+            live_occupancy=0,
+            state=LocationState.ACTIVE,
+            lecturer_email="michael@jcu.edu.au"
+        ),
+    ]
+    
+    db.add_all(locations)
+    db.commit()
+    print(f"✓ Created {len(locations)} lecturer locations")
+    return locations
 
 
 def create_locations(db):
@@ -379,55 +496,6 @@ def create_occupancy_history(db, locations):
     db.add_all(history_records)
     db.commit()
     print(f"✓ Created {len(history_records)} occupancy history records")
-
-
-def main():
-    """Main function to generate all mock data."""
-    print("=" * 60)
-    print("🎯 JCU Library Mock Data Generator")
-    print("=" * 60)
-    
-    # Initialize database
-    print("\n📦 Initializing database...")
-    init_db()
-    print("✓ Database initialized")
-    
-    # Create session
-    db = SessionLocal()
-    
-    try:
-        # Clear existing data
-        clear_database(db)
-        
-        # Create data
-        users = create_users(db)
-        locations = create_locations(db)
-        create_operating_hours(db, locations)
-        seats = create_floors_and_seats(db, locations)
-        create_occupancy_history(db, locations)
-        
-        print("\n" + "=" * 60)
-        print("✅ Mock data generation completed successfully!")
-        print("=" * 60)
-        print("\n📋 Summary:")
-        print(f"   • Users: {len(users)}")
-        print(f"   • Locations: {len(locations)}")
-        print(f"   • Seats: {len(seats)}")
-        print("\n🔐 Default Login Credentials:")
-        print("   Admin:    admin@jcu.edu.au / admin123")
-        print("   Lecturer: lecturer@jcu.edu.au / lecturer123")
-        print("   Student:  student@jcu.edu.au / student123")
-        print("   Guest:    guest@jcu.edu.au / guest123")
-        print("\n🚀 Start the server with:")
-        print("   uvicorn app.main:app --reload")
-        print("=" * 60)
-        
-    except Exception as e:
-        print(f"\n❌ Error: {e}")
-        db.rollback()
-        raise
-    finally:
-        db.close()
 
 
 if __name__ == "__main__":
