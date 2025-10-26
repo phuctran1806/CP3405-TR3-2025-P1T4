@@ -27,7 +27,7 @@ class LecturerLocation(Base):
     subject = Column(String(20), nullable=False)
     start_time = Column(DateTime, nullable=True)
     end_time = Column(DateTime, nullable=True)
-    lecturer_email = Column(String(255), nullable=True)
+    email = Column(String(255), nullable=True)
     live_occupancy = Column(Integer, nullable=True)
     state = Column(Enum(LocationState), nullable=False, default=LocationState.ACTIVE)
 
