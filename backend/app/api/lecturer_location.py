@@ -12,169 +12,123 @@ from datetime import datetime
 from app.database import get_db
 from app.models.lecturer_location import LecturerLocation
 from app.schemas.lecturer_location import (
-    LecturerLocationBase,
+    LecturerLocationResponse,
     LecturerLocationAssign,
     LecturerLocationUpdate,
-    LecturerLocationResponse,
 )
 from app.models.user import User
 from app.api.auth import get_current_user
 
-router = APIRouter(prefix="/lecturer-locations", tags=["Lecturer Locations"])
+router = APIRouter()
 
-# Utility functions:
 
-def check_schedule_conflict(db: Session, lecturer_email: str, start_time: datetime, end_time: datetime, exclude_id: str = None):
-    """
-    Check for overlapping schedules for the same lecturer.
-    """
-    query = db.query(LecturerLocation).filter(LecturerLocation.lecturer_email == lecturer_email)
-
+# Utility — prevent overlapping bookings
+def check_schedule_conflict(db: Session, email: str, start: datetime, end: datetime, exclude_id: str = None):
+    query = db.query(LecturerLocation).filter(LecturerLocation.email == email)
     if exclude_id:
         query = query.filter(LecturerLocation.id != exclude_id)
 
-    existing = query.all()
-
-    for loc in existing:
+    for loc in query.all():
         if loc.start_time and loc.end_time:
-            overlap = not (end_time <= loc.start_time or start_time >= loc.end_time)
-            if overlap:
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"Schedule conflict with room '{loc.name}' ({loc.code}) from {loc.start_time} to {loc.end_time}"
-                )
+            if start < loc.end_time and end > loc.start_time:
+                return True
+    return False
 
-# API endpoints:
 
-@router.get("/my-room", response_model=List[LecturerLocationResponse])
-async def get_my_rooms(
+# Lecturer: fetch only assigned rooms
+@router.get("/me", response_model=List[LecturerLocationResponse])
+def get_my_rooms(
+    db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
 ):
-    """
-    Lecturer: Fetch all assigned rooms (uses email from token).
-    """
+    print("Current user:", current_user.email, "Role:", current_user.role)
     if current_user.role != "lecturer":
-        raise HTTPException(status_code=403, detail="Access denied: lecturers only")
+        raise HTTPException(status_code=403, detail="Access denied")
 
     rooms = db.query(LecturerLocation).filter(
-        LecturerLocation.lecturer_email == current_user.email
+        LecturerLocation.email == current_user.email
     ).all()
-
-    if not rooms:
-        raise HTTPException(status_code=404, detail="No rooms assigned")
-
-    return [LecturerLocationResponse.from_orm(r) for r in rooms]
+    return rooms
 
 
+# Admin: fetch all rooms
 @router.get("/", response_model=List[LecturerLocationResponse])
-async def get_all_rooms(
+def get_all_rooms(
+    db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
 ):
-    """Admin: Get all lecture rooms."""
     if current_user.role != "admin":
-        raise HTTPException(status_code=403, detail="Access denied: admins only")
+        raise HTTPException(status_code=403, detail="Admins only")
 
-    rooms = db.query(LecturerLocation).all()
-    return [LecturerLocationResponse.from_orm(r) for r in rooms]
+    return db.query(LecturerLocation).all()
 
 
-@router.post("/", response_model=LecturerLocationResponse, status_code=201)
-async def create_room(
-    payload: LecturerLocationBase,
+# Admin: assign room to lecturer
+@router.post("/assign", response_model=LecturerLocationResponse)
+def assign_room(
+    assignment: LecturerLocationAssign,
+    db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
 ):
-    """Admin: Create a new lecture room."""
     if current_user.role != "admin":
-        raise HTTPException(status_code=403, detail="Access denied: admins only")
+        raise HTTPException(status_code=403, detail="Admins only")
 
-    new_room = LecturerLocation(id=str(uuid.uuid4()), **payload.dict())
-    db.add(new_room)
-    db.commit()
-    db.refresh(new_room)
-    return LecturerLocationResponse.from_orm(new_room)
-
-
-@router.post("/assign/{room_id}", response_model=LecturerLocationResponse)
-async def assign_room(
-    room_id: str,
-    payload: LecturerLocationAssign,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
-    """
-    Admin: Assign a lecturer to a room.
-    Validates that the lecturer’s schedule does not overlap with other assigned rooms.
-    """
-    if current_user.role != "admin":
-        raise HTTPException(status_code=403, detail="Access denied: admins only")
-
-    room = db.query(LecturerLocation).filter(LecturerLocation.id == room_id).first()
+    room = db.query(LecturerLocation).filter(LecturerLocation.id == assignment.id).first()
     if not room:
         raise HTTPException(status_code=404, detail="Room not found")
 
-    # check schedule conflicts for same lecturer
-    check_schedule_conflict(db, payload.lecturer_email, payload.start_time, payload.end_time, exclude_id=room_id)
+    if check_schedule_conflict(db, assignment.lecturer_email, assignment.start_time, assignment.end_time):
+        raise HTTPException(status_code=400, detail="Schedule conflict detected")
 
-    # assign
-    room.lecturer_email = payload.lecturer_email
-    room.start_time = payload.start_time
-    room.end_time = payload.end_time
-
+    room.lecturer_email = assignment.lecturer_email
+    room.start_time = assignment.start_time
+    room.end_time = assignment.end_time
     db.commit()
     db.refresh(room)
-    return LecturerLocationResponse.from_orm(room)
+    return room
 
 
+# Admin: update room or reassign lecturer
 @router.put("/{room_id}", response_model=LecturerLocationResponse)
-async def update_room(
+def update_room(
     room_id: str,
     payload: LecturerLocationUpdate,
+    db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
 ):
-    """Admin: Update room details or lecturer assignment."""
     if current_user.role != "admin":
-        raise HTTPException(status_code=403, detail="Access denied: admins only")
+        raise HTTPException(status_code=403, detail="Admins only")
 
     room = db.query(LecturerLocation).filter(LecturerLocation.id == room_id).first()
     if not room:
         raise HTTPException(status_code=404, detail="Room not found")
 
-    updated_data = payload.dict(exclude_unset=True)
-
-    # if updating lecturer or times, check for clash
-    if "lecturer_email" in updated_data or "start_time" in updated_data or "end_time" in updated_data:
-        lecturer_email = updated_data.get("lecturer_email", room.lecturer_email)
-        start_time = updated_data.get("start_time", room.start_time)
-        end_time = updated_data.get("end_time", room.end_time)
-        if lecturer_email and start_time and end_time:
-            check_schedule_conflict(db, lecturer_email, start_time, end_time, exclude_id=room.id)
-
-    for key, value in updated_data.items():
+    update_data = payload.dict(exclude_unset=True)
+    for key, value in update_data.items():
         setattr(room, key, value)
 
     db.commit()
     db.refresh(room)
-    return LecturerLocationResponse.from_orm(room)
+    return room
 
 
-@router.delete("/{room_id}", status_code=204)
-async def delete_room(
+# Admin: delete room assignment (not delete record)
+@router.delete("/{room_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_assignment(
     room_id: str,
+    db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
 ):
-    """Admin: Delete a lecture room."""
     if current_user.role != "admin":
-        raise HTTPException(status_code=403, detail="Access denied: admins only")
+        raise HTTPException(status_code=403, detail="Admins only")
 
     room = db.query(LecturerLocation).filter(LecturerLocation.id == room_id).first()
     if not room:
         raise HTTPException(status_code=404, detail="Room not found")
 
-    db.delete(room)
+    room.lecturer_email = None
+    room.start_time = None
+    room.end_time = None
+
     db.commit()
-    return None
+    return
