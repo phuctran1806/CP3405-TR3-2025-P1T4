@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ScrollView, KeyboardAvoidingView, Platform, StyleSheet, Text } from 'react-native';
+import RoleToggle, {type Role} from './components/RoleToggle';
 import SignupForm from './components/SignupForm';
 import { spacing } from '@/constants/spacing';
 import { useRouter } from 'expo-router';
@@ -22,7 +23,7 @@ const SignupScreen: React.FC = () => {
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
-  const [role, setRole] = useState<'student' | 'lecturer' | 'admin'>('student');
+  const [role, setRole] = useState<Role>('student');
   const [password, setPassword] = useState('');
   const [studentId, setStudentId] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -90,6 +91,9 @@ const SignupScreen: React.FC = () => {
           loading={loading}
         />
         {errors.api && <Text style={{ color: colors.red500, textAlign: 'center', marginTop: 8 }}>{errors.api}</Text>}
+
+        <RoleToggle selectedRole={role} onSelect={setRole} />
+
       </ScrollView>
     </KeyboardAvoidingView>
   );
