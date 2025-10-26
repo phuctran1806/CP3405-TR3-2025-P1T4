@@ -168,7 +168,7 @@ def create_lecturer_locations(db):
             end_time=datetime.utcnow() + timedelta(days=1, hours=11),
             live_occupancy=0,
             state=LocationState.ACTIVE,
-            lecturer_email="petteri@jcu.edu.au"
+            email="petteri@jcu.edu.au"
         ),
         LecturerLocation(
             id=str(uuid.uuid4()),
@@ -181,7 +181,7 @@ def create_lecturer_locations(db):
             end_time=datetime.utcnow() + timedelta(days=1, hours=15),
             live_occupancy=0,
             state=LocationState.ACTIVE,
-            lecturer_email="petteri@jcu.edu.au"
+            email="petteri@jcu.edu.au"
         ),
         LecturerLocation(
             id=str(uuid.uuid4()),
@@ -194,7 +194,7 @@ def create_lecturer_locations(db):
             end_time=datetime.utcnow() + timedelta(days=2, hours=15),
             live_occupancy=0,
             state=LocationState.ACTIVE,
-            lecturer_email="andrew@jcu.edu.au"
+            email="andrew@jcu.edu.au"
         ),
         LecturerLocation(
             id=str(uuid.uuid4()),
@@ -207,7 +207,7 @@ def create_lecturer_locations(db):
             end_time=datetime.utcnow() + timedelta(days=3, hours=12),
             live_occupancy=0,
             state=LocationState.ACTIVE,
-            lecturer_email="michael@jcu.edu.au"
+            email="michael@jcu.edu.au"
         ),
     ]
     
