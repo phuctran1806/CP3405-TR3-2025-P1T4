@@ -36,7 +36,6 @@ class LecturerLocationUpdate(BaseModel):
     subject: Optional[str]
     start_time: Optional[datetime]
     end_time: Optional[datetime]
-    live_occupancy: Optional[int]
     state: Optional[LocationState]
     lecturer_email: Optional[str]
 
