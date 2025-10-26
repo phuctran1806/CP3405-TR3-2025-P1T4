@@ -5,6 +5,7 @@ import { z } from 'zod';
 import LoginForm from './components/LoginForm';
 import AuthFooter from './components/AuthFooter';
 import LogoPlaceholder from '@/components/containers/LogoPlaceholder';
+import RoleToggle, {type Role} from './components/RoleToggle';
 import { login } from '@/api/auth';
 
 // 1️⃣ Zod schema
@@ -21,6 +22,7 @@ const LoginScreen: React.FC = () => {
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [generalError, setGeneralError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [role, setRole] = useState<Role>('student');
   const router = useRouter();
 
   const handleLogin = async () => {
@@ -43,7 +45,7 @@ const LoginScreen: React.FC = () => {
     try {
       const result = await login({ 'username': email, 'password': password });
       if (!result.ok) throw result.error;
-      router.replace('/(main)/home');
+      router.replace(`/(main)/home?role=${role}`);
     } catch (e: any) {
       if (e.status === 401) setGeneralError("Incorrect username or password");
       else setGeneralError(e.message || "Login failed");
