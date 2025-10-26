@@ -1,0 +1,24 @@
+version: "3.9"
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend.Dockerfile
+    container_name: backend
+    ports:
+      - "8000:8000"
+
+  nginx:
+    build:
+      context: .
+      dockerfile: nginx.Dockerfile
+    container_name: nginx
+    ports:
+      - "8080:80"
+    volumes:
+      # Mount local images directory into Nginx container
+      - ./images:/usr/share/nginx/html/images
+    depends_on:
+      - backend
+
