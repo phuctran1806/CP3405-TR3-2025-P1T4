@@ -80,7 +80,7 @@ const LoginScreen: React.FC = () => {
         
         <RoleToggle selectedRole={role} onSelect={setRole} />
 
-        <AuthFooter onGuestLogin={() => router.replace('/(main)/home')} />
+        <AuthFooter onGuestLogin={() => router.replace(`/(main)/home?role=student`)} />
       </ScrollView>
     </KeyboardAvoidingView>
   );
