@@ -9,6 +9,7 @@ from app.models.lecturer_location import LocationState
 
 
 class LecturerLocationBase(BaseModel):
+    id: str
     code: str
     name: str
     image_url: Optional[str]
@@ -20,30 +21,32 @@ class LecturerLocationBase(BaseModel):
     state: LocationState
     lecturer_email: Optional[str] = None
 
+    class Config:
+        orm_mode = True
+
 
 class LecturerLocationAssign(BaseModel):
-    """Admin: assign a lecturer to a room."""
-    lecturer_email: str
-    start_time: datetime = Field(..., description="Lecture start datetime")
-    end_time: datetime = Field(..., description="Lecture end datetime")
+    """Admin: assign a room to a lecturer."""
+    id: str = Field(..., description="ID of the lecturer location")
+    lecturer_email: str = Field(..., description="Email of the lecturer")
+    start_time: datetime
+    end_time: datetime
 
 
 class LecturerLocationUpdate(BaseModel):
-    """Admin: update room info or assignment."""
+    """Admin: update lecture room details or reassign lecturer."""
+    id: str
+    code: Optional[str]
     name: Optional[str]
     image_url: Optional[str]
     capacity: Optional[int]
     subject: Optional[str]
     start_time: Optional[datetime]
     end_time: Optional[datetime]
-    state: Optional[LocationState]
     lecturer_email: Optional[str]
+    state: Optional[LocationState]
 
 
 class LecturerLocationResponse(LecturerLocationBase):
-    id: str
     created_at: datetime
     updated_at: datetime
-
-    class Config:
-        from_attributes = True
