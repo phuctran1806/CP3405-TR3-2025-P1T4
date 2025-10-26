@@ -43,11 +43,11 @@ const LoginScreen: React.FC = () => {
     }
 
     try {
-      const result = await login({ 'username': email, 'password': password });
+      const result = await login({ 'email': email, 'password': password, 'role': role });
       if (!result.ok) throw result.error;
       router.replace(`/(main)/home?role=${role}`);
     } catch (e: any) {
-      if (e.status === 401) setGeneralError("Incorrect username or password");
+      if (e.status === 401) setGeneralError("Incorrect email or password");
       else setGeneralError(e.message || "Login failed");
     } finally {
       setLoading(false);
