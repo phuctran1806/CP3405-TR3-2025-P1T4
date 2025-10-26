@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, TouchableOpacity, Text, StyleSheet, Image } from 'react-native';
 
-type Role = 'student' | 'lecturer' | 'admin';
+export type Role = 'student' | 'lecturer' | 'admin';
 
 interface RoleToggleProps {
   selectedRole: Role;
