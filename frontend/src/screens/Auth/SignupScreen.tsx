@@ -52,7 +52,7 @@ const SignupScreen: React.FC = () => {
         setErrors({ api: res.error.message });
         return;
       }
-      router.replace('/(main)/home');
+      router.replace(`/(main)/home?role=${role}`);
     } catch (e: any) {
       setErrors({ api: e.message || 'Signup failed' });
     } finally {
