@@ -26,6 +26,7 @@ class UserLogin(BaseModel):
     """Schema for user login."""
     email: EmailStr
     password: str
+    role: UserRole
 
 
 class UserResponse(UserBase):
@@ -35,6 +36,7 @@ class UserResponse(UserBase):
     status: UserStatus
     created_at: datetime
     updated_at: datetime
+    role: UserRole
     
     class Config:
         from_attributes = True
