@@ -1,20 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { ScrollView, RefreshControl, View, ActivityIndicator, type ImageSourcePropType } from 'react-native';
 import { Box, VStack, Text, Spinner } from '@gluestack-ui/themed';
-import { locations } from '@/utils/mockData/locationDataLecturers';
 import { useRouter } from 'expo-router';
 import LocationCard from '@/components/cards/LocationCard';
-
-interface VenueDisplay {
-  id: string;
-  code: string;
-  name: string;
-  image: ImageSourcePropType;
-  subject: string;
-  schedule: string;
-  capacity: number;
-  liveOccupancy?: number | null;
-}
+import { fetchLecturerRooms } from '@/api/lecturer_locations';
+import { useSelectedVenue, type VenueDisplay} from '@/contexts/useSelectedVenue';
 
 export default function HomeLecturers() {
   const [venues, setVenues] = useState<VenueDisplay[]>([]);
@@ -22,21 +12,33 @@ export default function HomeLecturers() {
   const [refreshing, setRefreshing] = useState(false);
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
+  const { setSelectedVenue } = useSelectedVenue() as { setSelectedVenue: (venue: VenueDisplay) => void }; 
 
   useEffect(() => {
     setMounted(true);
+    fetchVenues();
   }, []);
 
   const fetchVenues = async () => {
     try {
-      // Simulate fetching updated live occupancy
       setLoading(true);
-      const refreshedVenues = locations.map((v) => ({
-        ...v,
-        // Randomize live occupancy again (simulate data refresh)
-        liveOccupancy: v.liveOccupancy
+      console.log('Fetching lecturer venues...');
+      const rooms = await fetchLecturerRooms();
+
+      const formattedVenues: VenueDisplay[] = rooms.map((room: any) => ({
+        id: room.id,
+        code: room.code,
+        name: room.name,
+        image: { uri: room.image_url || 'https://placehold.co/600x400?text=No+Image' },
+        subject: room.subject,
+        schedule: room.start_time && room.end_time
+          ? `${new Date(room.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${new Date(room.end_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+          : 'No schedule',
+        capacity: room.capacity,
+        liveOccupancy: room.live_occupancy ?? null,
       }));
-      setVenues(refreshedVenues);
+
+      setVenues(formattedVenues);
     } catch (err) {
       console.error('Error loading lecturer venues:', err);
     } finally {
@@ -44,18 +46,15 @@ export default function HomeLecturers() {
     }
   };
 
-  useEffect(() => {
-    fetchVenues();
-  }, []);
-
   const onRefresh = async () => {
     setRefreshing(true);
     await fetchVenues();
     setRefreshing(false);
   };
 
-  const handleVenuePress = (venueId: string) => {
-    router.push(`/dashboard/${venueId}?role=lecturer`);
+  const handleVenuePress = (venue: VenueDisplay) => {
+    setSelectedVenue(venue); // 👈 save venue in store
+    router.push(`/dashboard/${venue.id}?role=lecturer`);
   };
 
   if (!mounted) {
