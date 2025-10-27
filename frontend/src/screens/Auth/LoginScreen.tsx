@@ -7,6 +7,7 @@ import AuthFooter from './components/AuthFooter';
 import LogoPlaceholder from '@/components/containers/LogoPlaceholder';
 import RoleToggle, {type Role} from './components/RoleToggle';
 import { login } from '@/api/auth';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // 1️⃣ Zod schema
 const loginSchema = z.object({
@@ -45,6 +46,7 @@ const LoginScreen: React.FC = () => {
     try {
       const result = await login({ 'email': email, 'password': password, 'role': role });
       if (!result.ok) throw result.error;
+      await AsyncStorage.setItem("access_token", result.data.access_token);
       router.replace(`/(main)/home?role=${role}`);
     } catch (e: any) {
       if (e.status === 401) setGeneralError("Incorrect email or password");
