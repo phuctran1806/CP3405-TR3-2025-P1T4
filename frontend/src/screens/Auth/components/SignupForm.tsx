@@ -4,7 +4,6 @@ import LoginInput from '@/components/forms/LoginInput';
 import LoginButton from '@/components/buttons/LoginButton';
 import { colors } from '@/constants/colors';
 import { spacing } from '@/constants/spacing';
-import { Picker } from '@react-native-picker/picker';
 
 type Roles = 'student' | 'lecturer' | 'admin';
 
@@ -47,7 +46,6 @@ const SignupForm: React.FC<SignupFormProps> = ({
   onEmailChange,
   onNameChange,
   onPhoneNumberChange,
-  onRoleChange,
   onPasswordChange,
   onStudentIdChange,
   onSignup,
@@ -61,14 +59,6 @@ const SignupForm: React.FC<SignupFormProps> = ({
       <LoginInput placeholder="Full Name" value={name} onChangeText={onNameChange} error={nameError} />
       <LoginInput placeholder="Email" value={email} onChangeText={onEmailChange} error={emailError} keyboardType="email-address" autoCapitalize="none" />
       <LoginInput placeholder="Phone Number" value={phoneNumber} onChangeText={onPhoneNumberChange} error={phoneError} keyboardType="phone-pad" />
-
-      <View style={styles.pickerContainer}>
-        <Picker selectedValue={role} onValueChange={onRoleChange} style={styles.picker} dropdownIconColor={colors.gray700}>
-          <Picker.Item label="Student" value="student" />
-          <Picker.Item label="Lecturer" value="lecturer" />
-          <Picker.Item label="Admin" value="admin" />
-        </Picker>
-      </View>
 
       {role === 'student' && (
         <LoginInput placeholder="Student ID" value={studentId} onChangeText={onStudentIdChange} error={studentIdError} />
