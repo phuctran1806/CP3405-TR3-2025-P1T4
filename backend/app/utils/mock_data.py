@@ -128,6 +128,15 @@ def create_users(db):
             role=UserRole.GUEST,
             status=UserStatus.ACTIVE
         ),
+        User(
+            id=str(uuid.uuid4()),
+            email="petteri@jcu.edu.au",
+            hashed_password=get_password_hash("petteri123"),
+            name="Petteri",
+            student_id=None,
+            role=UserRole.LECTURER,
+            status=UserStatus.ACTIVE
+        )
     ]
 
     # Add more students
