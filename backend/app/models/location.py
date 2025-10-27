@@ -29,6 +29,10 @@ class Location(Base):
     description = Column(String(500), nullable=True)
     address = Column(String(200), nullable=True)
     image_url = Column(String(255), nullable=True)
+
+    # Coordinates
+    latitude = Column(Numeric, nullable=True)
+    longitude = Column(Numeric, nullable=True)
     
     # Capacity
     total_capacity = Column(Integer, nullable=False, default=0)

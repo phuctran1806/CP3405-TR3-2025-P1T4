@@ -3,26 +3,24 @@ Mock data generator for development and testing.
 Run this script to populate the database with sample data.
 """
 
+from app.utils.security import get_password_hash
+from app.models.operating_hours import OperatingHours
+from app.models.occupancy_history import OccupancyHistory
+from app.models.reservation import Reservation, ReservationStatus
+from app.models.seat import Seat, SeatType, SeatStatus
+from app.models.floor import Floor, FloorStatus
+from app.models.location import Location, LocationStatus
+from app.models.user import User, UserRole, UserStatus
+from app.database import SessionLocal, init_db
+import random
+import uuid
+from datetime import datetime, timedelta, time
 import sys
 import os
 from pathlib import Path
 
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-
-from datetime import datetime, timedelta, time
-import uuid
-import random
-
-from app.database import SessionLocal, init_db
-from app.models.user import User, UserRole, UserStatus
-from app.models.location import Location, LocationStatus
-from app.models.floor import Floor, FloorStatus
-from app.models.seat import Seat, SeatType, SeatStatus
-from app.models.reservation import Reservation, ReservationStatus
-from app.models.occupancy_history import OccupancyHistory
-from app.models.operating_hours import OperatingHours
-from app.utils.security import get_password_hash
 
 
 def clear_database(db):
@@ -42,7 +40,7 @@ def clear_database(db):
 def create_users(db):
     """Create sample users."""
     print("\n👥 Creating users...")
-    
+
     users = [
         User(
             id=str(uuid.uuid4()),
@@ -81,7 +79,7 @@ def create_users(db):
             status=UserStatus.ACTIVE
         ),
     ]
-    
+
     # Add more students
     for i in range(1, 11):
         users.append(User(
@@ -93,7 +91,7 @@ def create_users(db):
             role=UserRole.STUDENT,
             status=UserStatus.ACTIVE
         ))
-    
+
     db.add_all(users)
     db.commit()
     print(f"✓ Created {len(users)} users")
@@ -103,37 +101,70 @@ def create_users(db):
 def create_locations(db):
     """Create sample locations."""
     print("\n📍 Creating locations...")
-    
+
     locations = [
         Location(
             id=str(uuid.uuid4()),
-            name="JCU Library",
-            description="Main campus library with multiple study areas",
-            address="James Cook Drive, Townsville",
-            total_capacity=0,  # Will be calculated from seats
-            current_occupancy=0,
-            status=LocationStatus.OPEN
+            name="Study Hub E",
+            description="A modern study area equipped with power outlets, air conditioning, and Wi-Fi.",
+            address="Study Hub E Building",
+            image_url="/images/study-hub-e.jpg",
+            latitude=1.3521,
+            longitude=103.8198,
+            total_capacity=100,
+            current_occupancy=int(100 * 0.72),
+            status=LocationStatus.OPEN,
         ),
         Location(
             id=str(uuid.uuid4()),
-            name="Student Hub",
-            description="Collaborative study space for students",
-            address="Student Hub Building, JCU",
-            total_capacity=0,
-            current_occupancy=0,
-            status=LocationStatus.OPEN
+            name="Study Hub A",
+            description="Quiet and spacious hub ideal for focused study sessions.",
+            address="Study Hub A Building",
+            image_url="/images/study-hub-a.jpg",
+            latitude=1.3525,
+            longitude=103.8200,
+            total_capacity=100,
+            current_occupancy=int(100 * 0.54),
+            status=LocationStatus.OPEN,
         ),
         Location(
             id=str(uuid.uuid4()),
-            name="Study Pod",
-            description="Quiet individual study pods",
-            address="Building 32, JCU",
-            total_capacity=0,
-            current_occupancy=0,
-            status=LocationStatus.OPEN
+            name="Library",
+            description="Main campus library with extensive resources, cool air conditioning, and silent zones.",
+            address="Campus Library",
+            image_url="/images/library.jpg",
+            latitude=1.3530,
+            longitude=103.8205,
+            total_capacity=100,
+            current_occupancy=int(100 * 0.85),
+            status=LocationStatus.OPEN,
+        ),
+        Location(
+            id=str(uuid.uuid4()),
+            name="Study Pods",
+            description="Private study pods for individual work with power and Wi-Fi access.",
+            address="Study Pod Building",
+            image_url="/images/study-pods.jpg",
+            latitude=1.3515,
+            longitude=103.8190,
+            total_capacity=100,
+            current_occupancy=int(100 * 0.45),
+            status=LocationStatus.OPEN,
+        ),
+        Location(
+            id=str(uuid.uuid4()),
+            name="Courtyard",
+            description="Outdoor courtyard area with Wi-Fi access and relaxed atmosphere.",
+            address="Campus Courtyard",
+            image_url="/images/yard.jpg",
+            latitude=1.3518,
+            longitude=103.8195,
+            total_capacity=100,
+            current_occupancy=int(100 * 0.28),
+            status=LocationStatus.OPEN,
         ),
     ]
-    
+
     db.add_all(locations)
     db.commit()
     print(f"✓ Created {len(locations)} locations")
@@ -143,9 +174,9 @@ def create_locations(db):
 def create_operating_hours(db, locations):
     """Create operating hours for locations."""
     print("\n🕐 Creating operating hours...")
-    
+
     hours = []
-    
+
     # JCU Library - 24 hours on weekdays, limited on weekends
     library = locations[0]
     for day in range(7):
@@ -167,7 +198,7 @@ def create_operating_hours(db, locations):
                 is_24_hours=False,
                 is_closed=False
             ))
-    
+
     # Student Hub - Regular hours
     hub = locations[1]
     for day in range(7):
@@ -180,7 +211,7 @@ def create_operating_hours(db, locations):
             is_24_hours=False,
             is_closed=False
         ))
-    
+
     # Study Pod - Limited hours
     pod = locations[2]
     for day in range(7):
@@ -193,7 +224,7 @@ def create_operating_hours(db, locations):
             is_24_hours=False,
             is_closed=False
         ))
-    
+
     db.add_all(hours)
     db.commit()
     print(f"✓ Created {len(hours)} operating hour records")
@@ -202,9 +233,9 @@ def create_operating_hours(db, locations):
 def create_floors_and_seats(db, locations):
     """Create floors and seats for each location."""
     print("\n🏢 Creating floors and seats...")
-    
+
     all_seats = []
-    
+
     # JCU Library - 3 floors
     library = locations[0]
     for floor_num in range(1, 4):
@@ -220,13 +251,14 @@ def create_floors_and_seats(db, locations):
         )
         db.add(floor)
         db.flush()
-        
+
         # Create seats for this floor
         seats_per_floor = 30
         for i in range(1, seats_per_floor + 1):
-            seat_types = [SeatType.INDIVIDUAL, SeatType.QUIET, SeatType.COMPUTER]
+            seat_types = [SeatType.INDIVIDUAL,
+                          SeatType.QUIET, SeatType.COMPUTER]
             seat_type = random.choice(seat_types)
-            
+
             seat = Seat(
                 id=str(uuid.uuid4()),
                 floor_id=floor.id,
@@ -239,12 +271,13 @@ def create_floors_and_seats(db, locations):
                 capacity=1,
                 x_coordinate=float(random.random()),
                 y_coordinate=float(random.random()),
-                status=random.choice([SeatStatus.AVAILABLE, SeatStatus.OCCUPIED])
+                status=random.choice(
+                    [SeatStatus.AVAILABLE, SeatStatus.OCCUPIED])
             )
             all_seats.append(seat)
-        
+
         floor.total_seats = seats_per_floor
-    
+
     # Student Hub - 2 floors
     hub = locations[1]
     for floor_num in range(1, 3):
@@ -260,7 +293,7 @@ def create_floors_and_seats(db, locations):
         )
         db.add(floor)
         db.flush()
-        
+
         seats_per_floor = 20
         for i in range(1, seats_per_floor + 1):
             seat = Seat(
@@ -274,12 +307,13 @@ def create_floors_and_seats(db, locations):
                 capacity=4,
                 x_coordinate=float(random.randint(10, 90)),
                 y_coordinate=float(random.randint(10, 90)),
-                status=random.choice([SeatStatus.AVAILABLE, SeatStatus.OCCUPIED])
+                status=random.choice(
+                    [SeatStatus.AVAILABLE, SeatStatus.OCCUPIED])
             )
             all_seats.append(seat)
-        
+
         floor.total_seats = seats_per_floor
-    
+
     # Study Pod - 1 floor
     pod = locations[2]
     floor = Floor(
@@ -294,7 +328,7 @@ def create_floors_and_seats(db, locations):
     )
     db.add(floor)
     db.flush()
-    
+
     seats_per_floor = 15
     for i in range(1, seats_per_floor + 1):
         seat = Seat(
@@ -312,12 +346,12 @@ def create_floors_and_seats(db, locations):
             status=random.choice([SeatStatus.AVAILABLE, SeatStatus.OCCUPIED])
         )
         all_seats.append(seat)
-    
+
     floor.total_seats = seats_per_floor
-    
+
     db.add_all(all_seats)
     db.commit()
-    
+
     # Update floor occupied counts
     floors = db.query(Floor).all()
     for floor in floors:
@@ -326,19 +360,20 @@ def create_floors_and_seats(db, locations):
             Seat.status == SeatStatus.OCCUPIED
         ).count()
         floor.occupied_seats = occupied
-    
+
     # Update location capacities
     for location in locations:
-        total = db.query(Seat).join(Floor).filter(Floor.location_id == location.id).count()
+        total = db.query(Seat).join(Floor).filter(
+            Floor.location_id == location.id).count()
         occupied = db.query(Seat).join(Floor).filter(
             Floor.location_id == location.id,
             Seat.status == SeatStatus.OCCUPIED
         ).count()
         location.total_capacity = total
         location.current_occupancy = occupied
-    
+
     db.commit()
-    
+
     print(f"✓ Created {len(all_seats)} seats across multiple floors")
     return all_seats
 
@@ -346,24 +381,24 @@ def create_floors_and_seats(db, locations):
 def create_occupancy_history(db, locations):
     """Create historical occupancy data."""
     print("\n📊 Creating occupancy history...")
-    
+
     history_records = []
-    
+
     # Generate history for the past 7 days
     for location in locations:
         for days_ago in range(7, 0, -1):
             for hour in range(8, 22):  # 8 AM to 10 PM
                 timestamp = datetime.utcnow() - timedelta(days=days_ago, hours=(24-hour))
-                
+
                 # Simulate varying occupancy throughout the day
                 base_occupancy = location.total_capacity * 0.3
                 if 10 <= hour <= 16:  # Peak hours
                     occupancy = int(base_occupancy + random.randint(20, 40))
                 else:
                     occupancy = int(base_occupancy + random.randint(0, 15))
-                
+
                 occupancy = min(occupancy, location.total_capacity)
-                
+
                 history = OccupancyHistory(
                     id=str(uuid.uuid4()),
                     location_id=location.id,
@@ -375,7 +410,7 @@ def create_occupancy_history(db, locations):
                     hour_of_day=timestamp.hour
                 )
                 history_records.append(history)
-    
+
     db.add_all(history_records)
     db.commit()
     print(f"✓ Created {len(history_records)} occupancy history records")
@@ -386,26 +421,26 @@ def main():
     print("=" * 60)
     print("🎯 JCU Library Mock Data Generator")
     print("=" * 60)
-    
+
     # Initialize database
     print("\n📦 Initializing database...")
     init_db()
     print("✓ Database initialized")
-    
+
     # Create session
     db = SessionLocal()
-    
+
     try:
         # Clear existing data
         clear_database(db)
-        
+
         # Create data
         users = create_users(db)
         locations = create_locations(db)
         create_operating_hours(db, locations)
         seats = create_floors_and_seats(db, locations)
         create_occupancy_history(db, locations)
-        
+
         print("\n" + "=" * 60)
         print("✅ Mock data generation completed successfully!")
         print("=" * 60)
@@ -421,7 +456,7 @@ def main():
         print("\n🚀 Start the server with:")
         print("   uvicorn app.main:app --reload")
         print("=" * 60)
-        
+
     except Exception as e:
         print(f"\n❌ Error: {e}")
         db.rollback()
@@ -432,4 +467,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

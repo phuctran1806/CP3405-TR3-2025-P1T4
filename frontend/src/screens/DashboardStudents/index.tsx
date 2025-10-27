@@ -1,27 +1,76 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { ScrollView } from 'react-native';
 import { Box, Text } from '@gluestack-ui/themed';
 import { useLocalSearchParams } from 'expo-router';
-import { locations } from '@/utils/locationDataStudents';
 import Header from './components/Header';
-import SeatMap from '../../components/dashboard/SeatMap';
+import SeatMap from '@/components/dashboard/SeatMap';
 import Statistics from './components/Statistics';
 import InteractiveMap from '@/components/map/InteractiveMap';
+import { getOccupancyHistory } from '@/api/history';
+import type { OccupancyHistory } from '@/api/history';
 
 export default function LocationDashboard() {
   const { location: locationId } = useLocalSearchParams();
-  const location = locations.find((loc) => loc.id === locationId);
+
   const [view, setView] = useState<'seatmap' | 'statistics'>('seatmap');
-  console.log('Location ID from params:', locationId); // Debug log
+  const [history, setHistory] = useState<OccupancyHistory[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Load occupancy history on mount or location change
+  useEffect(() => {
+    if (!locationId) return;
+
+    let active = true;
+
+    async function loadOccupancy() {
+      try {
+        setLoading(true);
+        setError(null);
+        const result = await getOccupancyHistory(locationId as string);
+
+        if (!active) return;
+
+        if (result.ok) {
+          setHistory(Array.isArray(result.data) ? result.data : []);
+        } else {
+          console.error('API error:', result.error);
+          setError(result.error.message || 'Failed to load occupancy data');
+          setHistory([]);
+        }
+      } catch (err) {
+        if (!active) return;
+        console.error('Failed to fetch occupancy history:', err);
+        setError('Failed to load occupancy data');
+        setHistory([]);
+      } finally {
+        if (active) setLoading(false);
+      }
+    }
+
+    loadOccupancy();
+
+    return () => {
+      active = false;
+    };
+  }, [locationId]);
+
   useEffect(() => setView('seatmap'), [locationId]);
 
-  if (!location) {
-    return (
-      <Box flex={1} justifyContent="center" alignItems="center" bg="$gray50">
-        <Text color="$gray600">Location not found</Text>
-      </Box>
+  // --------------------------
+  // Data computations (always before returns)
+  // --------------------------
+
+  const latest = useMemo(() => {
+    if (!history.length) return null;
+    return history.reduce(
+      (a, b) =>
+        new Date(a.timestamp).getTime() > new Date(b.timestamp).getTime() ? a : b,
+      history[0]
     );
-  }
+  }, [history]);
+
+  const currentPercentage = latest?.occupancy_percentage ?? 0;
 
   const getOccupancyStatus = (percentage: number) => {
     if (percentage >= 80) return { label: 'High', color: '$red500', bg: '$red100' };
@@ -29,7 +78,71 @@ export default function LocationDashboard() {
     return { label: 'Low', color: '$green500', bg: '$green100' };
   };
 
-  const occupancyStatus = getOccupancyStatus(location.occupancyPercentage);
+  const occupancyStatus = getOccupancyStatus(currentPercentage);
+
+  // Weekly average occupancy (Sun–Sat)
+  const weeklyAverages = useMemo(() => {
+    if (!history.length) return Array(7).fill(0);
+
+    const totals = Array(7).fill(0);
+    const counts = Array(7).fill(0);
+
+    for (const rec of history) {
+      totals[rec.day_of_week] += rec.occupancy_percentage;
+      counts[rec.day_of_week] += 1;
+    }
+
+    return totals.map((t, i) => (counts[i] ? t / counts[i] : 0));
+  }, [history]);
+
+  const weeklyData = {
+    labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+    datasets: [{ data: weeklyAverages }],
+  };
+
+  // Hourly trend (line chart)
+  const lineData = useMemo(() => {
+    if (!history.length) return { labels: [], datasets: [{ data: [0] }] };
+
+    const sorted = [...history].sort(
+      (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+    );
+
+    const labels = sorted.map((d) => `${d.hour_of_day}:00`);
+    const data = sorted.map((d) => d.occupancy_percentage);
+
+    return {
+      labels,
+      datasets: [
+        {
+          data,
+          color: (opacity = 1) => `rgba(59, 130, 246, ${opacity})`,
+          strokeWidth: 3,
+        },
+      ],
+    };
+  }, [history]);
+
+  // Pie chart
+  const pieData = useMemo(
+    () => [
+      {
+        name: 'Occupied',
+        population: currentPercentage,
+        color: '#ef4444',
+        legendFontColor: '#374151',
+        legendFontSize: 13,
+      },
+      {
+        name: 'Available',
+        population: 100 - currentPercentage,
+        color: '#10b981',
+        legendFontColor: '#374151',
+        legendFontSize: 13,
+      },
+    ],
+    [currentPercentage]
+  );
 
   const chartConfig = {
     backgroundGradientFrom: '#ffffff',
@@ -46,52 +159,78 @@ export default function LocationDashboard() {
     },
   };
 
-  const pieData = [
-    {
-      name: 'Occupied',
-      population: location.occupancyPercentage,
-      color: '#ef4444',
-      legendFontColor: '#374151',
-      legendFontSize: 13,
-    },
-    {
-      name: 'Available',
-      population: 100 - location.occupancyPercentage,
-      color: '#10b981',
-      legendFontColor: '#374151',
-      legendFontSize: 13,
-    },
-  ];
+  // --------------------------
+  // Conditional rendering
+  // --------------------------
 
-  const weeklyData = {
-    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-    datasets: [{ data: Object.values(location.averageOccupancy) }],
-  };
+  if (!locationId) {
+    return (
+      <Box flex={1} justifyContent="center" alignItems="center" bg="$gray50">
+        <Text color="$gray600">No location selected</Text>
+      </Box>
+    );
+  }
 
-  const lineData = {
-    labels: location.lineChartData?.map((d) => d.time) || [],
-    datasets: [
-      {
-        data: location.lineChartData?.map((d) => d.value) || [0],
-        color: (opacity = 1) => `rgba(59, 130, 246, ${opacity})`,
-        strokeWidth: 3,
-      },
-    ],
-  };
+  if (loading) {
+    return (
+      <Box flex={1} justifyContent="center" alignItems="center" bg="$gray50">
+        <Text color="$gray600">Loading occupancy data...</Text>
+      </Box>
+    );
+  }
 
+  if (error) {
+    return (
+      <Box flex={1} justifyContent="center" alignItems="center" bg="$gray50">
+        <Text color="$gray600">{error}</Text>
+      </Box>
+    );
+  }
+
+  if (!history.length) {
+    return (
+      <Box flex={1} justifyContent="center" alignItems="center" bg="$gray50">
+        <Text color="$gray600">No occupancy data available</Text>
+      </Box>
+    );
+  }
+
+  // --------------------------
+  // Main render
+  // --------------------------
   return (
     <Box flex={1} bg="$gray50">
-      <Header location={location} occupancyStatus={occupancyStatus} view={view} setView={setView} />
+      <Header
+        location={{
+          id: locationId as string,
+          name: `Location ${locationId}`,
+          occupancyPercentage: currentPercentage,
+        }}
+        occupancyStatus={occupancyStatus}
+        view={view}
+        setView={setView}
+      />
 
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 40 }}
       >
         {view === 'seatmap' ? (
-          <SeatMap location={location} map={<InteractiveMap />} />
+          <SeatMap
+            location={{
+              id: locationId as string,
+              name: `Location ${locationId}`,
+              occupancyPercentage: currentPercentage,
+            }}
+            map={<InteractiveMap />}
+          />
         ) : (
           <Statistics
-            location={location}
+            location={{
+              id: locationId as string,
+              name: `Location ${locationId}`,
+              occupancyPercentage: currentPercentage,
+            }}
             pieData={pieData}
             weeklyData={weeklyData}
             lineData={lineData}

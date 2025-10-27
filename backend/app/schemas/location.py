@@ -15,6 +15,8 @@ class LocationResponse(BaseModel):
     description: Optional[str]
     address: Optional[str]
     image_url: Optional[str]
+    latitude: Optional[float]
+    longitude: Optional[float]
     total_capacity: int
     current_occupancy: int
     busyness_percentage: float
@@ -22,6 +24,6 @@ class LocationResponse(BaseModel):
     status: LocationStatus
     created_at: datetime
     updated_at: datetime
-    
+
     class Config:
         from_attributes = True
