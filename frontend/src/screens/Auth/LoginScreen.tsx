@@ -6,6 +6,7 @@ import LoginForm from './components/LoginForm';
 import AuthFooter from './components/AuthFooter';
 import LogoPlaceholder from '@/components/containers/LogoPlaceholder';
 import { login } from '@/api/auth';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // 1️⃣ Zod schema
 const loginSchema = z.object({
