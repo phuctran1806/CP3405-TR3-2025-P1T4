@@ -16,7 +16,6 @@ import random
 import uuid
 from datetime import datetime, timedelta, time
 import sys
-import os
 from pathlib import Path
 
 # Add parent directory to path
@@ -230,151 +229,73 @@ def create_operating_hours(db, locations):
     print(f"✓ Created {len(hours)} operating hour records")
 
 
-def create_floors_and_seats(db, locations):
-    """Create floors and seats for each location."""
+def create_floors_and_seats(db, locations: list[Location]):
+    """Create random floors and seats for each location."""
     print("\n🏢 Creating floors and seats...")
 
     all_seats = []
 
-    # JCU Library - 3 floors
-    library = locations[0]
-    for floor_num in range(1, 4):
-        floor = Floor(
-            id=str(uuid.uuid4()),
-            location_id=library.id,
-            floor_number=floor_num,
-            floor_name=f"Level {floor_num}",
-            total_seats=0,
-            occupied_seats=0,
-            is_best_floor=(floor_num == 2),  # Floor 2 is best
-            status=FloorStatus.OPEN
-        )
-        db.add(floor)
-        db.flush()
-
-        # Create seats for this floor
-        seats_per_floor = 30
-        for i in range(1, seats_per_floor + 1):
-            seat_types = [SeatType.INDIVIDUAL,
-                          SeatType.QUIET, SeatType.COMPUTER]
-            seat_type = random.choice(seat_types)
-
-            seat = Seat(
+    for loc in locations:
+        num_floors = random.randint(1, 3)
+        for floor_num in range(1, num_floors + 1):
+            floor = Floor(
                 id=str(uuid.uuid4()),
-                floor_id=floor.id,
-                seat_number=f"L{floor_num}-{i:03d}",
-                seat_type=seat_type,
-                has_power_outlet=random.choice([True, False]),
-                has_computer=(seat_type == SeatType.COMPUTER),
-                has_monitor=(seat_type == SeatType.COMPUTER),
-                accessibility=(i % 10 == 0),  # Every 10th seat is accessible
-                capacity=1,
-                x_coordinate=float(random.random()),
-                y_coordinate=float(random.random()),
-                status=random.choice(
-                    [SeatStatus.AVAILABLE, SeatStatus.OCCUPIED])
+                location_id=loc.id,
+                floor_number=floor_num,
+                floor_name=f"Level {floor_num}",
+                total_seats=0,
+                occupied_seats=0,
+                is_best_floor=(floor_num == 1),
+                status=FloorStatus.OPEN
             )
-            all_seats.append(seat)
+            db.add(floor)
+            db.flush()
 
-        floor.total_seats = seats_per_floor
+            seats_per_floor = random.randint(10, 30)
+            for i in range(1, seats_per_floor + 1):
+                seat_type = random.choice(list(SeatType))
+                seat = Seat(
+                    id=str(uuid.uuid4()),
+                    floor_id=floor.id,
+                    seat_number=f"{loc.name[:3].upper()}-{floor_num}-{i:03d}",
+                    seat_type=seat_type,
+                    has_power_outlet=random.choice([True, False]),
+                    has_wifi=random.choice([True, False]),
+                    has_ac=random.choice([True, False]),
+                    accessibility=random.choice([True, False]),
+                    capacity=random.choice([1, 2, 4]),
+                    x_coordinate=float(random.randint(0, 100)),
+                    y_coordinate=float(random.randint(0, 100)),
+                    status=random.choice(
+                        [SeatStatus.AVAILABLE, SeatStatus.OCCUPIED])
+                )
+                all_seats.append(seat)
 
-    # Student Hub - 2 floors
-    hub = locations[1]
-    for floor_num in range(1, 3):
-        floor = Floor(
-            id=str(uuid.uuid4()),
-            location_id=hub.id,
-            floor_number=floor_num,
-            floor_name=f"Hub Level {floor_num}",
-            total_seats=0,
-            occupied_seats=0,
-            is_best_floor=(floor_num == 1),
-            status=FloorStatus.OPEN
-        )
-        db.add(floor)
-        db.flush()
-
-        seats_per_floor = 20
-        for i in range(1, seats_per_floor + 1):
-            seat = Seat(
-                id=str(uuid.uuid4()),
-                floor_id=floor.id,
-                seat_number=f"HUB{floor_num}-{i:03d}",
-                seat_type=SeatType.GROUP,
-                has_power_outlet=True,
-                has_computer=False,
-                accessibility=(i % 8 == 0),
-                capacity=4,
-                x_coordinate=float(random.randint(10, 90)),
-                y_coordinate=float(random.randint(10, 90)),
-                status=random.choice(
-                    [SeatStatus.AVAILABLE, SeatStatus.OCCUPIED])
-            )
-            all_seats.append(seat)
-
-        floor.total_seats = seats_per_floor
-
-    # Study Pod - 1 floor
-    pod = locations[2]
-    floor = Floor(
-        id=str(uuid.uuid4()),
-        location_id=pod.id,
-        floor_number=1,
-        floor_name="Pod Area",
-        total_seats=0,
-        occupied_seats=0,
-        is_best_floor=True,
-        status=FloorStatus.OPEN
-    )
-    db.add(floor)
-    db.flush()
-
-    seats_per_floor = 15
-    for i in range(1, seats_per_floor + 1):
-        seat = Seat(
-            id=str(uuid.uuid4()),
-            floor_id=floor.id,
-            seat_number=f"POD-{i:03d}",
-            seat_type=SeatType.STUDY_POD,
-            has_power_outlet=True,
-            has_computer=True,
-            has_monitor=True,
-            accessibility=False,
-            capacity=1,
-            x_coordinate=float(random.randint(10, 90)),
-            y_coordinate=float(random.randint(10, 90)),
-            status=random.choice([SeatStatus.AVAILABLE, SeatStatus.OCCUPIED])
-        )
-        all_seats.append(seat)
-
-    floor.total_seats = seats_per_floor
+            floor.total_seats = seats_per_floor
 
     db.add_all(all_seats)
     db.commit()
 
     # Update floor occupied counts
-    floors = db.query(Floor).all()
-    for floor in floors:
-        occupied = db.query(Seat).filter(
+    for floor in db.query(Floor).all():
+        floor.occupied_seats = db.query(Seat).filter(
             Seat.floor_id == floor.id,
             Seat.status == SeatStatus.OCCUPIED
         ).count()
-        floor.occupied_seats = occupied
 
     # Update location capacities
-    for location in locations:
+    for loc in locations:
         total = db.query(Seat).join(Floor).filter(
-            Floor.location_id == location.id).count()
+            Floor.location_id == loc.id).count()
         occupied = db.query(Seat).join(Floor).filter(
-            Floor.location_id == location.id,
+            Floor.location_id == loc.id,
             Seat.status == SeatStatus.OCCUPIED
         ).count()
-        location.total_capacity = total
-        location.current_occupancy = occupied
+        loc.total_capacity = total
+        loc.current_occupancy = occupied
 
     db.commit()
-
-    print(f"✓ Created {len(all_seats)} seats across multiple floors")
+    print(f"✓ Created {len(all_seats)} seats across {len(locations)} locations")
     return all_seats
 
 

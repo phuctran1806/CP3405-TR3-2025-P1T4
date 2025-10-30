@@ -13,8 +13,8 @@ class SeatBase(BaseModel):
     seat_number: str
     seat_type: SeatType
     has_power_outlet: bool = False
-    has_computer: bool = False
-    has_monitor: bool = False
+    has_wifi: bool = False
+    has_ac: bool = False
     accessibility: bool = False
     capacity: int = 1
 
