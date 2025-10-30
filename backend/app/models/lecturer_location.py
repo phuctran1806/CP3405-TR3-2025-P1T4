@@ -3,6 +3,7 @@ LecturerLocation model — represents teaching rooms for lecturers.
 """
 
 from sqlalchemy import Column, String, Integer, Enum, DateTime
+from sqlalchemy.orm import relationship
 from datetime import datetime
 from app.database import Base
 import enum
@@ -21,14 +22,12 @@ class LecturerLocation(Base):
 
     id = Column(String(36), primary_key=True, index=True)
     name = Column(String(100), nullable=False)
-    image_url = Column(String(255), nullable=True)
-    capacity = Column(Integer, nullable=False)
     subject = Column(String(20), nullable=True)
     start_time = Column(DateTime, nullable=True)
     end_time = Column(DateTime, nullable=True)
-    email = Column(String(255), nullable=True)
-    live_occupancy = Column(Integer, nullable=False)
-    state = Column(Enum(LocationState), nullable=False, default=LocationState.ACTIVE)
+    
+    location = relationship("Location", back_populates="LecturerLocation")
+    user = relationship("User", back_populates="LecturerLocation")
 
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow,
