@@ -6,13 +6,6 @@ from sqlalchemy import Column, String, Integer, Enum, DateTime
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from app.database import Base
-import enum
-
-
-class LocationState(str, enum.Enum):
-    """Room state (for maintenance/active)."""
-    ACTIVE = "active"
-    MAINTENANCE = "maintenance"
 
 
 class LecturerLocation(Base):
