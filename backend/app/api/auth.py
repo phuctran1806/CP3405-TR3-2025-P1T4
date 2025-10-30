@@ -95,13 +95,13 @@ async def register(user_data: UserCreate, db: Session = Depends(get_db)):
 
 @router.post("/login", response_model=Token)
 async def login(
-    form_data: UserLogin,
+    form_data: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(get_db)
 ):
-    """Login with email, password, and role."""
+    """Login with email, password."""
     # Find user by email
-    user = db.query(User).filter(User.email == form_data.email).first()
-    
+    user = db.query(User).filter(User.email == form_data.username).first()
+    print(user.email)
     # Verify password
     if not user or not verify_password(form_data.password, user.hashed_password):
         raise HTTPException(
@@ -109,17 +109,10 @@ async def login(
             detail="Incorrect email or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-        
-    # Verify role
-    if form_data.role != user.role:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail=f"User does not sign up with role: {form_data.role.title()}"
-        )
     
     # Create access token
     access_token = create_access_token(
-        data={"sub": user.id, "email": user.email, "role": user.role}
+        data={"sub": user.id, "email": user.email}
     )
     
     return Token(
