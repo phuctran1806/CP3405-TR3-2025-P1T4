@@ -58,7 +58,7 @@ const Statistics = ({ location }: any) => {
           </Text>
 
           <Box alignItems="center">
-            {liveOccupancy !== null && liveOccupancy !== undefined ? (
+            {liveOccupancy !== null && liveOccupancy !== undefined && liveOccupancy !== 0 ? (
               <PieChart
                 data={pieData}
                 width={screenWidth - 64}
