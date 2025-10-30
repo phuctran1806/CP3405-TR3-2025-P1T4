@@ -4,7 +4,6 @@ import type { LecturerLocationResponse } from "./types/lecturer_location_types";
 
 export async function fetchLecturerRooms(): Promise<LecturerLocationResponse[]> {
   const token = await AsyncStorage.getItem("access_token");
-  console.log("DEBUG: access_token =", token);
 
   const res = await apiFetch(`/lecturer-locations/me`, {
     headers: {
