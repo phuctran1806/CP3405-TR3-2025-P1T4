@@ -14,6 +14,11 @@ class LocationStatus(str, enum.Enum):
     OPEN = "open"
     CLOSED = "closed"
     MAINTENANCE = "maintenance"
+    
+class LocationType(str, enum.Enum):
+    """Location type enumeration."""
+    PUBLIC = "public"
+    PRIVATE = "private"
 
 
 class Location(Base):
@@ -36,6 +41,9 @@ class Location(Base):
     
     # Status
     status = Column(Enum(LocationStatus), nullable=False, default=LocationStatus.OPEN)
+    
+    # Location type
+    location_type = Column(Enum(LocationType), nullable=False, default=LocationType.PRIVATE)
     
     # Timestamps
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
