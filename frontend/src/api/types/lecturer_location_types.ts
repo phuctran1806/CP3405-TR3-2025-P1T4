@@ -4,7 +4,6 @@ export type LocationState = "active" | "maintenance";
 
 export interface LecturerLocationBase {
   id: string;
-  code: string;
   name: string;
   image_url?: string | null;
   capacity: number;
@@ -36,7 +35,6 @@ export interface LecturerLocationAssign {
  */
 export interface LecturerLocationUpdate {
   id: string;
-  code?: string;
   name?: string;
   image_url?: string;
   capacity?: number;
