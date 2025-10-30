@@ -10,14 +10,13 @@ from app.models.lecturer_location import LocationState
 
 class LecturerLocationBase(BaseModel):
     id: str
-    code: str
     name: str
     image_url: Optional[str]
     capacity: int
-    subject: str
+    subject: Optional[str]
     start_time: Optional[datetime]
     end_time: Optional[datetime]
-    live_occupancy: Optional[int]
+    live_occupancy: int
     state: LocationState
     lecturer_email: Optional[str] = None
 
@@ -36,7 +35,6 @@ class LecturerLocationAssign(BaseModel):
 class LecturerLocationUpdate(BaseModel):
     """Admin: update lecture room details or reassign lecturer."""
     id: str
-    code: Optional[str]
     name: Optional[str]
     image_url: Optional[str]
     capacity: Optional[int]
