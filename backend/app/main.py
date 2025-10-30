@@ -7,8 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from app.config import settings
 from app.database import init_db
-from app.api import auth, seats, reservations, occupancy, admin, floors
-from backend.app.api import lecturer
+from app.api import auth, seats, reservations, occupancy, admin, floors, lecturer
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):

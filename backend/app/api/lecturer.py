@@ -16,7 +16,7 @@ from app.schemas.lecturer_location import (
     LecturerLocationAssign,
     LecturerLocationUpdate,
 )
-from app.models.user import User
+from app.models.user import User, UserRole
 from app.api.auth import get_current_user
 
 router = APIRouter()
@@ -34,19 +34,23 @@ def check_schedule_conflict(db: Session, email: str, start: datetime, end: datet
                 return True
     return False
 
+async def require_lecturer(current_user: User = Depends(get_current_user)):
+    """Dependency to require lecturer role."""
+    if current_user.role != UserRole.LECTURER:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Lecturer access required"
+        )
+    return current_user
 
 # Lecturer: fetch only assigned rooms
 @router.get("/me", response_model=List[LecturerLocationResponse])
 def get_my_rooms(
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    lecturer: User = Depends(require_lecturer),
 ):
-    print("Current user:", current_user.email, "Role:", current_user.role)
-    if current_user.role != "lecturer":
-        raise HTTPException(status_code=403, detail="Access denied")
-
     rooms = db.query(LecturerLocation).filter(
-        LecturerLocation.email == current_user.email
+        LecturerLocation.email == lecturer.email
     ).all()
     return rooms
 
