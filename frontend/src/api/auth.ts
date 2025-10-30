@@ -3,9 +3,8 @@ import type { UserRole, User, ApiResult } from "@/api/types";
 
 
 export interface LoginParams {
-  email: string,
-  password: string
-  role: UserRole,
+  email: string;
+  password: string;
 }
 
 export interface LoginResponse {
@@ -16,16 +15,15 @@ export interface LoginResponse {
 
 export async function login(body: LoginParams): Promise<ApiResult<LoginResponse>> {
   const form = new URLSearchParams();
-  form.append("email", body.email);
+  form.append("username", body.email);
   form.append("password", body.password);
-  form.append("role", body.role)
-
+  
   return apiFetch<LoginResponse>("/auth/login", {
     method: "POST",
     headers: {
-      "Content-Type": "application/json",
+      "Content-Type": "application/x-www-form-urlencoded",
     },
-    body: JSON.stringify(body),
+    body: form,
   });
 }
 
