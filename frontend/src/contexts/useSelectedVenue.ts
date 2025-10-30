@@ -4,7 +4,6 @@ import type { ImageSourcePropType } from "react-native";
 
 export interface VenueDisplay {
   id: string;
-  code: string;
   name: string;
   image: ImageSourcePropType;
   subject: string;

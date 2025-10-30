@@ -20,15 +20,14 @@ class LecturerLocation(Base):
     __tablename__ = "lecturer_locations"
 
     id = Column(String(36), primary_key=True, index=True)
-    code = Column(String(50), nullable=False, unique=True)
     name = Column(String(100), nullable=False)
     image_url = Column(String(255), nullable=True)
     capacity = Column(Integer, nullable=False)
-    subject = Column(String(20), nullable=False)
+    subject = Column(String(20), nullable=True)
     start_time = Column(DateTime, nullable=True)
     end_time = Column(DateTime, nullable=True)
     email = Column(String(255), nullable=True)
-    live_occupancy = Column(Integer, nullable=True)
+    live_occupancy = Column(Integer, nullable=False)
     state = Column(Enum(LocationState), nullable=False, default=LocationState.ACTIVE)
 
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
