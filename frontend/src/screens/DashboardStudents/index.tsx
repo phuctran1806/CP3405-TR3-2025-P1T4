@@ -2,22 +2,56 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { ScrollView } from 'react-native';
 import { Box, Text } from '@gluestack-ui/themed';
 import { useLocalSearchParams } from 'expo-router';
+
 import Header from './components/Header';
 import SeatMap from '@/components/dashboard/SeatMap';
 import Statistics from './components/Statistics';
 import InteractiveMap from '@/components/map/InteractiveMap';
-import { getOccupancyHistory } from '@/api/history';
-import type { OccupancyHistory } from '@/api/history';
+
+import { getOccupancyHistory, type OccupancyHistory } from '@/api/history';
+import { getLocationById, type LocationResponse } from '@/api/locations';
 
 export default function LocationDashboard() {
   const { location: locationId } = useLocalSearchParams();
 
   const [view, setView] = useState<'seatmap' | 'statistics'>('seatmap');
   const [history, setHistory] = useState<OccupancyHistory[]>([]);
+  const [location, setLocation] = useState<LocationResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Load occupancy history on mount or location change
+  // --------------------------
+  // Load location
+  // --------------------------
+  useEffect(() => {
+    if (!locationId) return;
+
+    let active = true;
+
+    async function loadLocation() {
+      try {
+        setError(null);
+        const result = await getLocationById(locationId as string);
+        if (!active) return;
+
+        if (!result.ok) throw result.error;
+        setLocation(result.data);
+      } catch (err: any) {
+        console.error('Failed to fetch location:', err);
+        if (active) setError('Failed to load location');
+        setLocation(null);
+      }
+    }
+
+    loadLocation();
+    return () => {
+      active = false;
+    };
+  }, [locationId]);
+
+  // --------------------------
+  // Load occupancy history
+  // --------------------------
   useEffect(() => {
     if (!locationId) return;
 
@@ -28,15 +62,12 @@ export default function LocationDashboard() {
         setLoading(true);
         setError(null);
         const result = await getOccupancyHistory(locationId as string);
-
         if (!active) return;
 
         if (result.ok) {
           setHistory(Array.isArray(result.data) ? result.data : []);
         } else {
-          console.error('API error:', result.error);
-          setError(result.error.message || 'Failed to load occupancy data');
-          setHistory([]);
+          throw new Error(result.error.message || 'Failed to load occupancy data');
         }
       } catch (err) {
         if (!active) return;
@@ -49,7 +80,6 @@ export default function LocationDashboard() {
     }
 
     loadOccupancy();
-
     return () => {
       active = false;
     };
@@ -58,7 +88,7 @@ export default function LocationDashboard() {
   useEffect(() => setView('seatmap'), [locationId]);
 
   // --------------------------
-  // Data computations (always before returns)
+  // Derived data
   // --------------------------
 
   const latest = useMemo(() => {
@@ -80,10 +110,9 @@ export default function LocationDashboard() {
 
   const occupancyStatus = getOccupancyStatus(currentPercentage);
 
-  // Weekly average occupancy (Sun–Sat)
+  // Weekly average occupancy
   const weeklyAverages = useMemo(() => {
     if (!history.length) return Array(7).fill(0);
-
     const totals = Array(7).fill(0);
     const counts = Array(7).fill(0);
 
@@ -103,14 +132,11 @@ export default function LocationDashboard() {
   // Hourly trend (line chart)
   const lineData = useMemo(() => {
     if (!history.length) return { labels: [], datasets: [{ data: [0] }] };
-
     const sorted = [...history].sort(
       (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
     );
-
     const labels = sorted.map((d) => `${d.hour_of_day}:00`);
     const data = sorted.map((d) => d.occupancy_percentage);
-
     return {
       labels,
       datasets: [
@@ -123,7 +149,7 @@ export default function LocationDashboard() {
     };
   }, [history]);
 
-  // Pie chart
+  // Pie chart data
   const pieData = useMemo(
     () => [
       {
@@ -160,7 +186,7 @@ export default function LocationDashboard() {
   };
 
   // --------------------------
-  // Conditional rendering
+  // Conditional returns
   // --------------------------
 
   if (!locationId) {
@@ -187,6 +213,14 @@ export default function LocationDashboard() {
     );
   }
 
+  if (!location) {
+    return (
+      <Box flex={1} justifyContent="center" alignItems="center" bg="$gray50">
+        <Text color="$gray600">Location data unavailable</Text>
+      </Box>
+    );
+  }
+
   if (!history.length) {
     return (
       <Box flex={1} justifyContent="center" alignItems="center" bg="$gray50">
@@ -198,12 +232,13 @@ export default function LocationDashboard() {
   // --------------------------
   // Main render
   // --------------------------
+
   return (
     <Box flex={1} bg="$gray50">
       <Header
         location={{
           id: locationId as string,
-          name: `Location ${locationId}`,
+          name: location.name,
           occupancyPercentage: currentPercentage,
         }}
         occupancyStatus={occupancyStatus}
@@ -219,8 +254,9 @@ export default function LocationDashboard() {
           <SeatMap
             location={{
               id: locationId as string,
-              name: `Location ${locationId}`,
+              name: location.name,
               occupancyPercentage: currentPercentage,
+              image: location.image_url,
             }}
             map={<InteractiveMap />}
           />
@@ -228,7 +264,7 @@ export default function LocationDashboard() {
           <Statistics
             location={{
               id: locationId as string,
-              name: `Location ${locationId}`,
+              name: location.name,
               occupancyPercentage: currentPercentage,
             }}
             pieData={pieData}

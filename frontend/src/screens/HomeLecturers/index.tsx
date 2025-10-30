@@ -92,14 +92,13 @@ export default function HomeLecturers() {
 
         <VStack space="md">
           {venues.map((venue) => (
-            // replaced Box per-venue with LocationCard
             <LocationCard
               key={venue.id}
               name={venue.name}
               subject={venue.subject}
               image={venue.image}
-              schedule={venue.schedule}           // using schedule as the secondary line
-              accessibility={null}               // no accessibility info in lecturer mock
+              schedule={venue.schedule}
+              accessibility={null}
               onPress={() => handleVenuePress(venue.id)}
             />
           ))}

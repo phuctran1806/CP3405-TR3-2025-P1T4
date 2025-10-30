@@ -1,12 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import { ScrollView, RefreshControl, Alert, View, ActivityIndicator } from 'react-native';
-import { Box, VStack, Text, Spinner } from '@gluestack-ui/themed';
-import * as Location from 'expo-location';
-import LocationCard from '@/components/LocationCard';
-import { calculateDistance, formatDistance } from '@/utils/calculateDistance';
-import { useRouter } from 'expo-router';
-import { getLocations } from '@/api/locations';
-import type { LocationResponse } from '@/api/locations';
+import React, { useState, useEffect } from "react";
+import {
+  ScrollView,
+  RefreshControl,
+  Alert,
+  View,
+  ActivityIndicator,
+} from "react-native";
+import { Box, VStack, Text, Spinner } from "@gluestack-ui/themed";
+import * as Location from "expo-location";
+import { useRouter } from "expo-router";
+import LocationCard from "@/components/LocationCard";
+import { calculateDistance, formatDistance } from "@/utils/calculateDistance";
+import { getLocations } from "@/api/locations";
+import type { LocationResponse } from "@/api/locations";
+import type { AccessibilityFeature } from "@/utils/accessibilityIcons";
+import { getAccessibilityIcon } from "@/utils/accessibilityIcons";
 
 interface LocationWithDistance {
   id: string;
@@ -16,6 +24,7 @@ interface LocationWithDistance {
   status: string;
   available_seats: number;
   total_capacity: number;
+  accessibility: AccessibilityFeature[];
 }
 
 export default function HomeStudents() {
@@ -26,17 +35,15 @@ export default function HomeStudents() {
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  useEffect(() => setMounted(true), []);
 
   const getUserLocation = async () => {
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
+      if (status !== "granted") {
         Alert.alert(
-          'Permission Denied',
-          'Location permission is required to show distances to study locations.'
+          "Permission Denied",
+          "Location permission is required to show distances."
         );
         setLoading(false);
         return;
@@ -47,96 +54,60 @@ export default function HomeStudents() {
         latitude: location.coords.latitude,
         longitude: location.coords.longitude,
       });
-    } catch (error) {
-      console.error('Error getting location:', error);
-      Alert.alert('Error', 'Failed to get your location. Please try again.');
+    } catch (err) {
+      console.error(err);
+      Alert.alert("Error", "Failed to get your location.");
     }
+  };
+
+  const mapLocations = (backendLocations: LocationResponse[]): LocationWithDistance[] => {
+    return backendLocations.map((loc) => {
+      // Build accessibility array from backend flags
+      const accessibility: AccessibilityFeature[] = [
+        ...(loc.has_power_outlet ? ["power"] : []),
+        ...(loc.has_ac ? ["cool"] : []),
+        ...(loc.has_wifi ? ["wifi"] : []),
+      ] as AccessibilityFeature[];
+
+      const distance = userLocation
+        ? calculateDistance(userLocation, {
+          latitude: loc.latitude ?? 0,
+          longitude: loc.longitude ?? 0,
+        })
+        : 0;
+
+      return {
+        id: loc.id,
+        name: loc.name,
+        image_url: loc.image_url,
+        status: loc.status,
+        available_seats: loc.available_seats,
+        total_capacity: loc.total_capacity,
+        distance: userLocation ? formatDistance(distance) : "Unknown",
+        accessibility,
+      };
+    });
   };
 
   const fetchLocations = async () => {
     const res = await getLocations();
-    if (!res.ok) {
-      Alert.alert('Error', res.error.message);
-      return [];
+    if (res.ok) {
+      setLocations(mapLocations(res.data));
     }
-    return res.data;
+    setLoading(false);
   };
 
-  const loadData = async () => {
-    try {
-      setLoading(true);
-      const [locs] = await Promise.all([fetchLocations(), getUserLocation()]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Fetch locations + user position initially
   useEffect(() => {
     (async () => {
       await getUserLocation();
-      const res = await getLocations();
-      if (res.ok) {
-        const backendLocations = res.data;
-
-        if (userLocation) {
-          const withDistances = backendLocations.map((loc: LocationResponse) => {
-            // If backend does not have coordinates, fallback gracefully
-            const distance = userLocation
-              ? calculateDistance(userLocation, {
-                latitude: loc.latitude ?? 0,
-                longitude: loc.longitude ?? 0,
-              })
-              : 0;
-
-            return {
-              id: loc.id,
-              name: loc.name,
-              image_url: loc.image_url,
-              status: loc.status,
-              available_seats: loc.available_seats,
-              total_capacity: loc.total_capacity,
-              distance: userLocation ? formatDistance(distance) : 'Unknown',
-            };
-          });
-
-          setLocations(withDistances);
-        } else {
-          // No user location, still display data
-          setLocations(
-            backendLocations.map(loc => ({
-              id: loc.id,
-              name: loc.name,
-              image_url: loc.image_url,
-              status: loc.status,
-              available_seats: loc.available_seats,
-              total_capacity: loc.total_capacity,
-              distance: 'Unknown',
-            }))
-          );
-        }
-      }
+      await fetchLocations();
     })();
-  }, [userLocation]);
+  }, []);
 
   const onRefresh = async () => {
     setRefreshing(true);
     await getUserLocation();
-    const res = await getLocations();
-    if (res.ok) {
-      const backendLocations = res.data;
-      setLocations(
-        backendLocations.map(loc => ({
-          id: loc.id,
-          name: loc.name,
-          image_url: loc.image_url,
-          status: loc.status,
-          available_seats: loc.available_seats,
-          total_capacity: loc.total_capacity,
-          distance: 'Refreshing...',
-        }))
-      );
-    }
+    await fetchLocations();
     setRefreshing(false);
   };
 
@@ -146,7 +117,7 @@ export default function HomeStudents() {
 
   if (!mounted) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#f9fafb' }}>
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#f9fafb" }}>
         <ActivityIndicator size="large" color="#3b82f6" />
       </View>
     );
@@ -156,9 +127,7 @@ export default function HomeStudents() {
     return (
       <Box flex={1} bg="$gray50" justifyContent="center" alignItems="center">
         <Spinner size="large" color="$blue500" />
-        <Text mt="$4" color="$gray600">
-          Loading locations...
-        </Text>
+        <Text mt="$4" color="$gray600">Loading locations...</Text>
       </Box>
     );
   }
@@ -180,15 +149,10 @@ export default function HomeStudents() {
               <LocationCard
                 key={loc.id}
                 name={loc.name}
-                image={
-                  loc.image_url
-                    // TODO: Map this to nginx server or add tunnel from backend
-                    ? { uri: `http://localhost:8080${loc.image_url}` }
-                    : { uri: undefined }
-                }
+                // TODO: replace this with a fallback image
+                image={loc.image_url ? { uri: `http://localhost:8080${loc.image_url}` } : { uri: "None" } }
                 distance={loc.distance}
-                // TODO: implement this later (accessibility feature)
-                accessibility={[]}
+                accessibility={loc.accessibility}
                 onPress={() => handleLocationPress(loc.id)}
               />
             ))

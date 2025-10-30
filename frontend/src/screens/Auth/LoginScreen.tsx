@@ -75,7 +75,7 @@ const LoginScreen: React.FC = () => {
           onSignUp={() => router.replace('/register')}
           onSocialLogin={(provider) => console.log(`${provider} login pressed`)}
         />
-        <AuthFooter onGuestLogin={() => router.replace('/(main)/home')} />
+        <AuthFooter onGuestLogin={() => router.replace('/(main)/home?role=student')} />
       </ScrollView>
     </KeyboardAvoidingView>
   );

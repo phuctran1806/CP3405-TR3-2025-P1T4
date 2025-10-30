@@ -1,6 +1,6 @@
-import { Zap, Wind, Wifi, Volume2 } from 'lucide-react-native';
+import { Zap, Wind, Wifi, Accessibility } from 'lucide-react-native';
 
-export type AccessibilityFeature = 'power' | 'cool' | 'wifi' | 'quiet';
+export type AccessibilityFeature = 'power' | 'cool' | 'wifi' | 'accessible';
 
 interface AccessibilityInfo {
   icon: any;
@@ -16,7 +16,7 @@ export const accessibilityMapping: Record<AccessibilityFeature, AccessibilityInf
   },
   cool: {
     icon: Wind,
-    label: 'Cool space',
+    label: 'Air-conditioned',
     color: '$blue500',
   },
   wifi: {
@@ -24,9 +24,9 @@ export const accessibilityMapping: Record<AccessibilityFeature, AccessibilityInf
     label: 'WiFi',
     color: '$green500',
   },
-  quiet: {
-    icon: Volume2,
-    label: 'Quiet zone',
+  accessible: {
+    icon: Accessibility,
+    label: 'Accessible',
     color: '$purple500',
   },
 };
