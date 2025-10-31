@@ -32,7 +32,6 @@ class Location(Base):
     # Basic information
     name = Column(String(100), nullable=False, unique=True)
     description = Column(String(500), nullable=True)
-    address = Column(String(200), nullable=True)
     image_url = Column(String(255), nullable=True)
 
     # Coordinates
