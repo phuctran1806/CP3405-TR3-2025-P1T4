@@ -8,13 +8,12 @@ from datetime import datetime
 from app.database import Base
 
 
-class LecturerLocation(Base):
+class LecturerAssignment(Base):
     """Model representing a lecturer’s teaching room."""
 
     __tablename__ = "lecturer_locations"
 
     id = Column(String(36), primary_key=True, index=True)
-    name = Column(String(100), nullable=False)
     subject = Column(String(20), nullable=True)
     start_time = Column(DateTime, nullable=True)
     end_time = Column(DateTime, nullable=True)
