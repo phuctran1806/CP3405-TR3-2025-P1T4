@@ -16,13 +16,13 @@ import random
 
 from app.database import SessionLocal, init_db
 from app.models.user import User, UserRole, UserStatus
-from app.models.location import Location, LocationStatus
+from app.models.location import Location, LocationStatus, LocationType
 from app.models.floor import Floor, FloorStatus
 from app.models.seat import Seat, SeatType, SeatStatus
 from app.models.reservation import Reservation, ReservationStatus
 from app.models.occupancy_history import OccupancyHistory
 from app.models.operating_hours import OperatingHours
-from app.models.lecturer_location import LecturerLocation, LocationState
+from app.models.lecturer_assignment import LecturerAssignment
 from app.utils.security import get_password_hash
 
 
@@ -47,7 +47,7 @@ def main():
         # Create data
         users = create_users(db)
         locations = create_locations(db)
-        lecturer_locations = create_lecturer_locations(db)
+        lecturer_assignments = create_lecturer_assignments(db, locations, users)
         create_operating_hours(db, locations)
         seats = create_floors_and_seats(db, locations)
         create_occupancy_history(db, locations)
@@ -58,7 +58,7 @@ def main():
         print("\n📋 Summary:")
         print(f"   • Users: {len(users)}")
         print(f"   • Locations: {len(locations)}")
-        print(f"   • Lecturer Locations: {len(lecturer_locations)}")
+        print(f"   • Lecturer assignments: {len(lecturer_assignments)}")
         print(f"   • Seats: {len(seats)}")
         print("\n🔐 Default Login Credentials:")
         print("   Admin:    admin@jcu.edu.au / admin123")
@@ -161,69 +161,49 @@ def create_users(db):
     return users
 
 
-def create_lecturer_locations(db):
-    """Create sample lecturer locations."""
-    print("\n📚 Creating lecturer locations...")
+def create_lecturer_assignments(db, locations: list[Location], users: list[User]):
+    """Create sample lecturer assignments."""
+    print("\n📚 Creating lecturer assignments...")
+    if not locations:
+        print("❌ No locations available to assign lecturers.")
+        return []
     
-    locations = [
-        LecturerLocation(
+    location_name_to_id = {loc.name: loc.id for loc in locations}
+    user_email_to_id = {user.email: user.id for user in users}
+
+    assignments = [
+        LecturerAssignment(
             id=str(uuid.uuid4()),
-            code="C4-14",
-            name="Auditorium C4-14",
-            image_url=None,
-            capacity=150,
             subject="CP2414",
-            start_time=datetime.utcnow() + timedelta(days=1, hours=9),
-            end_time=datetime.utcnow() + timedelta(days=1, hours=11),
-            live_occupancy=0,
-            state=LocationState.ACTIVE,
-            email="petteri@jcu.edu.au"
+            start_time=datetime(2025, 10, 1, 9, 0),
+            end_time=datetime(2025, 10, 1, 11, 0),
+            location_id=location_name_to_id.get("Auditorium C4-14"),
+            user_id=user_email_to_id.get("petteri@jcu.edu.au")
         ),
-        LecturerLocation(
+        LecturerAssignment(
             id=str(uuid.uuid4()),
-            code="A1-02",
-            name="Lecture Room A1-02",
-            image_url=None,
-            capacity=40,
             subject="CP1403",
-            start_time=datetime.utcnow() + timedelta(days=1, hours=13),
-            end_time=datetime.utcnow() + timedelta(days=1, hours=15),
-            live_occupancy=0,
-            state=LocationState.ACTIVE,
-            email="petteri@jcu.edu.au"
+            start_time=datetime(2025, 10, 2, 14, 0),
+            end_time=datetime(2025, 10, 2, 16, 0),
+            location_id=location_name_to_id.get("Lecture Room A1-02"),
+            user_id=user_email_to_id.get("petteri@jcu.edu.au")
         ),
-        LecturerLocation(
+        LecturerAssignment(
             id=str(uuid.uuid4()),
-            code="C2-15",
-            name="Auditorium C2-15",
-            image_url=None,
-            capacity=30,
-            subject="CP2408",
-            start_time=datetime.utcnow() + timedelta(days=2, hours=13),
-            end_time=datetime.utcnow() + timedelta(days=2, hours=15),
-            live_occupancy=0,
-            state=LocationState.ACTIVE,
-            email="andrew@jcu.edu.au"
-        ),
-        LecturerLocation(
-            id=str(uuid.uuid4()),
-            code="B1-05",
-            name="Lecture Room B1-05",
-            image_url=None,
-            capacity=50,
-            subject="CP3405",
-            start_time=datetime.utcnow() + timedelta(days=3, hours=10),
-            end_time=datetime.utcnow() + timedelta(days=3, hours=12),
-            live_occupancy=0,
-            state=LocationState.ACTIVE,
-            email="michael@jcu.edu.au"
-        ),
+            subject="CP2406",
+            start_time=datetime(2025, 10, 3, 10, 0),
+            end_time=datetime(2025, 10, 3, 12, 0),
+            location_id=location_name_to_id.get("Auditorium C2-15"),
+            user_id=user_email_to_id.get("petteri@jcu.edu.au")
+        )
     ]
+
+    print("DEBUG: created lecturer assignments =", assignments)
     
-    db.add_all(locations)
+    db.add_all(assignments)
     db.commit()
-    print(f"✓ Created {len(locations)} lecturer locations")
-    return locations
+    print(f"✓ Created {len(assignments)} lecturer assignments")
+    return assignments
 
 
 def create_locations(db):
@@ -235,28 +215,49 @@ def create_locations(db):
             id=str(uuid.uuid4()),
             name="JCU Library",
             description="Main campus library with multiple study areas",
-            address="James Cook Drive, Townsville",
             total_capacity=0,  # Will be calculated from seats
             current_occupancy=0,
-            status=LocationStatus.OPEN
+            location_type=LocationType.PUBLIC,
         ),
         Location(
             id=str(uuid.uuid4()),
             name="Student Hub",
             description="Collaborative study space for students",
-            address="Student Hub Building, JCU",
             total_capacity=0,
             current_occupancy=0,
-            status=LocationStatus.OPEN
+            location_type=LocationType.PUBLIC,
         ),
         Location(
             id=str(uuid.uuid4()),
             name="Study Pod",
             description="Quiet individual study pods",
-            address="Building 32, JCU",
             total_capacity=0,
             current_occupancy=0,
-            status=LocationStatus.OPEN
+            location_type=LocationType.PUBLIC,
+        ),
+        Location(
+            id=str(uuid.uuid4()),
+            name="Auditorium C4-14",
+            total_capacity=150,
+            current_occupancy=0,
+        ),
+        Location(
+            id=str(uuid.uuid4()),
+            name="Lecture Room A1-02",
+            total_capacity=40,
+            current_occupancy=0,
+        ),
+        Location(
+            id=str(uuid.uuid4()),
+            name="Auditorium C2-15",
+            total_capacity=30,
+            current_occupancy=0,
+        ),
+        Location(
+            id=str(uuid.uuid4()),
+            name="Lecture Room B1-05",
+            total_capacity=50,
+            current_occupancy=0,
         ),
     ]
     
