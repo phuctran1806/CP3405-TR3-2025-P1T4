@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { ScrollView, RefreshControl, View, ActivityIndicator, type ImageSourcePropType } from 'react-native';
+import { ScrollView, RefreshControl, View, ActivityIndicator } from 'react-native';
 import { Box, VStack, Text, Spinner } from '@gluestack-ui/themed';
 import { useRouter } from 'expo-router';
 import LocationCard from '@/components/cards/LocationCard';
-import { fetchLecturerRooms } from '@/api/lecturer_locations';
+import { fetchLecturerAssignments } from '@/api/lecturer_assignment';
+
 import { useSelectedVenue, type VenueDisplay} from '@/contexts/useSelectedVenue';
 
 export default function HomeLecturers() {
@@ -23,19 +24,18 @@ export default function HomeLecturers() {
     try {
       setLoading(true);
       console.log('Fetching lecturer venues...');
-      const rooms = await fetchLecturerRooms();
+      const lecturerAssignments = await fetchLecturerAssignments();
 
-      const formattedVenues: VenueDisplay[] = rooms.map((room: any) => ({
-        id: room.id,
-        code: room.code,
-        name: room.name,
-        image: { uri: room.image_url || 'https://placehold.co/600x400?text=No+Image' },
-        subject: room.subject,
-        schedule: room.start_time && room.end_time
-          ? `${new Date(room.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${new Date(room.end_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+      const formattedVenues: VenueDisplay[] = lecturerAssignments.map((assignment: any) => ({
+        id: assignment.id,
+        code: assignment.code,
+        name: assignment.name,
+        subject: assignment.subject,
+        schedule: assignment.start_time && assignment.end_time
+          ? `${new Date(assignment.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${new Date(assignment.end_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
           : 'No schedule',
-        capacity: room.capacity,
-        liveOccupancy: room.live_occupancy ?? null,
+        capacity: assignment.capacity,
+        liveOccupancy: assignment.live_occupancy ?? null,
       }));
 
       setVenues(formattedVenues);
@@ -98,11 +98,7 @@ export default function HomeLecturers() {
               image={venue.image}
               schedule={venue.schedule}
               accessibility={null}
-<<<<<<< HEAD
-              onPress={() => handleVenuePress(venue.id)}
-=======
               onPress={() => handleVenuePress(venue)} // 👈 pass the whole venue
->>>>>>> b804b009b4452cef94f424d792dd99d7e798c328
             />
           ))}
         </VStack>
