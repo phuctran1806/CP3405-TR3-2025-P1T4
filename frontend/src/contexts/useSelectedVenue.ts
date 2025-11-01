@@ -5,9 +5,12 @@ import type { ImageSourcePropType } from "react-native";
 export interface VenueDisplay {
   id: string;
   name: string;
-  image: ImageSourcePropType;
+  image: ImageSourcePropType | null;
   subject: string;
-  schedule: string;
+  schedule: {
+    start_time: Date;
+    end_time: Date;
+  };
   capacity: number;
   liveOccupancy?: number | null;
 }

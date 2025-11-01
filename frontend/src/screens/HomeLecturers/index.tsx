@@ -4,8 +4,9 @@ import { Box, VStack, Text, Spinner } from '@gluestack-ui/themed';
 import { useRouter } from 'expo-router';
 import LocationCard from '@/components/cards/LocationCard';
 import { fetchLecturerAssignments } from '@/api/lecturer_assignment';
-
-import { useSelectedVenue, type VenueDisplay} from '@/contexts/useSelectedVenue';
+import { getLocationById } from '@/api/locations';
+import { useSelectedVenue, type VenueDisplay } from '@/contexts/useSelectedVenue';
+import type { LecturerAssignmentResponse } from '@/api/types/lecturer_assignment_types';
 
 export default function HomeLecturers() {
   const [venues, setVenues] = useState<VenueDisplay[]>([]);
@@ -13,7 +14,7 @@ export default function HomeLecturers() {
   const [refreshing, setRefreshing] = useState(false);
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
-  const { setSelectedVenue } = useSelectedVenue() as { setSelectedVenue: (venue: VenueDisplay) => void }; 
+  const { setSelectedVenue } = useSelectedVenue() as { setSelectedVenue: (venue: VenueDisplay) => void };
 
   useEffect(() => {
     setMounted(true);
@@ -25,18 +26,23 @@ export default function HomeLecturers() {
       setLoading(true);
       console.log('Fetching lecturer venues...');
       const lecturerAssignments = await fetchLecturerAssignments();
-
-      const formattedVenues: VenueDisplay[] = lecturerAssignments.map((assignment: any) => ({
-        id: assignment.id,
-        code: assignment.code,
-        name: assignment.name,
-        subject: assignment.subject,
-        schedule: assignment.start_time && assignment.end_time
-          ? `${new Date(assignment.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${new Date(assignment.end_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
-          : 'No schedule',
-        capacity: assignment.capacity,
-        liveOccupancy: assignment.live_occupancy ?? null,
-      }));
+      const formattedVenues = await Promise.all(
+        lecturerAssignments.map(async (assignment: LecturerAssignmentResponse) => {
+          const location = await getLocationById(assignment.location_id);
+          return {
+            id: assignment.id,
+            name: location?.name ?? "Unknown Venue",
+            image: null,
+            subject: assignment.subject,
+            schedule: {
+              start_time: assignment.start_time,
+              end_time: assignment.end_time,
+            },
+            capacity: location?.total_capacity ?? 0,
+            liveOccupancy: location?.current_occupancy ?? 0,
+          };
+        })
+      );
 
       setVenues(formattedVenues);
     } catch (err) {
@@ -53,7 +59,7 @@ export default function HomeLecturers() {
   };
 
   const handleVenuePress = (venue: VenueDisplay) => {
-    setSelectedVenue(venue); // 👈 save venue in store
+    setSelectedVenue(venue);
     router.push(`/dashboard/${venue.id}?role=lecturer`);
   };
 
@@ -98,7 +104,7 @@ export default function HomeLecturers() {
               image={venue.image}
               schedule={venue.schedule}
               accessibility={null}
-              onPress={() => handleVenuePress(venue)} // 👈 pass the whole venue
+              onPress={() => handleVenuePress(venue)}
             />
           ))}
         </VStack>
