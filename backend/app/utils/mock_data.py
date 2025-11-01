@@ -207,31 +207,6 @@ def create_lecturer_assignments(db, locations: list[Location], users: list[User]
             end_time=datetime(2025, 10, 3, 12, 0),
             location_id=location_name_to_id.get("Auditorium C2-15"),
             user_id=user_email_to_id.get("petteri@jcu.edu.au")
-        ),
-        # Assignments for Sarah Johnson
-        LecturerAssignment(
-            id=str(uuid.uuid4()),
-            subject="BU1105",
-            start_time=datetime(2025, 10, 1, 13, 0),
-            end_time=datetime(2025, 10, 1, 15, 0),
-            location_id=location_name_to_id.get("Lecture Room B1-05"),
-            user_id=user_email_to_id.get("sarah.johnson@jcu.edu.au")
-        ),
-        LecturerAssignment(
-            id=str(uuid.uuid4()),
-            subject="BU2202",
-            start_time=datetime(2025, 10, 2, 9, 0),
-            end_time=datetime(2025, 10, 2, 11, 0),
-            location_id=location_name_to_id.get("Auditorium C4-14"),
-            user_id=user_email_to_id.get("sarah.johnson@jcu.edu.au")
-        ),
-        LecturerAssignment(
-            id=str(uuid.uuid4()),
-            subject="BU3301",  
-            start_time=datetime(2025, 10, 3, 14, 0),
-            end_time=datetime(2025, 10, 3, 16, 0),
-            location_id=location_name_to_id.get("Lecture Room A1-02"),
-            user_id=user_email_to_id.get("sarah.johnson@jcu.edu.au")
         )
     ]
 
@@ -251,7 +226,6 @@ def create_locations(db):
         Location(
             id=str(uuid.uuid4()),
             name="JCU Library",
-            description="Main campus library with multiple study areas",
             total_capacity=0,  # Will be calculated from seats
             current_occupancy=0,
             location_type=LocationType.PUBLIC,
@@ -259,7 +233,6 @@ def create_locations(db):
         Location(
             id=str(uuid.uuid4()),
             name="Student Hub",
-            description="Collaborative study space for students",
             total_capacity=0,
             current_occupancy=0,
             location_type=LocationType.PUBLIC,
@@ -267,7 +240,6 @@ def create_locations(db):
         Location(
             id=str(uuid.uuid4()),
             name="Study Pod",
-            description="Quiet individual study pods",
             total_capacity=0,
             current_occupancy=0,
             location_type=LocationType.PUBLIC,
