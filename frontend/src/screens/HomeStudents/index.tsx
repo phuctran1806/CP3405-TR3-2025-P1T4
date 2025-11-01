@@ -14,7 +14,6 @@ import { calculateDistance, formatDistance } from "@/utils/calculateDistance";
 import { getLocations } from "@/api/locations";
 import type { LocationResponse } from "@/api/locations";
 import type { AccessibilityFeature } from "@/utils/accessibilityIcons";
-import { getAccessibilityIcon } from "@/utils/accessibilityIcons";
 
 interface LocationWithDistance {
   id: string;
@@ -150,7 +149,7 @@ export default function HomeStudents() {
                 key={loc.id}
                 name={loc.name}
                 // TODO: replace this with a fallback image
-                image={loc.image_url ? { uri: `http://localhost:8080${loc.image_url}` } : { uri: "None" } }
+                image={loc.image_url ? { uri: `${loc.image_url}` } : { uri: "None" } }
                 distance={loc.distance}
                 accessibility={loc.accessibility}
                 onPress={() => handleLocationPress(loc.id)}
