@@ -4,8 +4,8 @@ import type { LecturerAssignmentResponse } from "./types/lecturer_assignment_typ
 
 export async function fetchLecturerAssignments(): Promise<LecturerAssignmentResponse[]> {
   const token = await AsyncStorage.getItem("access_token");
-  
-  const res = await apiFetch(`/lecturer-assignments/my-assignments`, {
+
+  const res = await apiFetch<LecturerAssignmentResponse[]>(`/lecturer-assignments/my-assignments`, {
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
