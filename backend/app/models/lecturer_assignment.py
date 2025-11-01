@@ -2,7 +2,7 @@
 LecturerLocation model — represents teaching rooms for lecturers.
 """
 
-from sqlalchemy import Column, String, Integer, Enum, DateTime
+from sqlalchemy import Column, String, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from app.database import Base
@@ -14,16 +14,19 @@ class LecturerAssignment(Base):
     __tablename__ = "lecturer_locations"
 
     id = Column(String(36), primary_key=True, index=True)
-    subject = Column(String(20), nullable=True)
-    start_time = Column(DateTime, nullable=True)
-    end_time = Column(DateTime, nullable=True)
+    subject = Column(String(20), nullable=False)
+    start_time = Column(DateTime, nullable=False)
+    end_time = Column(DateTime, nullable=False)
     
-    location = relationship("Location", back_populates="LecturerLocation")
-    user = relationship("User", back_populates="LecturerLocation")
+    location_id = Column(String(36), ForeignKey("locations.id"), nullable=False)
+    user_id = Column(String(36), ForeignKey("users.id"), nullable=False)
+
+    location = relationship("Location")
+    user = relationship("User")
 
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow,
                         onupdate=datetime.utcnow, nullable=False)
 
     def __repr__(self):
-        return f"<LecturerLocation(code={self.code}, subject={self.subject}, lecturer={self.lecturer_email})>"
+        return f"<LecturerLocation(id={self.id}, subject={self.subject}, user_id={self.user_id}, location_id={self.location_id})>"
