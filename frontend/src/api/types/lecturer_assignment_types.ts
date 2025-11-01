@@ -7,7 +7,7 @@ export interface LecturerAssignmentRequest {
   user_id: string;
 }
 
-export interface LecturerAssignmentResponse {
+export interface LecturerAssignmentResponse extends LecturerAssignmentRequest {
   created_at: Date;
   updated_at: Date;
 }
