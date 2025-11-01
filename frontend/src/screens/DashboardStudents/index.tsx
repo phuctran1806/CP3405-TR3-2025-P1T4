@@ -36,6 +36,7 @@ export default function LocationDashboard() {
 
         if (!result.ok) throw result.error;
         setLocation(result.data);
+        console.log(result.data);
       } catch (err: any) {
         console.error('Failed to fetch location:', err);
         if (active) setError('Failed to load location');
@@ -256,7 +257,7 @@ export default function LocationDashboard() {
               id: locationId as string,
               name: location.name,
               occupancyPercentage: currentPercentage,
-              image: location.image_url,
+              image: `/${location.image_url}`,
             }}
             map={<InteractiveMap />}
           />

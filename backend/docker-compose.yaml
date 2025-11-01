@@ -6,6 +6,9 @@ services:
       context: .
       dockerfile: backend.Dockerfile
     container_name: backend
+    volumes:
+      # Backend must also have the same mapping to check for file existence
+      - ./images:/var/www/cp3405-uploads/
     ports:
       - "8000:8000"
 
@@ -15,10 +18,11 @@ services:
       dockerfile: nginx.Dockerfile
     container_name: nginx
     ports:
-      - "8080:80"
+      - "8080:8080"
     volumes:
       # Mount local images directory into Nginx container
-      - ./images:/usr/share/nginx/html/images
+      - ./images:/var/www/cp3405-uploads/
     depends_on:
       - backend
-
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
