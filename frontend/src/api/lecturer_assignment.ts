@@ -1,11 +1,11 @@
 import { apiFetch } from "./fetcher";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import type { LecturerLocationResponse } from "./types/lecturer_location_types";
+import type { LecturerAssignmentResponse } from "./types/lecturer_assignment_types";
 
-export async function fetchLecturerRooms(): Promise<LecturerLocationResponse[]> {
+export async function fetchLecturerAssignments(): Promise<LecturerAssignmentResponse[]> {
   const token = await AsyncStorage.getItem("access_token");
-
-  const res = await apiFetch(`/lecturer-locations/me`, {
+  
+  const res = await apiFetch(`/lecturer-assignments/my-assignments`, {
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
@@ -17,7 +17,7 @@ export async function fetchLecturerRooms(): Promise<LecturerLocationResponse[]> 
     console.log("DEBUG: response error text =", text);
     throw new Error(`Failed to fetch rooms: ${text}`);
   }
-
-  return await res.data as LecturerLocationResponse[];
+  console.log("Fetched lecturer assignments:", res.data);
+  return await res.data as LecturerAssignmentResponse[];
 }
 
