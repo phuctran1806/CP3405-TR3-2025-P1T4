@@ -12,8 +12,6 @@ class LocationResponse(BaseModel):
     """Schema for location response with aggregated accessibility info."""
     id: str
     name: str
-    description: Optional[str]
-    address: Optional[str]
     image_url: Optional[str]
     latitude: Optional[float]
     longitude: Optional[float]
