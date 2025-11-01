@@ -98,7 +98,11 @@ export default function HomeLecturers() {
               image={venue.image}
               schedule={venue.schedule}
               accessibility={null}
+<<<<<<< HEAD
               onPress={() => handleVenuePress(venue.id)}
+=======
+              onPress={() => handleVenuePress(venue)} // 👈 pass the whole venue
+>>>>>>> b804b009b4452cef94f424d792dd99d7e798c328
             />
           ))}
         </VStack>

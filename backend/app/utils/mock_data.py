@@ -450,26 +450,26 @@ def main():
     print("=" * 60)
     print("🎯 JCU Library Mock Data Generator")
     print("=" * 60)
-
+    
     # Initialize database
     print("\n📦 Initializing database...")
     init_db()
     print("✓ Database initialized")
-
+    
     # Create session
     db = SessionLocal()
-
+    
     try:
         # Clear existing data
         clear_database(db)
-
+        
         # Create data
         users = create_users(db)
         locations = create_locations(db)
         create_operating_hours(db, locations)
         seats = create_floors_and_seats(db, locations)
         create_occupancy_history(db, locations)
-
+        
         print("\n" + "=" * 60)
         print("✅ Mock data generation completed successfully!")
         print("=" * 60)
@@ -485,7 +485,7 @@ def main():
         print("\n🚀 Start the server with:")
         print("   uvicorn app.main:app --reload")
         print("=" * 60)
-
+        
     except Exception as e:
         print(f"\n❌ Error: {e}")
         db.rollback()
