@@ -11,14 +11,12 @@ from datetime import datetime
 from app.database import get_db
 from app.models.lecturer_assignment import LecturerAssignment
 from app.schemas.lecturer_assignment import (
-    LecturerAssignmentRequest,
     LecturerAssignmentResponse,
 )
 from app.models.user import User, UserRole
 from app.api.auth import get_current_user
 
-router = APIRouter(prefix="/lecturer-assignments", tags=["Lecturer Assignments"])
-
+router = APIRouter()
 
 # --------------------------------------------------
 # Utility — prevent overlapping schedules
@@ -37,13 +35,14 @@ def check_schedule_conflict(
 
     for record in query.all():
         if record.start_time and record.end_time:
+            # Overlap if times intersect
             if start_time < record.end_time and end_time > record.start_time:
                 return True
     return False
 
 
 # --------------------------------------------------
-# Dependency — require lecturer role
+# Role Dependencies
 # --------------------------------------------------
 async def require_lecturer(current_user: User = Depends(get_current_user)):
     if current_user.role != UserRole.LECTURER:
@@ -55,15 +54,16 @@ async def require_lecturer(current_user: User = Depends(get_current_user)):
 
 
 # --------------------------------------------------
-# Lecturer endpoints
+# Lecturer Endpoints
 # --------------------------------------------------
-@router.get("/me", response_model=List[LecturerAssignmentResponse])
+@router.get("/my-assignments", response_model=List[LecturerAssignmentResponse])
 def get_my_assigned_rooms(
     db: Session = Depends(get_db),
     lecturer: User = Depends(require_lecturer),
 ):
     """Lecturer: view all rooms assigned to them."""
-    rooms = db.query(LecturerAssignment).filter(
+    assignments = db.query(LecturerAssignment).filter(
         LecturerAssignment.user_id == lecturer.id
     ).all()
-    return rooms
+
+    return assignments

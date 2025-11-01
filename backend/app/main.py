@@ -51,7 +51,7 @@ app.include_router(floors.router, prefix="/api/floors", tags=["Floors"])
 app.include_router(reservations.router, prefix="/api/reservations", tags=["Reservations"])
 app.include_router(occupancy.router, prefix="/api/iot", tags=["IoT Occupancy"])
 app.include_router(admin.router, prefix="/api/admin", tags=["Admin"])
-app.include_router(lecturer.router, prefix="/api/lecturer-locations", tags=["Lecturer Locations"])
+app.include_router(lecturer.router, prefix="/api/lecturer-assignments", tags=["Lecturer Assignments"])
 
 
 @app.get("/")
