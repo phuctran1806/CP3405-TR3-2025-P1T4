@@ -44,6 +44,7 @@ const LoginScreen: React.FC = () => {
     try {
       const result = await login({ 'email': email, 'password': password });
       if (!result.ok) throw result.error;
+      await AsyncStorage.setItem('access_token', result.data.access_token);
       router.replace(`/(main)/home?role=${result.data.user.role}`);
     } catch (e: any) {
       if (e.status === 401) setGeneralError("Incorrect email or password");
