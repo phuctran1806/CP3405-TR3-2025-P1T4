@@ -80,7 +80,7 @@ export default function LocationCard({
             {distance
               ? distance
               : schedule && schedule.start_time && schedule.end_time
-                ? `${new Date(schedule.start_time).toLocaleString([], { weekday: 'short', hour: '2-digit', minute: '2-digit' })} - ${new Date(schedule.end_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+                ? `${new Date(schedule.start_time).toLocaleString([], { weekday: 'short', hour: '2-digit' })} - ${new Date(schedule.end_time).toLocaleTimeString([], { hour: '2-digit' })}`
                 : ''}
           </Text>
 
