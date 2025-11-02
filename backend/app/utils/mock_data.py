@@ -259,7 +259,7 @@ def create_locations(db):
         Location(
             id=str(uuid.uuid4()),
             name="Auditorium C2-15",
-            total_capacity=30,
+            total_capacity=100,
             current_occupancy=0,
         ),
         Location(
@@ -336,13 +336,35 @@ def create_operating_hours(db, locations):
 
 
 def create_floors_and_seats(db, locations: list[Location]):
-    """Create random floors and seats for each location."""
+    """Create floors and seats so that the total number of seats matches each location's total_capacity."""
     print("\n🏢 Creating floors and seats...")
 
     all_seats = []
 
     for loc in locations:
-        num_floors = random.randint(1, 3)
+        required_seats = int(loc.total_capacity or 0)
+
+        # If capacity is 0, create no seats (and optionally skip floors)
+        if required_seats <= 0:
+            # Optionally create a single empty floor to keep structure consistent
+            floor = Floor(
+                id=str(uuid.uuid4()),
+                location_id=loc.id,
+                floor_number=1,
+                floor_name="Level 1",
+                total_seats=0,
+                occupied_seats=0,
+                is_best_floor=True,
+                status=FloorStatus.OPEN
+            )
+            db.add(floor)
+            continue
+
+        # Choose up to 3 floors but never more than required seats
+        num_floors = min(3, required_seats)
+
+        # Create floors first
+        floors = []
         for floor_num in range(1, num_floors + 1):
             floor = Floor(
                 id=str(uuid.uuid4()),
@@ -355,29 +377,34 @@ def create_floors_and_seats(db, locations: list[Location]):
                 status=FloorStatus.OPEN
             )
             db.add(floor)
-            db.flush()
+            db.flush()  # get floor.id
+            floors.append(floor)
 
-            seats_per_floor = random.randint(10, 30)
-            for i in range(1, seats_per_floor + 1):
+        # Evenly distribute seats across floors so sum == required_seats
+        base = required_seats // num_floors
+        remainder = required_seats % num_floors
+
+        for idx, floor in enumerate(floors):
+            seats_on_floor = base + (1 if idx < remainder else 0)
+            for i in range(1, seats_on_floor + 1):
                 seat_type = random.choice(list(SeatType))
                 seat = Seat(
                     id=str(uuid.uuid4()),
                     floor_id=floor.id,
-                    seat_number=f"{loc.name[:3].upper()}-{floor_num}-{i:03d}",
+                    seat_number=f"{loc.name[:3].upper()}-{floor.floor_number}-{i:03d}",
                     seat_type=seat_type,
                     has_power_outlet=random.choice([True, False]),
                     has_wifi=random.choice([True, False]),
                     has_ac=random.choice([True, False]),
                     accessibility=random.choice([True, False]),
-                    capacity=random.choice([1, 2, 4]),
+                    capacity=1,
                     x_coordinate=float(random.randint(0, 100)),
                     y_coordinate=float(random.randint(0, 100)),
-                    status=random.choice(
-                        [SeatStatus.AVAILABLE, SeatStatus.OCCUPIED])
+                    status=random.choice([SeatStatus.AVAILABLE, SeatStatus.OCCUPIED])
                 )
                 all_seats.append(seat)
 
-            floor.total_seats = seats_per_floor
+            floor.total_seats = seats_on_floor
 
     db.add_all(all_seats)
     db.commit()
@@ -389,15 +416,12 @@ def create_floors_and_seats(db, locations: list[Location]):
             Seat.status == SeatStatus.OCCUPIED
         ).count()
 
-    # Update location capacities
+    # Update current_occupancy only. Do NOT overwrite total_capacity.
     for loc in locations:
-        total = db.query(Seat).join(Floor).filter(
-            Floor.location_id == loc.id).count()
         occupied = db.query(Seat).join(Floor).filter(
             Floor.location_id == loc.id,
             Seat.status == SeatStatus.OCCUPIED
         ).count()
-        loc.total_capacity = total
         loc.current_occupancy = occupied
 
     db.commit()
