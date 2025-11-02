@@ -16,7 +16,6 @@ interface LocationCardProps {
   name: string;
   subject?: string;
   image: ImageSourcePropType | null;
-  distance?: string;
   schedule?: {
     start_time: Date;
     end_time: Date;
@@ -75,14 +74,12 @@ export default function LocationCard({
             {subject}
           </Text>
 
-          {/* Show distance for students, schedule for lecturers */}
-          <Text fontSize="$sm" color="$gray600">
-            {distance
-              ? distance
-              : schedule && schedule.start_time && schedule.end_time
-                ? `${new Date(schedule.start_time).toLocaleString([], { weekday: 'short', hour: '2-digit' })} - ${new Date(schedule.end_time).toLocaleTimeString([], { hour: '2-digit' })}`
-                : ''}
-          </Text>
+          {/* Schedule */}
+          {schedule && (
+            <Text fontSize="$sm" color="$gray600">
+              {`${new Date(schedule.start_time).toLocaleString([], { weekday: 'short', hour: '2-digit' })} - ${new Date(schedule.end_time).toLocaleTimeString([], { hour: '2-digit' })}`}
+            </Text>
+          )}
 
           {accessibility && accessibility.length > 0 && (
             <HStack space="md" flexWrap="wrap" mt="$2">
