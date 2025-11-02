@@ -7,7 +7,7 @@ import Animated, {
 } from "react-native-reanimated";
 import Svg, { Defs, LinearGradient, Stop, G, SvgXml } from "react-native-svg";
 import { ChairMarker } from "./ChairMarker";
-import { VIEWBOX_WIDTH, VIEWBOX_HEIGHT, ASPECT_RATIO } from "./Chair";
+import { VIEWBOX_WIDTH, VIEWBOX_HEIGHT, ASPECT_RATIO } from "./MapConfig";
 import type { SeatResponse } from "@/api/seats";
 
 interface FloorMapContentProps {
@@ -165,13 +165,7 @@ export const FloorMapContent: React.FC<FloorMapContentProps> = ({
         {seats.map((seat) => (
           <ChairMarker
             key={seat.id}
-            chair={{
-              id: seat.id,
-              occupied: seat.status === "occupied",
-              hasPlug: seat.has_power_outlet,
-              x: seat.x_coordinate ?? Math.random() * VIEWBOX_WIDTH,
-              y: seat.y_coordinate ?? Math.random() * VIEWBOX_HEIGHT,
-            }}
+            seat={seat}
             isSelected={selectedSeat?.id === seat.id}
             onPress={() => onChairPress(seat)}
           />

@@ -23,7 +23,7 @@ export async function login(body: LoginParams): Promise<ApiResult<LoginResponse>
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
     },
-    body: form.toString()
+    body: form,
   });
 }
 

@@ -2,7 +2,8 @@
 Seat schemas for request/response validation.
 """
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
+from typing import List
 from typing import Optional
 from datetime import datetime
 from app.models.seat import SeatType, SeatStatus
@@ -29,7 +30,7 @@ class SeatResponse(SeatBase):
     notes: Optional[str]
     created_at: datetime
     updated_at: datetime
-    
+
     class Config:
         from_attributes = True
 
@@ -40,3 +41,23 @@ class SeatAvailability(BaseModel):
     is_available: bool
     next_available_time: Optional[datetime] = None
 
+
+class SeatUpdate(SeatBase):
+    """Schema for single seat update request"""
+    id: Optional[str]
+
+
+class SeatUpdateRequest(BaseModel):
+    """Schema for seat update request"""
+    added: Optional[List[SeatUpdate]] = []
+    removed: Optional[List[str]] = []
+    updated: Optional[List[SeatUpdate]] = []
+
+
+class SeatUpdateResponse(BaseModel):
+    """Schema for seat update response"""
+    message: Optional[str]
+    created_at: datetime
+
+    class Config:
+        from_attributes = True

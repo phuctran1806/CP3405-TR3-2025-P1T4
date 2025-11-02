@@ -298,7 +298,7 @@ export default function LocationDashboard() {
               <Button
                 key={floor.id}
                 size="sm"
-                variant={selectedFloor?.id === floor.id ? 'solid' : 'outline'}
+                variant="solid"
                 bg={selectedFloor?.id === floor.id ? '$blue500' : 'transparent'}
                 onPress={() => setSelectedFloor(floor)}
               >

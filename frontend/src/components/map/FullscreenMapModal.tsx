@@ -42,13 +42,19 @@ export const FullscreenMapModal: React.FC<FullscreenMapModalProps> = ({
               Floor Map
             </Text>
             <HStack space="sm">
-              <Badge size="sm" variant="solid" action="success" borderRadius="$full">
+              <Badge
+                size="sm"
+                variant="solid"
+                action="success"
+                borderRadius="$full"
+                bgColor={availableSeats === 0 ? "$red" : "$green"}
+              >
                 <Text fontSize="$xs" color="$white">
                   {availableSeats} Available
                 </Text>
               </Badge>
               {seatsWithPlugs > 0 && (
-                <Badge size="sm" variant="solid" action="info" borderRadius="$full">
+                <Badge size="sm" variant="solid" action="info" borderRadius="$full" bgColor="$blue">
                   <Text fontSize="$xs" color="$white">
                     ⚡ {seatsWithPlugs} with Power
                   </Text>

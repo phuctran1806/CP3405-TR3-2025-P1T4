@@ -9,3 +9,6 @@ export const SEAT_CONFIG = {
   plugIconSize: 35,
   strokeWidth: 5,
 }
+
+export const SEAT_TYPES = ['individual', 'group', 'quiet', 'computer', 'study_pod'];
+export const SEAT_STATUSES = ['available', 'occupied', 'reserved', 'maintenance', 'blocked'];

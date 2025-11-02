@@ -71,6 +71,16 @@ export const SelectedChairInfo: React.FC<SelectedChairInfoProps> = ({
               Seat {seat.seat_number} : {seat.seat_type}
             </Text>
             <HStack space="md">
+              <Badge
+                size="md"
+                variant="solid"
+                bgColor={seat.status === "available" ? "$green" : "$red"}
+                borderRadius="$full"
+              >
+                <Text fontSize="$sm" color="$white">
+                  {seat.status}
+                </Text>
+              </Badge>
               {seat.has_power_outlet && (
                 <HStack space="xs" alignItems="center">
                   <Text fontSize="$lg">⚡</Text>
@@ -79,15 +89,6 @@ export const SelectedChairInfo: React.FC<SelectedChairInfoProps> = ({
                   </Text>
                 </HStack>
               )}
-              <Badge
-                size="md"
-                variant="solid"
-                borderRadius="$full"
-              >
-                <Text fontSize="$sm" color="$white">
-                  {seat.status}
-                </Text>
-              </Badge>
             </HStack>
           </VStack>
           {onClose && (

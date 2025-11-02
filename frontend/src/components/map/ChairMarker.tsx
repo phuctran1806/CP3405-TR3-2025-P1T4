@@ -1,19 +1,19 @@
 import React from "react";
 import { Rect, Path, Circle, G } from "react-native-svg";
-import { VIEWBOX_WIDTH, VIEWBOX_HEIGHT, SEAT_CONFIG } from "./Chair";
-import type { Chair } from "./Chair";
+import { VIEWBOX_WIDTH, VIEWBOX_HEIGHT, SEAT_CONFIG } from "./MapConfig";
+import type { Seat } from "@/api/seats";
 
-interface ChairMarkerProps {
-  chair: Chair;
+interface SeatMarkerProps {
+  seat: Seat;
   isSelected: boolean;
   onPress: () => void;
 }
 
-export const ChairMarker: React.FC<ChairMarkerProps> = ({ chair, isSelected, onPress }) => {
-  const cx = chair.x * VIEWBOX_WIDTH;
-  const cy = chair.y * VIEWBOX_HEIGHT;
+export const SeatMarker: React.FC<SeatMarkerProps> = ({ seat, isSelected, onPress }) => {
+  const cx = seat.x_coordinate * VIEWBOX_WIDTH;
+  const cy = seat.y_coordinate * VIEWBOX_HEIGHT;
 
-  const fillGradient = chair.occupied
+  const fillGradient = seat.status === "available"
     ? "url(#occupiedGrad)"
     : isSelected
       ? "url(#selectedGrad)"
@@ -42,14 +42,14 @@ export const ChairMarker: React.FC<ChairMarkerProps> = ({ chair, isSelected, onP
         height={SEAT_CONFIG.height}
         rx={SEAT_CONFIG.radius}
         fill={fillGradient}
-        stroke={isSelected ? "#1E40AF" : chair.hasPlug ? "#FCD34D" : "transparent"}
+        stroke={isSelected ? "#1E40AF" : seat.has_power_outlet ? "#FCD34D" : "transparent"}
         strokeWidth={SEAT_CONFIG.strokeWidth}
         onPress={onPress}
-        opacity={chair.occupied ? 0.6 : 1}
+        opacity={seat.status === "available" ? 0.6 : 1}
       />
 
       {/* Plug icon */}
-      {chair.hasPlug && (
+      {seat.has_power_outlet && (
         <G>
           <Circle
             cx={cx + SEAT_CONFIG.width / 2 - 25}
@@ -68,7 +68,7 @@ export const ChairMarker: React.FC<ChairMarkerProps> = ({ chair, isSelected, onP
       )}
 
       {/* Seat label */}
-      {chair.label && (
+      {seat.seat_number && (
         <Path
           d={`M ${cx - 15} ${cy + 5} L ${cx + 15} ${cy + 5}`}
           stroke="#FFFFFF"

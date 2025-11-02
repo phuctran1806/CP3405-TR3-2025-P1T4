@@ -2,7 +2,7 @@ import { apiFetch } from "@/api/fetcher";
 import buildQuery from "@/utils/buildQuery";
 import type { ApiResult } from "@/api/types";
 
-export interface SeatResponse {
+export interface Seat {
   id: string;
   seat_number: string;
   seat_type: string;
@@ -12,9 +12,12 @@ export interface SeatResponse {
   accessibility: boolean;
   capacity: number;
   floor_id: string;
-  x_coordinate?: number | null;
-  y_coordinate?: number | null;
+  x_coordinate: number;
+  y_coordinate: number;
   status: string;
+}
+
+export type SeatResponse = Seat & {
   notes?: string | null;
   created_at: string;
   updated_at: string;
@@ -61,4 +64,24 @@ export async function getAvailableSeats(params?: {
  */
 export async function getSeatById(seat_id: string): Promise<ApiResult<SeatResponse>> {
   return apiFetch<SeatResponse>(`/seats/${seat_id}`);
+}
+
+export interface SeatUpdatePayload {
+  added?: Partial<Seat>[];
+  removed?: string[];
+  updated?: Partial<Seat>[];
+}
+
+/**
+ * PATCH /seats/update
+ * Update many seats at a time
+ */
+export async function updateSeats(payload: SeatUpdatePayload): Promise<ApiResult<{ status: string; message: string }>> {
+  return apiFetch<{ status: string; message: string }>(`/seats/update`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
 }
