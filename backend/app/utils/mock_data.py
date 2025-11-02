@@ -226,21 +226,35 @@ def create_locations(db):
         Location(
             id=str(uuid.uuid4()),
             name="JCU Library",
-            total_capacity=0,  # Will be calculated from seats
+            total_capacity=60,  
             current_occupancy=0,
             location_type=LocationType.PUBLIC,
         ),
         Location(
             id=str(uuid.uuid4()),
             name="Student Hub",
-            total_capacity=0,
+            total_capacity=80,
             current_occupancy=0,
             location_type=LocationType.PUBLIC,
         ),
         Location(
             id=str(uuid.uuid4()),
             name="Study Pod",
-            total_capacity=0,
+            total_capacity=30,
+            current_occupancy=0,
+            location_type=LocationType.PUBLIC,
+        ),
+        Location(
+            id=str(uuid.uuid4()),
+            name="Study Hub",
+            total_capacity=90,
+            current_occupancy=0,
+            location_type=LocationType.PUBLIC,
+        ),
+        Location(
+            id=str(uuid.uuid4()),
+            name="yard",
+            total_capacity=20,
             current_occupancy=0,
             location_type=LocationType.PUBLIC,
         ),
