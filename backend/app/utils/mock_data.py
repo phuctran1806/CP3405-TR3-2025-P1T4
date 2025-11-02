@@ -261,24 +261,28 @@ def create_locations(db):
         Location(
             id=str(uuid.uuid4()),
             name="Auditorium C4-14",
+            image_url="api/images/auditorium.jpg",
             total_capacity=150,
             current_occupancy=0,
         ),
         Location(
             id=str(uuid.uuid4()),
             name="Lecture Room A1-02",
+            image_url="api/images/lecture-room.jpg",
             total_capacity=40,
             current_occupancy=0,
         ),
         Location(
             id=str(uuid.uuid4()),
             name="Auditorium C2-15",
+            image_url="api/images/small-auditorium.jpg",
             total_capacity=100,
             current_occupancy=0,
         ),
         Location(
             id=str(uuid.uuid4()),
             name="Lecture Room B1-05",
+            image_url="api/images/lecture-room.jpg",
             total_capacity=50,
             current_occupancy=0,
         ),
