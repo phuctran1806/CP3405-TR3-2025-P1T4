@@ -9,7 +9,8 @@ import Statistics from './components/Statistics';
 import InteractiveMap from '@/components/map/InteractiveMap';
 
 import { getOccupancyHistory, type OccupancyHistory } from '@/api/history';
-import { getLocationById, type LocationResponse } from '@/api/locations';
+import { getLocationById } from '@/api/locations';
+import type { LocationResponse } from '@/api/types/location_types';
 
 export default function LocationDashboard() {
   const { location: locationId } = useLocalSearchParams();
