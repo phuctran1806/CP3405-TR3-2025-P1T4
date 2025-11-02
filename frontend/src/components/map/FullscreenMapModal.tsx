@@ -3,32 +3,34 @@ import { Modal, View, TouchableOpacity, StyleSheet } from "react-native";
 import { Box, VStack, HStack, Text, Badge } from "@gluestack-ui/themed";
 import { FloorMapContent } from "./FloorMapContent";
 import { SelectedChairInfo } from "./SelectedChairInfo";
-import type { Chair } from "./Chair";
+import type { SeatResponse } from "@/api/seats";
 
 interface FullscreenMapModalProps {
   visible: boolean;
   onClose: () => void;
-  selectedChair: string | null;
-  selectedChairData: Chair | undefined;
-  onChairPress: (id: string) => void;
+  selectedSeat: SeatResponse | null;
+  onChairPress: (next: SeatResponse) => void;
   onDeselectChair: () => void;
   availableSeats: number;
   seatsWithPlugs: number;
   screenWidth: number;
   screenHeight: number;
+  seats: SeatResponse[];
+  map_url?: string | null;
 }
 
 export const FullscreenMapModal: React.FC<FullscreenMapModalProps> = ({
   visible,
   onClose,
-  selectedChair,
-  selectedChairData,
+  selectedSeat,
   onChairPress,
   onDeselectChair,
   availableSeats,
   seatsWithPlugs,
   screenWidth,
   screenHeight,
+  seats,
+  map_url,
 }) => (
   <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
     <View style={styles.fullscreenContainer}>
@@ -67,15 +69,17 @@ export const FullscreenMapModal: React.FC<FullscreenMapModalProps> = ({
         <FloorMapContent
           width={screenWidth}
           height={screenHeight}
-          selectedChair={selectedChair}
+          selectedSeat={selectedSeat}
           onChairPress={onChairPress}
+          seats={seats}
+          map_url={map_url}
         />
       </View>
 
       {/* Bottom Sheet for Selected Chair */}
-      {selectedChairData && (
+      {selectedSeat && (
         <SelectedChairInfo
-          chairData={selectedChairData}
+          seat={selectedSeat}
           onClose={onDeselectChair}
         />
       )}
@@ -98,9 +102,5 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     backgroundColor: "#F3F4F6",
   },
-  expandButton: {
-    padding: 8,
-    borderRadius: 8,
-    backgroundColor: "#F3F4F6",
-  },
 });
+

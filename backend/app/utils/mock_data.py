@@ -244,6 +244,7 @@ def create_floors_and_seats(db, locations: list[Location]):
                 floor_number=floor_num,
                 floor_name=f"Level {floor_num}",
                 total_seats=0,
+                floor_map_url="api/images/mockmap.svg",
                 occupied_seats=0,
                 is_best_floor=(floor_num == 1),
                 status=FloorStatus.OPEN
@@ -264,8 +265,8 @@ def create_floors_and_seats(db, locations: list[Location]):
                     has_ac=random.choice([True, False]),
                     accessibility=random.choice([True, False]),
                     capacity=random.choice([1, 2, 4]),
-                    x_coordinate=float(random.randint(0, 100)),
-                    y_coordinate=float(random.randint(0, 100)),
+                    x_coordinate=float(random.random()),
+                    y_coordinate=float(random.random()),
                     status=random.choice(
                         [SeatStatus.AVAILABLE, SeatStatus.OCCUPIED])
                 )
