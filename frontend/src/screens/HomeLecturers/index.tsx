@@ -28,18 +28,23 @@ export default function HomeLecturers() {
       const lecturerAssignments = await fetchLecturerAssignments();
       const formattedVenues = await Promise.all(
         lecturerAssignments.map(async (assignment: LecturerAssignmentResponse) => {
-          const location = await getLocationById(assignment.location_id);
+          const res = await getLocationById(assignment.location_id);
+          if (!res.ok) {
+            console.warn(`Location not found for ID: ${assignment.location_id}`);
+            return null;
+          }
+          const location = res.data;
           return {
             id: assignment.id,
-            name: location?.name ?? "Unknown Venue",
-            image: null,
+            name: location.name ?? "Unknown Venue",
+            image: location.image_url,
             subject: assignment.subject,
             schedule: {
               start_time: assignment.start_time,
               end_time: assignment.end_time,
             },
-            capacity: location?.total_capacity ?? 0,
-            liveOccupancy: location?.current_occupancy ?? 0,
+            capacity: location.total_capacity ?? 0,
+            liveOccupancy: location.current_occupancy ?? 0,
           };
         })
       );
