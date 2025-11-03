@@ -4,7 +4,7 @@ import { accessibilityMapping } from '@/utils/accessibilityIcons';
 import type { AccessibilityFeature } from '@/utils/accessibilityIcons';
 import SegmentedControl from '@/components/dashboard/SegmentedControl';
 
-const Header = ({ location, occupancyStatus, view, setView }: any) => (
+  const Header = ({ location, occupancyStatus, view, setView }: any) => (
   <Box
     bg="$white"
     borderBottomLeftRadius="$2xl"
@@ -24,7 +24,7 @@ const Header = ({ location, occupancyStatus, view, setView }: any) => (
         </VStack>
         <VStack alignItems="flex-end">
           <Text fontSize="$xl" fontWeight="$bold" color="$blue600">
-            {location.occupancyPercentage}% Occupied
+            {Math.round(location.occupancyPercentage)}% Occupied
           </Text>
           <Badge
             action="error"

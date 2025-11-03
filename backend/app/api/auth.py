@@ -98,10 +98,11 @@ async def login(
     form_data: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(get_db)
 ):
-    """Login with email and password."""
+    """Login with email, password."""
     # Find user by email
     user = db.query(User).filter(User.email == form_data.username).first()
-    
+    print(user.email)
+    # Verify password
     if not user or not verify_password(form_data.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

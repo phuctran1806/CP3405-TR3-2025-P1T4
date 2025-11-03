@@ -9,10 +9,10 @@ import {
 import { Box, VStack, Text, Spinner } from "@gluestack-ui/themed";
 import * as Location from "expo-location";
 import { useRouter } from "expo-router";
-import LocationCard from "@/components/LocationCard";
+import LocationCard from "@/components/cards/LocationCard";
 import { calculateDistance, formatDistance } from "@/utils/calculateDistance";
 import { getLocations } from "@/api/locations";
-import type { LocationResponse } from "@/api/locations";
+import type { LocationResponse } from "@/api/types/location_types";
 import type { AccessibilityFeature } from "@/utils/accessibilityIcons";
 
 interface LocationWithDistance {

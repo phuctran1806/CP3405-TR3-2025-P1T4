@@ -3,8 +3,8 @@ import type { UserRole, User, ApiResult } from "@/api/types";
 
 
 export interface LoginParams {
-  username: string,
-  password: string
+  email: string;
+  password: string;
 }
 
 export interface LoginResponse {
@@ -15,9 +15,9 @@ export interface LoginResponse {
 
 export async function login(body: LoginParams): Promise<ApiResult<LoginResponse>> {
   const form = new URLSearchParams();
-  form.append("username", body.username);
+  form.append("username", body.email);
   form.append("password", body.password);
-
+  
   return apiFetch<LoginResponse>("/auth/login", {
     method: "POST",
     headers: {

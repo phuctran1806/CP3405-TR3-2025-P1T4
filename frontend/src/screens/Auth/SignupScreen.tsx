@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ScrollView, KeyboardAvoidingView, Platform, StyleSheet, Text } from 'react-native';
+import RoleToggle, {type Role} from './components/RoleToggle';
 import SignupForm from './components/SignupForm';
 import { spacing } from '@/constants/spacing';
 import { useRouter } from 'expo-router';
@@ -8,6 +9,7 @@ import type { SignupParams } from '@/api/auth';
 import LogoPlaceholder from '@/components/containers/LogoPlaceholder';
 import { z } from 'zod';
 import { colors } from '@/constants/colors';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const SignupSchema = z.object({
   name: z.string().min(2, 'Name is required'),
@@ -22,7 +24,7 @@ const SignupScreen: React.FC = () => {
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
-  const [role, setRole] = useState<'student' | 'lecturer' | 'admin'>('student');
+  const [role, setRole] = useState<Role>('student');
   const [password, setPassword] = useState('');
   const [studentId, setStudentId] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -51,7 +53,8 @@ const SignupScreen: React.FC = () => {
         setErrors({ api: res.error.message });
         return;
       }
-      router.replace('/(main)/home');
+      await AsyncStorage.setItem('access_token', res.data.access_token);
+      router.replace(`/(main)/home?role=${role}`);
     } catch (e: any) {
       setErrors({ api: e.message || 'Signup failed' });
     } finally {
@@ -90,6 +93,9 @@ const SignupScreen: React.FC = () => {
           loading={loading}
         />
         {errors.api && <Text style={{ color: colors.red500, textAlign: 'center', marginTop: 8 }}>{errors.api}</Text>}
+
+        <RoleToggle selectedRole={role} onSelect={setRole} />
+
       </ScrollView>
     </KeyboardAvoidingView>
   );

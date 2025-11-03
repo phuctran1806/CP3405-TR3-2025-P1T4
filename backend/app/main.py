@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from app.config import settings
 from app.database import init_db
-from app.api import auth, seats, reservations, occupancy, admin, floors, locations, images
+from app.api import auth, seats, reservations, occupancy, admin, floors, locations, images, lecturer
 
 
 @asynccontextmanager
@@ -50,11 +50,11 @@ app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
 app.include_router(seats.router, prefix="/api/seats", tags=["Seats"])
 app.include_router(floors.router, prefix="/api/floors", tags=["Floors"])
 app.include_router(locations.router, prefix="/api/locations", tags=["Locations"])
-app.include_router(reservations.router,
-                   prefix="/api/reservations", tags=["Reservations"])
+app.include_router(reservations.router, prefix="/api/reservations", tags=["Reservations"])
 app.include_router(occupancy.router, prefix="/api/iot", tags=["IoT Occupancy"])
 app.include_router(admin.router, prefix="/api/admin", tags=["Admin"])
 app.include_router(images.router, prefix="/api/images", tags=["Images"])
+app.include_router(lecturer.router, prefix="/api/lecturer-assignments", tags=["Lecturer Assignments"])
 
 
 @app.get("/")

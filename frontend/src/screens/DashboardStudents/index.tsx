@@ -9,9 +9,9 @@ import Statistics from './components/Statistics';
 import InteractiveMap from '@/components/map/InteractiveMap';
 
 import { getOccupancyHistory, type OccupancyHistory } from '@/api/history';
-import { getLocationById, type LocationResponse } from '@/api/locations';
+import { getLocationById } from '@/api/locations';
+import type { LocationResponse } from '@/api/types/location_types';
 import { getFloors, type FloorResponse } from '@/api/floors';
-
 
 export default function LocationDashboard() {
   const { location: locationId } = useLocalSearchParams();
@@ -275,7 +275,7 @@ export default function LocationDashboard() {
         location={{
           id: locationId as string,
           name: location.name,
-          occupancyPercentage: currentPercentage,
+          occupancyPercentage: location.busyness_percentage,
         }}
         occupancyStatus={occupancyStatus}
         view={view}

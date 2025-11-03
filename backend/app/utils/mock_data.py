@@ -3,23 +3,76 @@ Mock data generator for development and testing.
 Run this script to populate the database with sample data.
 """
 
-from app.utils.security import get_password_hash
-from app.models.operating_hours import OperatingHours
-from app.models.occupancy_history import OccupancyHistory
-from app.models.reservation import Reservation, ReservationStatus
-from app.models.seat import Seat, SeatType, SeatStatus
-from app.models.floor import Floor, FloorStatus
-from app.models.location import Location, LocationStatus
-from app.models.user import User, UserRole, UserStatus
-from app.database import SessionLocal, init_db
-import random
-import uuid
 from datetime import datetime, timedelta, time
-import sys
 from pathlib import Path
+import uuid
+import random
+import sys
+
+from app.database import SessionLocal, init_db
+from app.models.user import User, UserRole, UserStatus
+from app.models.location import Location, LocationStatus, LocationType
+from app.models.floor import Floor, FloorStatus
+from app.models.seat import Seat, SeatType, SeatStatus
+from app.models.reservation import Reservation
+from app.models.occupancy_history import OccupancyHistory
+from app.models.operating_hours import OperatingHours
+from app.models.lecturer_assignment import LecturerAssignment
+from app.utils.security import get_password_hash
 
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
+
+def main():
+    """Main function to generate all mock data."""
+    print("=" * 60)
+    print("🎯 JCU Library Mock Data Generator")
+    print("=" * 60)
+
+    # Initialize database
+    print("\n📦 Initializing database...")
+    init_db()
+    print("✓ Database initialized")
+
+    # Create session
+    db = SessionLocal()
+
+    try:
+        # Clear existing data
+        clear_database(db)
+
+        # Create data
+        users = create_users(db)
+        locations = create_locations(db)
+        lecturer_assignments = create_lecturer_assignments(db, locations, users)
+        create_operating_hours(db, locations)
+        seats = create_floors_and_seats(db, locations)
+        create_occupancy_history(db, locations)
+
+        print("\n" + "=" * 60)
+        print("✅ Mock data generation completed successfully!")
+        print("=" * 60)
+        print("\n📋 Summary:")
+        print(f"   • Users: {len(users)}")
+        print(f"   • Locations: {len(locations)}")
+        print(f"   • Lecturer assignments: {len(lecturer_assignments)}")
+        print(f"   • Seats: {len(seats)}")
+        print("\n🔐 Default Login Credentials:")
+        print("   Admin:    admin@jcu.edu.au / admin123")
+        print("   Lecturer: lecturer@jcu.edu.au / lecturer123")
+        print("   Student:  student@jcu.edu.au / student123")
+        print("   Guest:    guest@jcu.edu.au / guest123")
+        print("\n🚀 Start the server with:")
+        print("   uvicorn app.main:app --reload")
+        print("=" * 60)
+
+    except Exception as e:
+        print(f"\n❌ Error: {e}")
+        db.rollback()
+        raise
+    finally:
+        db.close()
 
 
 def clear_database(db):
@@ -77,6 +130,15 @@ def create_users(db):
             role=UserRole.GUEST,
             status=UserStatus.ACTIVE
         ),
+        User(
+            id=str(uuid.uuid4()),
+            email="petteri@jcu.edu.au",
+            hashed_password=get_password_hash("petteri123"),
+            name="Petteri",
+            student_id=None,
+            role=UserRole.LECTURER,
+            status=UserStatus.ACTIVE
+        )
     ]
 
     # Add more students
@@ -97,6 +159,52 @@ def create_users(db):
     return users
 
 
+def create_lecturer_assignments(db, locations: list[Location], users: list[User]):
+    """Create sample lecturer assignments."""
+    print("\n📚 Creating lecturer assignments...")
+    if not locations:
+        print("❌ No locations available to assign lecturers.")
+        return []
+
+    location_name_to_id = {loc.name: loc.id for loc in locations}
+    user_email_to_id = {user.email: user.id for user in users}
+
+    assignments = [
+        # Assignments for Petteri
+        LecturerAssignment(
+            id=str(uuid.uuid4()),
+            subject="CP2414",
+            start_time=datetime(2025, 10, 1, 9, 0),
+            end_time=datetime(2025, 10, 1, 11, 0),
+            location_id=location_name_to_id.get("Auditorium C4-14"),
+            user_id=user_email_to_id.get("petteri@jcu.edu.au")
+        ),
+        LecturerAssignment(
+            id=str(uuid.uuid4()),
+            subject="CP1403",
+            start_time=datetime(2025, 10, 2, 14, 0),
+            end_time=datetime(2025, 10, 2, 16, 0),
+            location_id=location_name_to_id.get("Lecture Room B1-05"),
+            user_id=user_email_to_id.get("petteri@jcu.edu.au")
+        ),
+        LecturerAssignment(
+            id=str(uuid.uuid4()),
+            subject="CP2406",
+            start_time=datetime(2025, 10, 3, 10, 0),
+            end_time=datetime(2025, 10, 3, 12, 0),
+            location_id=location_name_to_id.get("Auditorium C2-15"),
+            user_id=user_email_to_id.get("petteri@jcu.edu.au")
+        )
+    ]
+
+    print("DEBUG: created lecturer assignments =", assignments)
+
+    db.add_all(assignments)
+    db.commit()
+    print(f"✓ Created {len(assignments)} lecturer assignments")
+    return assignments
+
+
 def create_locations(db):
     """Create sample locations."""
     print("\n📍 Creating locations...")
@@ -105,61 +213,85 @@ def create_locations(db):
         Location(
             id=str(uuid.uuid4()),
             name="Study Hub E",
-            description="A modern study area equipped with power outlets, air conditioning, and Wi-Fi.",
-            address="Study Hub E Building",
             image_url="api/images/study-hub-e.jpg",
             latitude=1.3521,
             longitude=103.8198,
             total_capacity=100,
             current_occupancy=int(100 * 0.72),
             status=LocationStatus.OPEN,
+            location_type=LocationType.PUBLIC,
         ),
         Location(
             id=str(uuid.uuid4()),
             name="Study Hub A",
-            description="Quiet and spacious hub ideal for focused study sessions.",
-            address="Study Hub A Building",
             image_url="api/images/study-hub-a.jpg",
             latitude=1.3525,
             longitude=103.8200,
             total_capacity=100,
             current_occupancy=int(100 * 0.54),
             status=LocationStatus.OPEN,
+            location_type=LocationType.PUBLIC,
         ),
         Location(
             id=str(uuid.uuid4()),
             name="Library",
-            description="Main campus library with extensive resources, cool air conditioning, and silent zones.",
-            address="Campus Library",
             image_url="api/images/library.jpg",
             latitude=1.3530,
             longitude=103.8205,
             total_capacity=100,
             current_occupancy=int(100 * 0.85),
             status=LocationStatus.OPEN,
+            location_type=LocationType.PUBLIC,
         ),
         Location(
             id=str(uuid.uuid4()),
             name="Study Pods",
-            description="Private study pods for individual work with power and Wi-Fi access.",
-            address="Study Pod Building",
             image_url="api/images/study-pods.jpg",
             latitude=1.3515,
             longitude=103.8190,
             total_capacity=100,
             current_occupancy=int(100 * 0.45),
             status=LocationStatus.OPEN,
+            location_type=LocationType.PUBLIC,
         ),
         Location(
             id=str(uuid.uuid4()),
             name="Courtyard",
-            description="Outdoor courtyard area with Wi-Fi access and relaxed atmosphere.",
-            address="Campus Courtyard",
             image_url="api/images/yard.jpg",
             latitude=1.3518,
             longitude=103.8195,
             total_capacity=100,
             current_occupancy=int(100 * 0.28),
+            status=LocationStatus.OPEN,
+        ),
+        Location(
+            id=str(uuid.uuid4()),
+            name="Auditorium C4-14",
+            image_url="api/images/auditorium.jpg",
+            latitude=1.3518,
+            longitude=81.8195,
+            total_capacity=150,
+            current_occupancy=0,
+            status=LocationStatus.OPEN,
+        ),
+        Location(
+            id=str(uuid.uuid4()),
+            name="Auditorium C2-15",
+            image_url="api/images/small-auditorium.jpg",
+            latitude=1.3518,
+            longitude=60.8195,
+            total_capacity=100,
+            current_occupancy=0,
+            status=LocationStatus.OPEN,
+        ),
+        Location(
+            id=str(uuid.uuid4()),
+            name="Lecture Room B1-05",
+            image_url="api/images/lecture-room.jpg",
+            latitude=76.3518,
+            longitude=81.8195,
+            total_capacity=50,
+            current_occupancy=0,
             status=LocationStatus.OPEN,
         ),
     ]
@@ -243,7 +375,7 @@ def create_floors_and_seats(db, locations: list[Location]):
                 location_id=loc.id,
                 floor_number=floor_num,
                 floor_name=f"Level {floor_num}",
-                total_seats=0,
+                total_seats=0,  # TODO: Just do a count query for this
                 floor_map_url="api/images/mockmap.svg",
                 occupied_seats=0,
                 is_best_floor=(floor_num == 1),
@@ -284,7 +416,7 @@ def create_floors_and_seats(db, locations: list[Location]):
             Seat.status == SeatStatus.OCCUPIED
         ).count()
 
-    # Update location capacities
+    # Update current_occupancy only. Do NOT overwrite total_capacity.
     for loc in locations:
         total = db.query(Seat).join(Floor).filter(
             Floor.location_id == loc.id).count()
@@ -336,55 +468,6 @@ def create_occupancy_history(db, locations):
     db.add_all(history_records)
     db.commit()
     print(f"✓ Created {len(history_records)} occupancy history records")
-
-
-def main():
-    """Main function to generate all mock data."""
-    print("=" * 60)
-    print("🎯 JCU Library Mock Data Generator")
-    print("=" * 60)
-
-    # Initialize database
-    print("\n📦 Initializing database...")
-    init_db()
-    print("✓ Database initialized")
-
-    # Create session
-    db = SessionLocal()
-
-    try:
-        # Clear existing data
-        clear_database(db)
-
-        # Create data
-        users = create_users(db)
-        locations = create_locations(db)
-        create_operating_hours(db, locations)
-        seats = create_floors_and_seats(db, locations)
-        create_occupancy_history(db, locations)
-
-        print("\n" + "=" * 60)
-        print("✅ Mock data generation completed successfully!")
-        print("=" * 60)
-        print("\n📋 Summary:")
-        print(f"   • Users: {len(users)}")
-        print(f"   • Locations: {len(locations)}")
-        print(f"   • Seats: {len(seats)}")
-        print("\n🔐 Default Login Credentials:")
-        print("   Admin:    admin@jcu.edu.au / admin123")
-        print("   Lecturer: lecturer@jcu.edu.au / lecturer123")
-        print("   Student:  student@jcu.edu.au / student123")
-        print("   Guest:    guest@jcu.edu.au / guest123")
-        print("\n🚀 Start the server with:")
-        print("   uvicorn app.main:app --reload")
-        print("=" * 60)
-
-    except Exception as e:
-        print(f"\n❌ Error: {e}")
-        db.rollback()
-        raise
-    finally:
-        db.close()
 
 
 if __name__ == "__main__":
