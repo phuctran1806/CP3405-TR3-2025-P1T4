@@ -21,7 +21,9 @@ const Header = ({ location, occupancyStatus, view, setView }: any) => (
           </Text>
           <Text color="$gray600" fontWeight="$semibold">{location.subject}</Text>
           <Text color="$gray600" mb="$3">
-            {location.schedule}
+            {location.schedule && location.schedule.start_time && location.schedule.end_time
+              ? `${new Date(location.schedule.start_time).toLocaleString([], { weekday: 'short', hour: '2-digit' })} - ${new Date(location.schedule.end_time).toLocaleTimeString([], { hour: '2-digit' })}`
+              : ''}
           </Text>
         </VStack>
 

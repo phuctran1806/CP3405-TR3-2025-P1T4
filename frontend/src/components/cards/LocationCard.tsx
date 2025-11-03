@@ -6,7 +6,6 @@ import {
   Text,
   VStack,
 } from '@gluestack-ui/themed';
-import { MapPin } from 'lucide-react-native';
 import React from 'react';
 import type { ImageSourcePropType } from 'react-native';
 import { Image } from 'react-native';
@@ -16,9 +15,11 @@ import type { AccessibilityFeature } from '@/utils/accessibilityIcons';
 interface LocationCardProps {
   name: string;
   subject?: string;
-  image: ImageSourcePropType;
-  distance?: string;
-  schedule?: string;
+  image: ImageSourcePropType | null;
+  schedule?: {
+    start_time: Date;
+    end_time: Date;
+  };
   accessibility: AccessibilityFeature[] | null;
   onPress: () => void;
 }
@@ -73,13 +74,12 @@ export default function LocationCard({
             {subject}
           </Text>
 
-          {/* Show distance for students, schedule for lecturers */}
-          <HStack space="xs" alignItems="center">
-            <Icon as={MapPin} size="sm" color="$gray600" />
+          {/* Schedule */}
+          {schedule && (
             <Text fontSize="$sm" color="$gray600">
-              {distance ? distance : schedule} 
+              {`${new Date(schedule.start_time).toLocaleString([], { weekday: 'short', hour: '2-digit' })} - ${new Date(schedule.end_time).toLocaleTimeString([], { hour: '2-digit' })}`}
             </Text>
-          </HStack>
+          )}
 
           {accessibility && accessibility.length > 0 && (
             <HStack space="md" flexWrap="wrap" mt="$2">

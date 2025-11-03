@@ -14,6 +14,11 @@ class LocationStatus(str, enum.Enum):
     OPEN = "open"
     CLOSED = "closed"
     MAINTENANCE = "maintenance"
+    
+class LocationType(str, enum.Enum):
+    """Location type enumeration."""
+    PUBLIC = "public"
+    PRIVATE = "private"
 
 
 class Location(Base):
@@ -26,9 +31,11 @@ class Location(Base):
     
     # Basic information
     name = Column(String(100), nullable=False, unique=True)
-    description = Column(String(500), nullable=True)
-    address = Column(String(200), nullable=True)
     image_url = Column(String(255), nullable=True)
+
+    # Coordinates
+    latitude = Column(Numeric, nullable=True)
+    longitude = Column(Numeric, nullable=True)
     
     # Capacity
     total_capacity = Column(Integer, nullable=False, default=0)
@@ -36,6 +43,9 @@ class Location(Base):
     
     # Status
     status = Column(Enum(LocationStatus), nullable=False, default=LocationStatus.OPEN)
+    
+    # Location type
+    location_type = Column(Enum(LocationType), nullable=False, default=LocationType.PRIVATE)
     
     # Timestamps
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)

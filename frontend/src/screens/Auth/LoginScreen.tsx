@@ -6,6 +6,7 @@ import LoginForm from './components/LoginForm';
 import AuthFooter from './components/AuthFooter';
 import LogoPlaceholder from '@/components/containers/LogoPlaceholder';
 import { login } from '@/api/auth';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // 1️⃣ Zod schema
 const loginSchema = z.object({
@@ -43,6 +44,7 @@ const LoginScreen: React.FC = () => {
     try {
       const result = await login({ 'email': email, 'password': password });
       if (!result.ok) throw result.error;
+      await AsyncStorage.setItem('access_token', result.data.access_token);
       router.replace(`/(main)/home?role=${result.data.user.role}`);
     } catch (e: any) {
       if (e.status === 401) setGeneralError("Incorrect email or password");
@@ -75,8 +77,7 @@ const LoginScreen: React.FC = () => {
           onSignUp={() => router.replace('/register')}
           onSocialLogin={(provider) => console.log(`${provider} login pressed`)}
         />
-
-        <AuthFooter onGuestLogin={() => router.replace(`/(main)/home?role=student`)} />
+        <AuthFooter onGuestLogin={() => router.replace('/(main)/home?role=student')} />
       </ScrollView>
     </KeyboardAvoidingView>
   );

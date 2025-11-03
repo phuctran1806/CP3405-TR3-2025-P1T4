@@ -1,20 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { ScrollView, RefreshControl, View, ActivityIndicator, type ImageSourcePropType } from 'react-native';
+import { ScrollView, RefreshControl, View, ActivityIndicator } from 'react-native';
 import { Box, VStack, Text, Spinner } from '@gluestack-ui/themed';
-import { locations } from '@/utils/mockData/locationDataLecturers';
 import { useRouter } from 'expo-router';
 import LocationCard from '@/components/cards/LocationCard';
-
-interface VenueDisplay {
-  id: string;
-  code: string;
-  name: string;
-  image: ImageSourcePropType;
-  subject: string;
-  schedule: string;
-  capacity: number;
-  liveOccupancy?: number | null;
-}
+import { fetchLecturerAssignments } from '@/api/lecturer_assignment';
+import { getLocationById } from '@/api/locations';
+import { useSelectedVenue, type VenueDisplay } from '@/contexts/useSelectedVenue';
+import type { LecturerAssignmentResponse } from '@/api/types/lecturer_assignment_types';
 
 export default function HomeLecturers() {
   const [venues, setVenues] = useState<VenueDisplay[]>([]);
@@ -22,21 +14,42 @@ export default function HomeLecturers() {
   const [refreshing, setRefreshing] = useState(false);
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
+  const { setSelectedVenue } = useSelectedVenue() as { setSelectedVenue: (venue: VenueDisplay) => void };
 
   useEffect(() => {
     setMounted(true);
+    fetchVenues();
   }, []);
 
   const fetchVenues = async () => {
     try {
-      // Simulate fetching updated live occupancy
       setLoading(true);
-      const refreshedVenues = locations.map((v) => ({
-        ...v,
-        // Randomize live occupancy again (simulate data refresh)
-        liveOccupancy: v.liveOccupancy
-      }));
-      setVenues(refreshedVenues);
+      console.log('Fetching lecturer venues...');
+      const lecturerAssignments = await fetchLecturerAssignments();
+      const formattedVenues = await Promise.all(
+        lecturerAssignments.map(async (assignment: LecturerAssignmentResponse) => {
+          const res = await getLocationById(assignment.location_id);
+          if (!res.ok) {
+            console.warn(`Location not found for ID: ${assignment.location_id}`);
+            return null;
+          }
+          const location = res.data;
+          return {
+            id: assignment.id,
+            name: location.name ?? "Unknown Venue",
+            image: location.image_url,
+            subject: assignment.subject,
+            schedule: {
+              start_time: assignment.start_time,
+              end_time: assignment.end_time,
+            },
+            capacity: location.total_capacity ?? 0,
+            liveOccupancy: location.current_occupancy ?? 0,
+          };
+        })
+      );
+
+      setVenues(formattedVenues);
     } catch (err) {
       console.error('Error loading lecturer venues:', err);
     } finally {
@@ -44,18 +57,15 @@ export default function HomeLecturers() {
     }
   };
 
-  useEffect(() => {
-    fetchVenues();
-  }, []);
-
   const onRefresh = async () => {
     setRefreshing(true);
     await fetchVenues();
     setRefreshing(false);
   };
 
-  const handleVenuePress = (venueId: string) => {
-    router.push(`/dashboard/${venueId}?role=lecturer`);
+  const handleVenuePress = (venue: VenueDisplay) => {
+    setSelectedVenue(venue);
+    router.push(`/dashboard/${venue.id}?role=lecturer`);
   };
 
   if (!mounted) {
@@ -92,15 +102,14 @@ export default function HomeLecturers() {
 
         <VStack space="md">
           {venues.map((venue) => (
-            // replaced Box per-venue with LocationCard
             <LocationCard
               key={venue.id}
               name={venue.name}
               subject={venue.subject}
               image={venue.image}
-              schedule={venue.schedule}           // using schedule as the secondary line
-              accessibility={null}               // no accessibility info in lecturer mock
-              onPress={() => handleVenuePress(venue.id)}
+              schedule={venue.schedule}
+              accessibility={null}
+              onPress={() => handleVenuePress(venue)}
             />
           ))}
         </VStack>

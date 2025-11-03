@@ -9,6 +9,7 @@ import type { SignupParams } from '@/api/auth';
 import LogoPlaceholder from '@/components/containers/LogoPlaceholder';
 import { z } from 'zod';
 import { colors } from '@/constants/colors';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const SignupSchema = z.object({
   name: z.string().min(2, 'Name is required'),
@@ -52,6 +53,7 @@ const SignupScreen: React.FC = () => {
         setErrors({ api: res.error.message });
         return;
       }
+      await AsyncStorage.setItem('access_token', res.data.access_token);
       router.replace(`/(main)/home?role=${role}`);
     } catch (e: any) {
       setErrors({ api: e.message || 'Signup failed' });
