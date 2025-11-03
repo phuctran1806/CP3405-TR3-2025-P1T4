@@ -226,6 +226,7 @@ def create_locations(db):
         Location(
             id=str(uuid.uuid4()),
             name="JCU Library",
+            image_url="api/images/library.jpg",
             total_capacity=60,  
             current_occupancy=0,
             location_type=LocationType.PUBLIC,
@@ -233,6 +234,7 @@ def create_locations(db):
         Location(
             id=str(uuid.uuid4()),
             name="Student Hub",
+            image_url="api/images/study-hub-a.jpg",
             total_capacity=80,
             current_occupancy=0,
             location_type=LocationType.PUBLIC,
@@ -240,6 +242,7 @@ def create_locations(db):
         Location(
             id=str(uuid.uuid4()),
             name="Study Pod",
+            image_url="api/images/study-pods.jpg",
             total_capacity=30,
             current_occupancy=0,
             location_type=LocationType.PUBLIC,
@@ -247,13 +250,15 @@ def create_locations(db):
         Location(
             id=str(uuid.uuid4()),
             name="Study Hub",
+            image_url="api/images/study-hub-e.jpg",
             total_capacity=90,
             current_occupancy=0,
             location_type=LocationType.PUBLIC,
         ),
         Location(
             id=str(uuid.uuid4()),
-            name="yard",
+            name="Yard",
+            image_url="api/images/yard.jpg",
             total_capacity=20,
             current_occupancy=0,
             location_type=LocationType.PUBLIC,
