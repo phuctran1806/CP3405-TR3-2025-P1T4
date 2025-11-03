@@ -1,0 +1,15 @@
+[Unit]
+Description=CP3405 Backend Service
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/CP3405-TR3-2025-P1T4/backend
+Environment="PATH=/opt/CP3405-TR3-2025-P1T4/backend/venv/bin"
+ExecStart=/opt/CP3405-TR3-2025-P1T4/backend/venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8000 --workers 4
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
