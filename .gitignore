@@ -8,5 +8,3 @@ backend/jcu_library.db
 .idea/
 
 **/node_modules
-
-backend/images/

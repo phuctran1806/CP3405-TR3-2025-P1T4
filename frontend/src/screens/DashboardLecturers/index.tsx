@@ -1,21 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { ScrollView } from 'react-native';
 import { Box, Text } from '@gluestack-ui/themed';
-import { useSelectedVenue, type VenueDisplay } from '@/contexts/useSelectedVenue';
+import { useLocalSearchParams } from 'expo-router';
+import { locations } from '@/utils/mockData/locationDataLecturers';
 import Header from './components/Header';
 import Statistics from './components/Statistics';
 import { LectureRoomMap } from './components/LectureRoomMap';
 
 export default function DashboardLecturer() {
-  const { selectedVenue: location } = useSelectedVenue() as { selectedVenue: VenueDisplay };
+  const { location: locationId } = useLocalSearchParams();
+  const location = locations.find((loc) => loc.id === locationId);
   const [view, setView] = useState<'statistics' | 'schedule'>('statistics');
 
-  useEffect(() => setView('statistics'), [location]);
+  // Reset view when switching locations
+  useEffect(() => setView('statistics'), [locationId]);
 
   if (!location) {
     return (
       <Box flex={1} justifyContent="center" alignItems="center" bg="$gray50">
-        <Text color="$gray600">No location selected</Text>
+        <Text color="$gray600">Location not found</Text>
       </Box>
     );
   }
@@ -42,8 +45,8 @@ export default function DashboardLecturer() {
         ) : (
           <LectureRoomMap
             capacity={location.capacity}
-            liveOccupancy={location.liveOccupancy ?? null}
-            columns={10}
+            liveOccupancy={location.liveOccupancy}
+            columns={10} // Assuming 10 columns for lecture room seating
           />
         )}
       </ScrollView>

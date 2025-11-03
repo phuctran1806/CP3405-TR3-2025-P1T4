@@ -43,7 +43,7 @@ const Header = ({ location, occupancyStatus, view, setView }: any) => (
       </HStack>
 
       {/* Accessibility */}
-      {location.accessibility !== undefined && location.accessibility.length > 0 && (
+      {location.accessibility.length > 0 && (
         <HStack space="xs" flexWrap="wrap">
           {location.accessibility.map((feature: string) => {
             const accessInfo = accessibilityMapping[feature as AccessibilityFeature];

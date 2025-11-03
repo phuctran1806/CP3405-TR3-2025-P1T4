@@ -5,8 +5,8 @@ import { z } from 'zod';
 import LoginForm from './components/LoginForm';
 import AuthFooter from './components/AuthFooter';
 import LogoPlaceholder from '@/components/containers/LogoPlaceholder';
+import RoleToggle, {type Role} from './components/RoleToggle';
 import { login } from '@/api/auth';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // 1️⃣ Zod schema
 const loginSchema = z.object({
@@ -22,6 +22,7 @@ const LoginScreen: React.FC = () => {
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [generalError, setGeneralError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [role, setRole] = useState<Role>('student');
   const router = useRouter();
 
   const handleLogin = async () => {
@@ -42,10 +43,9 @@ const LoginScreen: React.FC = () => {
     }
 
     try {
-      const result = await login({ 'email': email, 'password': password });
+      const result = await login({ 'email': email, 'password': password, 'role': role });
       if (!result.ok) throw result.error;
-      await AsyncStorage.setItem('access_token', result.data.access_token);
-      router.replace(`/(main)/home?role=${result.data.user.role}`);
+      router.replace(`/(main)/home?role=${role}`);
     } catch (e: any) {
       if (e.status === 401) setGeneralError("Incorrect email or password");
       else setGeneralError(e.message || "Login failed");
@@ -77,7 +77,10 @@ const LoginScreen: React.FC = () => {
           onSignUp={() => router.replace('/register')}
           onSocialLogin={(provider) => console.log(`${provider} login pressed`)}
         />
-        <AuthFooter onGuestLogin={() => router.replace('/(main)/home?role=student')} />
+        
+        <RoleToggle selectedRole={role} onSelect={setRole} />
+
+        <AuthFooter onGuestLogin={() => router.replace(`/(main)/home?role=student`)} />
       </ScrollView>
     </KeyboardAvoidingView>
   );

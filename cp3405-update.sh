@@ -32,10 +32,19 @@ if [ -z "$LOCAL" ] || [ "$LOCAL" != "$REMOTE" ]; then
     log "Building frontend (Expo static export)..."
     cd "$FRONTEND_DIR"
     if command -v npm >/dev/null 2>&1; then
+      # Replace localhost with server IP for production
+      log "Replacing localhost with 45.77.44.161 in API config..."
+      sed -i 's|http://localhost:8000|http://45.77.44.161|g' src/api/config.ts
+      
       npm ci || npm install --legacy-peer-deps
       npx expo export --platform web --output-dir /var/www/cp3405-frontend || {
         log "WARN: Frontend build failed, keeping previous version."
       }
+      
+      # Revert localhost replacement for next development
+      log "Reverting config to localhost..."
+      sed -i 's|http://45.77.44.161|http://localhost:8000|g' src/api/config.ts
+      
       log "Reloading Nginx..."
       nginx -t && systemctl reload nginx || true
     else
@@ -53,8 +62,17 @@ else
   # Optional rebuild even if no git updates, to ensure assets are present
   if [ -d "$FRONTEND_DIR/app" ] || [ -d "$FRONTEND_DIR/src/app" ]; then
     cd "$FRONTEND_DIR"
+    # Replace localhost with server IP for production
+    log "Replacing localhost with 45.77.44.161 in API config..."
+    sed -i 's|http://localhost:8000|http://45.77.44.161|g' src/api/config.ts
+    
     npm ci || npm install --legacy-peer-deps
     npx expo export --platform web --output-dir /var/www/cp3405-frontend || true
+    
+    # Revert localhost replacement for next development
+    log "Reverting config to localhost..."
+    sed -i 's|http://45.77.44.161|http://localhost:8000|g' src/api/config.ts
+    
     nginx -t && systemctl reload nginx || true
   fi
 fi

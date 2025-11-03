@@ -1,13 +1,18 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet } from 'react-native';
-import { UserCircle } from 'lucide-react-native';
 
 export default function HeaderLayout() {
   return (
     <View style={styles.header}>
       {/* Left section: Avatar + text */}
       <View style={styles.leftSection}>
-        <UserCircle style={styles.avatar} />
+        <Image
+          source={{
+            uri: 'https://via.placeholder.com/150/4A90E2/FFFFFF?text=User',
+          }}
+          style={styles.avatar}
+        />
+
         <View>
           <Text style={styles.subtitle}>Welcome back</Text>
           <Text style={styles.title}>User</Text>

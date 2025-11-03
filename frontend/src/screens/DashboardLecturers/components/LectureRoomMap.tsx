@@ -32,19 +32,8 @@ export const LectureRoomMap: React.FC<LectureRoomMapProps> = ({
     return seats;
   }, [capacity, takenCount]);
 
-
   return (
     <View style={styles.container}>
-      {/* Capacity/occupancy summary (kept above teaching stand) */}
-      <View style={styles.metrics}>
-        <Text style={styles.metricsText}>
-          {`Capacity: ${capacity} seats`}
-          {liveOccupancy != null
-            ? `\u00A0\u00B7\u00A0Occupied: ${takenCount} / ${capacity}`
-            : ''}
-        </Text>
-      </View>
-
       {/* Teaching stand */}
       <View style={styles.standContainer}>
         <View style={styles.stand}>
@@ -86,27 +75,14 @@ export const LectureRoomMap: React.FC<LectureRoomMapProps> = ({
 };
 
 const styles = StyleSheet.create({
-  container: { alignItems: 'center', paddingVertical: 5 },
-  standContainer: { alignItems: 'center', marginBottom: 8 },
+  container: { alignItems: 'center', paddingVertical: 16 },
+  standContainer: { alignItems: 'center', marginBottom: 12 },
   stand: { backgroundColor: '#222', paddingVertical: 8, paddingHorizontal: 24, borderRadius: 8 },
   standLabel: { color: 'white', fontWeight: 'bold' },
   mapContainer: { alignItems: 'center' },
   row: { flexDirection: 'row', justifyContent: 'center' },
   seat: { width: 18, height: 18, margin: 3, borderRadius: 4 },
-
-  metrics: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 8,
-  },
-  metricsText: {
-    fontSize: 12,
-    color: '#374151',
-    lineHeight: 18,       
-    textAlign: 'center',   
-  },
-
   legend: { flexDirection: 'row', alignItems: 'center', marginTop: 12 },
   legendItem: { width: 16, height: 16, marginHorizontal: 4, borderRadius: 3 },
-  legendText: { fontSize: 12, marginRight: 12 },
+  legendText: { fontSize: 12, marginRight: 8 },
 });

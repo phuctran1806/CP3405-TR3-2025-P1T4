@@ -108,7 +108,6 @@ const Statistics = ({ location, pieData, weeklyData, lineData, chartConfig }: an
 
     {/* Quick Stats */}
     <HStack space="sm">
-      {/* TODO: remove this shit and add real backend */}
       <StatBox label="PEAK TIME" value="2-4 PM" bg="$blue50" borderColor="$blue200" textColor="$blue700" />
       <StatBox label="BEST TIME" value="8-10 AM" bg="$green50" borderColor="$green200" textColor="$green700" />
     </HStack>

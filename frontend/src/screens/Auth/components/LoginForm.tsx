@@ -88,6 +88,14 @@ const LoginForm: React.FC<LoginFormProps> = ({
         </Text>
       )}
 
+      <View style={styles.dividerContainer}>
+        <View style={styles.dividerLine} />
+        <Text style={styles.dividerText}>Or log in with</Text>
+        <View style={styles.dividerLine} />
+      </View>
+
+      <SocialButtons onSocialLogin={onSocialLogin} />
+
       <View style={styles.signUpContainer}>
         <Text style={styles.signUpText}>Don&apos;t have an account? </Text>
         <TouchableOpacity onPress={onSignUp}>
