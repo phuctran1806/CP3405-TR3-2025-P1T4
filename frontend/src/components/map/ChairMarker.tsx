@@ -1,5 +1,5 @@
 import React from "react";
-import { Rect, Path, Circle, G } from "react-native-svg";
+import { Rect, Path, Circle, G, Text as SvgText } from "react-native-svg";
 import { VIEWBOX_WIDTH, VIEWBOX_HEIGHT, SEAT_CONFIG } from "./MapConfig";
 import type { Seat } from "@/api/seats";
 
@@ -13,11 +13,12 @@ export const SeatMarker: React.FC<SeatMarkerProps> = ({ seat, isSelected, onPres
   const cx = seat.x_coordinate * VIEWBOX_WIDTH;
   const cy = seat.y_coordinate * VIEWBOX_HEIGHT;
 
-  const fillGradient = seat.status === "available"
-    ? "url(#occupiedGrad)"
-    : isSelected
-      ? "url(#selectedGrad)"
-      : "url(#availableGrad)";
+  const fillGradient =
+    seat.status === "occupied"
+      ? "url(#occupiedGrad)"
+      : isSelected
+        ? "url(#selectedGrad)"
+        : "url(#availableGrad)";
 
   return (
     <G>
@@ -45,7 +46,7 @@ export const SeatMarker: React.FC<SeatMarkerProps> = ({ seat, isSelected, onPres
         stroke={isSelected ? "#1E40AF" : seat.has_power_outlet ? "#FCD34D" : "transparent"}
         strokeWidth={SEAT_CONFIG.strokeWidth}
         onPress={onPress}
-        opacity={seat.status === "available" ? 0.6 : 1}
+        opacity={seat.status === "occupied" ? 0.6 : 1}
       />
 
       {/* Plug icon */}
@@ -67,15 +68,20 @@ export const SeatMarker: React.FC<SeatMarkerProps> = ({ seat, isSelected, onPres
         </G>
       )}
 
-      {/* Seat label */}
+      {/* Seat label (fixes potential text node issue) */}
       {seat.seat_number && (
-        <Path
-          d={`M ${cx - 15} ${cy + 5} L ${cx + 15} ${cy + 5}`}
-          stroke="#FFFFFF"
-          strokeWidth={3}
-          strokeLinecap="round"
-        />
+        <SvgText
+          x={cx}
+          y={cy + SEAT_CONFIG.height / 2 + 20}
+          textAnchor="middle"
+          fontSize={28}
+          fontWeight="bold"
+          fill="#FFFFFF"
+        >
+          {seat.seat_number}
+        </SvgText>
       )}
     </G>
   );
 };
+

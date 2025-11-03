@@ -2,15 +2,18 @@
 Seat schemas for request/response validation.
 """
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import List
 from typing import Optional
 from datetime import datetime
 from app.models.seat import SeatType, SeatStatus
+import uuid
 
 
 class SeatBase(BaseModel):
     """Base seat schema."""
+    x_coordinate: float
+    y_coordinate: float
     seat_number: str
     seat_type: SeatType
     has_power_outlet: bool = False
@@ -18,15 +21,13 @@ class SeatBase(BaseModel):
     has_ac: bool = False
     accessibility: bool = False
     capacity: int = 1
+    status: SeatStatus
 
 
 class SeatResponse(SeatBase):
     """Schema for seat response."""
     id: str
     floor_id: str
-    x_coordinate: Optional[float]
-    y_coordinate: Optional[float]
-    status: SeatStatus
     notes: Optional[str]
     created_at: datetime
     updated_at: datetime
@@ -42,14 +43,29 @@ class SeatAvailability(BaseModel):
     next_available_time: Optional[datetime] = None
 
 
-class SeatUpdate(SeatBase):
-    """Schema for single seat update request"""
-    id: Optional[str]
+class SeatUpdate(BaseModel):
+    id: str
+    seat_number: Optional[str] = None
+    seat_type: Optional[SeatType] = None
+    has_power_outlet: Optional[bool] = None
+    has_wifi: Optional[bool] = None
+    has_ac: Optional[bool] = None
+    accessibility: Optional[bool] = None
+    capacity: Optional[int] = None
+    floor_id: Optional[str] = None
+    x_coordinate: Optional[float] = None
+    y_coordinate: Optional[float] = None
+    status: Optional[SeatStatus] = None
+
+
+class SeatCreate(SeatBase):
+    id: str
+    floor_id: str
 
 
 class SeatUpdateRequest(BaseModel):
     """Schema for seat update request"""
-    added: Optional[List[SeatUpdate]] = []
+    added: Optional[List[SeatCreate]] = []
     removed: Optional[List[str]] = []
     updated: Optional[List[SeatUpdate]] = []
 

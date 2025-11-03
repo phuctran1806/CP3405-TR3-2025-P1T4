@@ -88,6 +88,7 @@ async def update_seats(
     try:
         # --- Add new seats ---
         if payload.added:
+            print(payload.added[0])
             new_seats = [Seat(**seat.dict()) for seat in payload.added]
             db.add_all(new_seats)
 
@@ -108,7 +109,7 @@ async def update_seats(
 
         return SeatUpdateResponse(
             message="Map successfully modified",
-            created_at=datetime())
+            created_at=datetime.now())
 
     except SQLAlchemyError as e:
         db.rollback()

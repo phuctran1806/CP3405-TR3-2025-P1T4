@@ -29,6 +29,11 @@ export interface SeatAvailability {
   next_available_time?: string | null;
 }
 
+export interface SeatUpdateResponse {
+ status: string;
+ message: string 
+}
+
 /**
  * GET /seats
  * Fetch a list of seats with optional filters
@@ -77,7 +82,8 @@ export interface SeatUpdatePayload {
  * Update many seats at a time
  */
 export async function updateSeats(payload: SeatUpdatePayload): Promise<ApiResult<{ status: string; message: string }>> {
-  return apiFetch<{ status: string; message: string }>(`/seats/update`, {
+  console.log(payload)
+  return apiFetch<SeatUpdateResponse>(`/seats/update`, {
     method: "PATCH",
     body: JSON.stringify(payload),
     headers: {

@@ -43,6 +43,7 @@ import {
 import { uploadImage } from "@/api/upload";
 import { SeatMarker } from "@/components/map/ChairMarker";
 import { VIEWBOX_WIDTH, VIEWBOX_HEIGHT, SEAT_TYPES, SEAT_STATUSES } from "@/components/map/MapConfig";
+import { v4 as uuidv4 } from 'uuid';
 
 /**
  * SeatMapEditor (web / desktop only)
@@ -344,6 +345,8 @@ const SeatMapEditor: React.FC = () => {
     if (addedSeats.length > 0) {
       payload.added = addedSeats.map(({ id, created_at, updated_at, notes, ...rest }) => ({
         ...rest,
+        id: uuidv4(),
+        floor_id: selectedFloorId,
         x_coordinate: Number(((rest.x_coordinate ?? 0) as number).toFixed(4)),
         y_coordinate: Number(((rest.y_coordinate ?? 0) as number).toFixed(4)),
       }));
@@ -480,7 +483,10 @@ const SeatMapEditor: React.FC = () => {
 
               <Box>
                 <Text size="sm" mb="$2" fontWeight="$medium">Floor Map</Text>
-                <Button size="md" variant="outline" onPress={handleUploadClick} isDisabled={!selectedFloorId || isUploading}>
+                {/* TODO: Will disable this feature, open for another PR */}
+                <Button size="md" variant="outline" onPress={handleUploadClick}
+                  //isDisabled={!selectedFloorId || isUploading}>
+                  isDisabled={true}>
                   {isUploading ? <Spinner size="small" /> : <ButtonText>{floorMapUrl ? "Replace Map" : "Upload Map"}</ButtonText>}
                 </Button>
               </Box>
@@ -570,7 +576,7 @@ const SeatMapEditor: React.FC = () => {
                       {visibleSeats.map((s) => (
                         <G
                           key={s.id}
-                          onPointerDown={(e) => {
+                          onPointerDown={(e: PointerEvent) => {
                             e.stopPropagation();
                             handleMarkerPressIn(s.id, e as any);
                           }}>
