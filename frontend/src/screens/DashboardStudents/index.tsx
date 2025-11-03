@@ -240,7 +240,7 @@ export default function LocationDashboard() {
         location={{
           id: locationId as string,
           name: location.name,
-          occupancyPercentage: currentPercentage,
+          occupancyPercentage: location.busyness_percentage,
         }}
         occupancyStatus={occupancyStatus}
         view={view}
