@@ -32,7 +32,8 @@ import {
   ButtonText,
 } from "@gluestack-ui/themed";
 
-import { getLocations, type LocationResponse } from "@/api/locations";
+import { getLocations } from "@/api/locations";
+import type { LocationResponse } from "@/api/types/location_types";
 import { getFloors, type FloorResponse } from "@/api/floors";
 import {
   getSeats,
@@ -41,7 +42,7 @@ import {
   type SeatUpdatePayload,
 } from "@/api/seats";
 import { uploadImage } from "@/api/upload";
-import { SeatMarker } from "@/components/map/ChairMarker";
+import { SeatMarker } from "@/components/map/SeatMarker";
 import { VIEWBOX_WIDTH, VIEWBOX_HEIGHT, SEAT_TYPES, SEAT_STATUSES } from "@/components/map/MapConfig";
 import { v4 as uuidv4 } from 'uuid';
 
@@ -91,6 +92,7 @@ const SeatMapEditor: React.FC = () => {
   const pointerStartedOnCanvasRef = useRef(false);
   const svgContainerRef = useRef<View | null>(null);
   const dragStateRef = useRef<{ isDragging: boolean; seatId: string | null }>({ isDragging: false, seatId: null });
+  const seatRefs = useRef(new Map<string, any>());
 
   // --- Derived data ---
   const visibleSeats = [
@@ -284,11 +286,16 @@ const SeatMapEditor: React.FC = () => {
 
     setDraggingSeatId(seatId);
     setSelectedSeatId(seatId);
+    e?.currentTarget.setPointerCapture(e.pointerId);
+
     dragStateRef.current = { isDragging: true, seatId };
   };
 
   // Handle drag move
-  const handleContainerMove = (e: React.PointerEvent, seatId: string) => {
+  // TODO: fix this now, the mouse speed is always higher than widget moving speed
+  const handleContainerMove = (e: React.PointerEvent) => {
+    if (!draggingSeatId) return;
+
     const container = svgContainerRef.current as HTMLElement | null;
     if (!container) return;
 
@@ -298,15 +305,22 @@ const SeatMapEditor: React.FC = () => {
     const x = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
     const y = Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height));
 
-    if (seatId.startsWith("temp_")) {
+    if (draggingSeatId.startsWith("temp_")) {
       setAddedSeats((prev) =>
-        prev.map((s) => (s.id === seatId ? { ...s, x_coordinate: Number(x.toFixed(4)), y_coordinate: Number(y.toFixed(4)) } : s))
+        prev.map((s) =>
+          s.id === draggingSeatId ? { ...s, x_coordinate: +x.toFixed(4), y_coordinate: +y.toFixed(4) } : s
+        )
       );
     } else {
       setUpdatedSeats((prev) => {
         const next = new Map(prev);
-        const current = next.get(seatId) ?? {};
-        next.set(seatId, { ...current, id: seatId, x_coordinate: Number(x.toFixed(4)), y_coordinate: Number(y.toFixed(4)) });
+        const current = next.get(draggingSeatId) ?? {};
+        next.set(draggingSeatId, {
+          ...current,
+          id: draggingSeatId,
+          x_coordinate: +x.toFixed(4),
+          y_coordinate: +y.toFixed(4),
+        });
         return next;
       });
     }
@@ -314,6 +328,8 @@ const SeatMapEditor: React.FC = () => {
 
   // Handle drag end
   const handleContainerRelease = () => {
+    if (!draggingSeatId) return;
+
     setDraggingSeatId(null);
     dragStateRef.current = { isDragging: false, seatId: null };
   };
@@ -534,7 +550,7 @@ const SeatMapEditor: React.FC = () => {
                   }}
                   onPointerMove={(e) => {
                     if (dragStateRef.current.isDragging && dragStateRef.current.seatId) {
-                      handleContainerMove(e, dragStateRef.current.seatId);
+                      handleContainerMove(e);
                     }
                   }}
                   onPointerUp={handleContainerRelease}
@@ -581,6 +597,11 @@ const SeatMapEditor: React.FC = () => {
                             handleMarkerPressIn(s.id, e as any);
                           }}>
                           <SeatMarker
+                            key={s.id}
+                            ref={(el) => {
+                              if (el) seatRefs.current.set(s.id, el);
+                              else seatRefs.current.delete(s.id);
+                            }}
                             seat={s}
                             isSelected={s.id === selectedSeatId}
                             onPress={() => !addMode && setSelectedSeatId(s.id)}

@@ -1,11 +1,10 @@
-export const VIEWBOX_WIDTH = 2292;
-export const VIEWBOX_HEIGHT = 2025;
+// TODO: I still don't know how to fetch aspect ratio from the svg file, I would probably need to get tell the server to save it
+export const VIEWBOX_WIDTH = 2400;
+export const VIEWBOX_HEIGHT = 1500;
 export const ASPECT_RATIO = VIEWBOX_HEIGHT / VIEWBOX_WIDTH;
 
 export const SEAT_CONFIG = {
-  width: 100,
-  height: 70,
-  radius: 12,
+  radius: 40,
   plugIconSize: 35,
   strokeWidth: 5,
 }

@@ -4,9 +4,10 @@ import Animated, {
   useSharedValue,
   runOnJS,
   useAnimatedReaction,
+  withTiming,
 } from "react-native-reanimated";
 import Svg, { Defs, LinearGradient, Stop, G, SvgXml } from "react-native-svg";
-import { ChairMarker } from "./ChairMarker";
+import { SeatMarker } from "./SeatMarker";
 import { VIEWBOX_WIDTH, VIEWBOX_HEIGHT, ASPECT_RATIO } from "./MapConfig";
 import type { SeatResponse } from "@/api/seats";
 
@@ -63,23 +64,20 @@ export const FloorMapContent: React.FC<FloorMapContentProps> = ({
     }
   );
 
-  const clampPosition = () => {
+  const clampPosition = (x: number, y: number, w: number) => {
     "worklet";
-    const currW = viewBoxWidthAnim.value;
-    const currH = currW * ASPECT_RATIO;
-    let currX = viewBoxXAnim.value;
-    let currY = viewBoxYAnim.value;
+    const currH = w * ASPECT_RATIO;
+    
+    const clampedX = Math.max(0, Math.min(x, VIEWBOX_WIDTH - w));
+    const clampedY = Math.max(0, Math.min(y, VIEWBOX_HEIGHT - currH));
 
-    currX = Math.max(0, Math.min(currX, VIEWBOX_WIDTH - currW));
-    currY = Math.max(0, Math.min(currY, VIEWBOX_HEIGHT - currH));
-
-    viewBoxXAnim.value = currX;
-    viewBoxYAnim.value = currY;
+    viewBoxXAnim.value = withTiming(clampedX, { duration: 100 });
+    viewBoxYAnim.value = withTiming(clampedY, { duration: 100 });
   };
 
   // --- Pinch Gesture ---
   const pinchGesture = Gesture.Pinch()
-    .onBegin(() => {
+    .onStart(() => {
       lastX.value = viewBoxXAnim.value;
       lastY.value = viewBoxYAnim.value;
       lastW.value = viewBoxWidthAnim.value;
@@ -108,17 +106,14 @@ export const FloorMapContent: React.FC<FloorMapContentProps> = ({
       viewBoxYAnim.value = newY;
     })
     .onEnd(() => {
-      runOnJS(clampPosition)();
-    })
-    .onFinalize(() => {
-      runOnJS(clampPosition)();
+      clampPosition(viewBoxXAnim.value, viewBoxYAnim.value, viewBoxWidthAnim.value);
     });
 
   // --- Pan Gesture ---
   const panGesture = Gesture.Pan()
     .minPointers(1)
     .maxPointers(1)
-    .onBegin(() => {
+    .onStart(() => {
       lastX.value = viewBoxXAnim.value;
       lastY.value = viewBoxYAnim.value;
     })
@@ -132,10 +127,7 @@ export const FloorMapContent: React.FC<FloorMapContentProps> = ({
       viewBoxYAnim.value = lastY.value - deltaViewY;
     })
     .onEnd(() => {
-      runOnJS(clampPosition)();
-    })
-    .onFinalize(() => {
-      runOnJS(clampPosition)();
+      clampPosition(viewBoxXAnim.value, viewBoxYAnim.value, viewBoxWidthAnim.value);
     });
 
   // Combine both gestures to allow simultaneous pan + pinch
@@ -163,7 +155,7 @@ export const FloorMapContent: React.FC<FloorMapContentProps> = ({
 
       <G>
         {seats.map((seat) => (
-          <ChairMarker
+          <SeatMarker
             key={seat.id}
             seat={seat}
             isSelected={selectedSeat?.id === seat.id}
@@ -186,4 +178,3 @@ export const FloorMapContent: React.FC<FloorMapContentProps> = ({
     </GestureDetector>
   );
 };
-
