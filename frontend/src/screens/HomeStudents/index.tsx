@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import {
   ScrollView,
   RefreshControl,
-  Alert,
   View,
   ActivityIndicator,
 } from "react-native";
@@ -10,16 +9,14 @@ import { Box, VStack, Text, Spinner } from "@gluestack-ui/themed";
 import * as Location from "expo-location";
 import { useRouter } from "expo-router";
 import LocationCard from "@/components/cards/LocationCard";
-import { calculateDistance, formatDistance } from "@/utils/calculateDistance";
 import { getLocations } from "@/api/locations";
-import type { LocationResponse } from "@/api/types/location_types";
+import type { LocationResponse, LocationStatus } from "@/api/types/location_types";
 import type { AccessibilityFeature } from "@/utils/accessibilityIcons";
 
-interface LocationWithDistance {
+interface Location {
   id: string;
   name: string;
   image_url?: string | null;
-  distance: string;
   status: string;
   available_seats: number;
   total_capacity: number;
@@ -27,8 +24,7 @@ interface LocationWithDistance {
 }
 
 export default function HomeStudents() {
-  const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
-  const [locations, setLocations] = useState<LocationWithDistance[]>([]);
+  const [locations, setLocations] = useState<Location[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -36,30 +32,7 @@ export default function HomeStudents() {
 
   useEffect(() => setMounted(true), []);
 
-  const getUserLocation = async () => {
-    try {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        Alert.alert(
-          "Permission Denied",
-          "Location permission is required to show distances."
-        );
-        setLoading(false);
-        return;
-      }
-
-      const location = await Location.getCurrentPositionAsync({});
-      setUserLocation({
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
-      });
-    } catch (err) {
-      console.error(err);
-      Alert.alert("Error", "Failed to get your location.");
-    }
-  };
-
-  const mapLocations = (backendLocations: LocationResponse[]): LocationWithDistance[] => {
+  const mapLocations = (backendLocations: LocationResponse[]): Location[] => {
     return backendLocations.map((loc) => {
       // Build accessibility array from backend flags
       const accessibility: AccessibilityFeature[] = [
@@ -68,13 +41,6 @@ export default function HomeStudents() {
         ...(loc.is_quiet ? ["quiet"] : []),
       ] as AccessibilityFeature[];
 
-      const distance = userLocation
-        ? calculateDistance(userLocation, {
-          latitude: loc.latitude ?? 0,
-          longitude: loc.longitude ?? 0,
-        })
-        : 0;
-
       return {
         id: loc.id,
         name: loc.name,
@@ -82,7 +48,6 @@ export default function HomeStudents() {
         status: loc.status,
         available_seats: loc.available_seats,
         total_capacity: loc.total_capacity,
-        distance: userLocation ? formatDistance(distance) : "Unknown",
         accessibility,
       };
     });
@@ -98,14 +63,12 @@ export default function HomeStudents() {
 
   useEffect(() => {
     (async () => {
-      await getUserLocation();
       await fetchLocations();
     })();
   }, []);
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await getUserLocation();
     await fetchLocations();
     setRefreshing(false);
   };
@@ -150,8 +113,8 @@ export default function HomeStudents() {
                 name={loc.name}
                 // TODO: replace this with a fallback image
                 image={loc.image_url ? { uri: `${loc.image_url}` } : { uri: "None" } }
-                distance={loc.distance}
                 accessibility={loc.accessibility}
+                status={loc.status as LocationStatus}
                 onPress={() => handleLocationPress(loc.id)}
               />
             ))
