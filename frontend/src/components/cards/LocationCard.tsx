@@ -5,12 +5,13 @@ import {
   Pressable,
   Text,
   VStack,
+  Badge,
 } from '@gluestack-ui/themed';
 import React from 'react';
 import type { ImageSourcePropType } from 'react-native';
 import { Image } from 'react-native';
-import { accessibilityMapping } from '@/utils/accessibilityIcons';
-import type { AccessibilityFeature } from '@/utils/accessibilityIcons';
+import { accessibilityMapping, type AccessibilityFeature } from '@/utils/accessibilityIcons';
+import type { LocationStatus } from '@/api/types/location_types';
 
 interface LocationCardProps {
   name: string;
@@ -21,6 +22,7 @@ interface LocationCardProps {
     end_time: Date;
   };
   accessibility: AccessibilityFeature[] | null;
+  status: LocationStatus;
   onPress: () => void;
 }
 
@@ -28,11 +30,26 @@ export default function LocationCard({
   name,
   subject,
   image,
-  distance,
   schedule,
   accessibility,
+  status,
   onPress,
 }: LocationCardProps) {
+  const getStatusStyle = (status: LocationStatus) => {
+    switch (status) {
+      case 'open':
+        return { bg: '$green100', color: '$green700', text: 'Open' };
+      case 'closed':
+        return { bg: '$red100', color: '$red700', text: 'Closed' };
+      case 'maintenance':
+        return { bg: '$amber100', color: '$amber700', text: 'Maintenance' };
+      default:
+        return { bg: '$gray100', color: '$gray700', text: status };
+    }
+  };
+
+  const statusStyle = getStatusStyle(status);
+
   return (
     <Pressable onPress={onPress}>
       <Box
@@ -64,15 +81,30 @@ export default function LocationCard({
         </Box>
 
         <VStack p="$4" space="sm">
-          {/* Location name */}
-          <Text fontSize="$lg" fontWeight="$bold" color="$black">
-            {name}
-          </Text>
+          {/* Location name and status */}
+          <HStack alignItems="center" justifyContent="space-between">
+            <Text fontSize="$lg" fontWeight="$bold" color="$black" flex={1}>
+              {name}
+            </Text>
+            <Badge
+              variant="solid"
+              bg={statusStyle.bg}
+              borderRadius="$full"
+              px="$2.5"
+              py="$0.5"
+            >
+              <Text fontSize="$xs" fontWeight="$semibold" color={statusStyle.color}>
+                {statusStyle.text}
+              </Text>
+            </Badge>
+          </HStack>
 
           {/* Subject for lecturers */}
-          <Text fontSize="$md" color="$gray700">
-            {subject}
-          </Text>
+          {subject && (
+            <Text fontSize="$md" color="$gray700">
+              {subject}
+            </Text>
+          )}
 
           {/* Schedule */}
           {schedule && (
