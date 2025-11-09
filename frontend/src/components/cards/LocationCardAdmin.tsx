@@ -2,11 +2,12 @@ import React from 'react';
 import { Box, VStack, HStack, Text, Pressable, Icon } from '@gluestack-ui/themed';
 import { Building2, MapPin, BarChart2, Edit3 } from 'lucide-react-native';
 import { View } from 'react-native';
+import type { LocationType, LocationStatus } from '@/api/types/location_types';
 
 interface LocationCardAdminProps {
   name: string;
-  block: string;
-  status: 'active' | 'maintenance';
+  status: LocationStatus;
+  type: LocationType;
   current: number;
   capacity: number;
   onAnalytics: () => void;
@@ -15,8 +16,8 @@ interface LocationCardAdminProps {
 
 export default function LocationCardAdmin({
   name,
-  block,
   status,
+  type,
   current,
   capacity,
   onAnalytics,
@@ -56,7 +57,7 @@ export default function LocationCardAdmin({
             <HStack alignItems="center" space="xs">
               <Icon as={MapPin} size="xs" color="$gray600" />
               <Text fontSize="$xs" color="$gray600">
-                {block}
+                {type.charAt(0).toUpperCase() + type.slice(1)} Location
               </Text>
             </HStack>
           </VStack>
@@ -64,7 +65,7 @@ export default function LocationCardAdmin({
 
         {/* Status Tag */}
         <Box
-          bg={status === 'active' ? '$green100' : '$yellow100'}
+          bg={status === 'open' ? '$green100' : '$yellow100'}
           px="$2"
           py="$1"
           borderRadius="$md"
@@ -72,7 +73,7 @@ export default function LocationCardAdmin({
           <Text
             fontSize="$xs"
             fontWeight="$semibold"
-            color={status === 'active' ? '$green700' : '$yellow700'}
+            color={status === 'open' ? '$green700' : '$yellow700'}
           >
             {status}
           </Text>
@@ -118,13 +119,13 @@ export default function LocationCardAdmin({
           p="$2"
           alignItems="center"
           justifyContent="center"
-          disabled={status !== 'active'}
+          disabled={status !== 'open'}
         >
           <HStack space="xs" alignItems="center">
             <Icon as={BarChart2} size="sm" color="$gray700" />
             <Text
               fontSize="$sm"
-              color={status === 'active' ? '$gray700' : '$gray400'}
+              color={status === 'open' ? '$gray700' : '$gray400'}
               fontWeight="$medium"
             >
               View Analytics

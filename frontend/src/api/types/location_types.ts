@@ -1,4 +1,4 @@
-export type LocationStatus = "open" | "closed" | "busy" | "unknown";
+export type LocationStatus = "open" | "closed" | "maintenance";
 export type LocationType = "public" | "private";
 
 export interface LocationResponse {
