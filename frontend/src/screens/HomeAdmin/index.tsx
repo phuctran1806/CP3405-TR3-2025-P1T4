@@ -23,8 +23,6 @@ import { calculateDistance, formatDistance } from '@/utils/calculateDistance';
 import SummaryCard from './components/SummaryCard';
 import LocationCardAdmin from '@/components/cards/LocationCardAdmin';
 import DropDownMenu, { type TabType } from '@/components/DropDownMenu';
-import BookingRequestCard from './components/BookingRequestCard';
-import { bookingRequests } from '@/utils/mockData/bookingData';
 import LecturerAssignmentCard from './components/LectureAssignmentCard';
 import { lecturerAssignments } from '@/utils/mockData/lectureAssignmentData';
 
@@ -112,8 +110,6 @@ export default function HomeAdmin() {
             studentLocations.reduce((sum, s) => sum + s.occupancy, 0) / studentLocations.length
         ) || 0;
 
-    const pendingRequests = bookingRequests.filter((req) => req.status === 'pending').length;
-
     if (!mounted) {
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#f9fafb' }}>
@@ -142,11 +138,10 @@ export default function HomeAdmin() {
             >
 
                 {/* Dashboard summary cards */}
-                <HStack space="md" flexWrap="wrap" justifyContent="space-between" mb="$4">
+                <HStack space="md" flexWrap="wrap" justifyContent="center" mb="$4">
                     <SummaryCard title="Total Venues" value={totalVenues.toString()} subtitle="Across campus" />
                     <SummaryCard title="Total Capacity" value={totalCapacity.toString()} subtitle="Available seats" />
                     <SummaryCard title="Current Occupancy" value={`${avgOccupancy}%`} subtitle="Avg. across venues" />
-                    <SummaryCard title="Pending Requests" value={pendingRequests.toString()} subtitle="Awaiting approval" />
                 </HStack>
 
                 <DropDownMenu activeTab={activeTab} setActiveTab={setActiveTab} />
@@ -174,26 +169,6 @@ export default function HomeAdmin() {
                                 />
                             );
                         })}
-                    </VStack>
-                )}
-
-                {activeTab === 'Booking Requests' && (
-                    <VStack mt="$4" space="md">
-                        {bookingRequests.map((req) => (
-                            <BookingRequestCard
-                                key={req.id}
-                                venue={req.venue}
-                                lecturerName={req.lecturerName}
-                                lecturerRole={req.lecturerRole}
-                                purpose={req.purpose}
-                                date={req.date}
-                                startTime={req.startTime}
-                                endTime={req.endTime}
-                                status={req.status}
-                                onApprove={() => console.log(`Approved ${req.id}`)}
-                                onReject={() => console.log(`Rejected ${req.id}`)}
-                            />
-                        ))}
                     </VStack>
                 )}
 
