@@ -175,7 +175,7 @@ def create_lecturer_assignments(db, locations: list[Location], users: list[User]
             subject="CP1403",
             start_time=datetime(2025, 10, 2, 14, 0),
             end_time=datetime(2025, 10, 2, 16, 0),
-            location_id=location_name_to_id.get("Lecture Room A1-02"),
+            location_id=location_name_to_id.get("Lecture Room B1-05"),
             user_id=user_email_to_id.get("lecturer@jcu.edu.au")
         ),
         LecturerAssignment(
@@ -219,15 +219,7 @@ def create_locations(db):
         ),
         Location(
             id=str(uuid.uuid4()),
-            name="Study Pods",
-            image_url="api/images/study-pods.jpg",
-            total_capacity=30,
-            current_occupancy=0,
-            location_type=LocationType.PUBLIC,
-        ),
-        Location(
-            id=str(uuid.uuid4()),
-            name="Study Hub",
+            name="Study Hub E",
             image_url="api/images/study-hub-e.jpg",
             latitude=1.3521,
             longitude=103.8198,
@@ -407,7 +399,6 @@ def create_floors_and_seats(db, locations: list[Location]):
 
             for i, pos in enumerate(positions, 1):
                 seat_type = random.choice(list(SeatType))
-                
                 # Set location-specific attributes
                 if loc.name == "Study Pods":
                     # Study Pods: only power plugs
