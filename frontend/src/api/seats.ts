@@ -56,6 +56,9 @@ export async function getAvailableSeats(params?: {
   floor_id?: string;
   has_power?: boolean;
   has_ac?: boolean;
+}): Promise<ApiResult<SeatResponse[]>> {
+  const query = buildQuery(params ?? {});
+  return apiFetch<SeatResponse[]>(`/seats/available${query}`);
 }
 
 /**

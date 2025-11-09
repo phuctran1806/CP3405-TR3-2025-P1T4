@@ -293,7 +293,6 @@ const SeatMapEditor: React.FC = () => {
       seat_number: `NEW_${addedSeats.length + 1}`,
       seat_type: "individual",
       has_power_outlet: false,
-      has_wifi: false,
       has_ac: false,
       accessibility: false,
       capacity: 1,
@@ -739,10 +738,6 @@ const SeatMapEditor: React.FC = () => {
                     <Checkbox value="power" isChecked={!!selectedSeat.has_power_outlet} onChange={(c) => updateSeatAttribute("has_power_outlet", Boolean(c))}>
                       <CheckboxIndicator mr="$2"><CheckIcon /></CheckboxIndicator>
                       <Text>Power</Text>
-                    </Checkbox>
-                    <Checkbox value="wifi" isChecked={!!selectedSeat.has_wifi} onChange={(c) => updateSeatAttribute("has_wifi", Boolean(c))}>
-                      <CheckboxIndicator mr="$2"><CheckIcon /></CheckboxIndicator>
-                      <Text>Wi-Fi</Text>
                     </Checkbox>
                     <Checkbox value="ac" isChecked={!!selectedSeat.has_ac} onChange={(c) => updateSeatAttribute("has_ac", Boolean(c))}>
                       <CheckboxIndicator mr="$2"><CheckIcon /></CheckboxIndicator>

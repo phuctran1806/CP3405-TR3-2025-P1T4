@@ -31,12 +31,6 @@ export const SeatMarker = React.forwardRef<any, SeatMarkerProps>(
         color: "#FCD34D",
         viewBox: "0 0 100 100",
       });
-    if (seat.has_wifi)
-      featureIcons.push({
-        path: "M12 18h.01M8.5 14.5c1.5-1.5 4-1.5 5.5 0M5.5 11.5c3-3 8-3 11 0M2.5 8.5c4.5-4.5 13-4.5 17.5 0",
-        color: "#60A5FA",
-        viewBox: "0 0 24 24",
-      });
     if (seat.has_ac)
       featureIcons.push({
         path: "M12 2v20M17 7l-5 5-5-5M17 17l-5-5-5 5M7 12h10",

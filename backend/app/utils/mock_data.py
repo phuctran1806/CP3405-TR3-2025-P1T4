@@ -424,7 +424,6 @@ def create_floors_and_seats(db, locations: list[Location]):
                     has_ac = random.choice([True, False])
                     is_quiet = False
                     accessibility = random.choice([True, False])
-                
                 seat = Seat(
                     id=str(uuid.uuid4()),
                     floor_id=floor.id,

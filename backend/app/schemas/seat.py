@@ -48,7 +48,6 @@ class SeatUpdate(BaseModel):
     seat_number: Optional[str] = None
     seat_type: Optional[SeatType] = None
     has_power_outlet: Optional[bool] = None
-    has_wifi: Optional[bool] = None
     has_ac: Optional[bool] = None
     accessibility: Optional[bool] = None
     capacity: Optional[int] = None
