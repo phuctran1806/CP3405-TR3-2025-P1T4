@@ -1,4 +1,5 @@
 export type LocationStatus = "open" | "closed" | "busy" | "unknown";
+export type LocationType = "public" | "private";
 
 export interface LocationResponse {
   id: string;
@@ -16,6 +17,7 @@ export interface LocationResponse {
   has_ac: boolean;
   has_wifi: boolean;
   status: LocationStatus;
+  location_type: LocationType;
   created_at: string; // ISO datetime
   updated_at: string; // ISO datetime
 }

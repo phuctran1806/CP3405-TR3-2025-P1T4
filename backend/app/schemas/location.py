@@ -5,7 +5,7 @@ Location schemas for request/response validation.
 from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime
-from app.models.location import LocationStatus
+from app.models.location import LocationStatus, LocationType
 
 
 class LocationResponse(BaseModel):
@@ -20,6 +20,7 @@ class LocationResponse(BaseModel):
     busyness_percentage: float
     available_seats: int
     status: LocationStatus
+    location_type: LocationType
     created_at: datetime
     updated_at: datetime
 
