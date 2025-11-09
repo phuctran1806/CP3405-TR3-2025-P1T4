@@ -111,7 +111,7 @@ export default function HomeStudents() {
   };
 
   const handleLocationPress = (locationId: string) => {
-    router.push(`/dashboard/${locationId}?role=student`);
+    router.push(`/dashboard/${locationId}`);
   };
 
   if (!mounted) {

@@ -54,7 +54,9 @@ const SignupScreen: React.FC = () => {
         return;
       }
       await AsyncStorage.setItem('access_token', res.data.access_token);
-      router.replace(`/(main)/home?role=${role}`);
+      await AsyncStorage.setItem('user_role', res.data.user.role);
+      await AsyncStorage.setItem('user_data', JSON.stringify(res.data.user));
+      router.replace(`/(main)/home`);
     } catch (e: any) {
       setErrors({ api: e.message || 'Signup failed' });
     } finally {
@@ -102,9 +104,14 @@ const SignupScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#1A2942' },
-  scrollContainer: { flexGrow: 1, justifyContent: 'center', alignItems: 'center', padding: spacing.lg },
+  container: {
+    flex: 1,
+    backgroundColor: '#1A2942',
+  },
+  scrollContainer: {
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.xl,
+  },
 });
 
 export default SignupScreen;
-

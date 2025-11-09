@@ -45,7 +45,9 @@ const LoginScreen: React.FC = () => {
       const result = await login({ 'email': email, 'password': password });
       if (!result.ok) throw result.error;
       await AsyncStorage.setItem('access_token', result.data.access_token);
-      router.replace(`/(main)/home?role=${result.data.user.role}`);
+      await AsyncStorage.setItem('user_role', result.data.user.role);
+      await AsyncStorage.setItem('user_data', JSON.stringify(result.data.user));
+      router.replace(`/(main)/home`);
     } catch (e: any) {
       if (e.status === 401) setGeneralError("Incorrect email or password");
       else setGeneralError(e.message || "Login failed");
@@ -77,7 +79,10 @@ const LoginScreen: React.FC = () => {
           onSignUp={() => router.replace('/register')}
           onSocialLogin={(provider) => console.log(`${provider} login pressed`)}
         />
-        <AuthFooter onGuestLogin={() => router.replace('/(main)/home?role=student')} />
+        <AuthFooter onGuestLogin={() => {
+          AsyncStorage.setItem('user_role', 'guest');
+          router.replace('/(main)/home');
+        }} />
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -97,4 +102,3 @@ const styles = StyleSheet.create({
 });
 
 export default LoginScreen;
-
