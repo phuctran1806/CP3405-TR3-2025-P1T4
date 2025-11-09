@@ -15,7 +15,7 @@ export interface LocationResponse {
   available_seats: number;
   has_power_outlet: boolean;
   has_ac: boolean;
-  has_wifi: boolean;
+  is_quiet: boolean;
   status: LocationStatus;
   location_type: LocationType;
   created_at: string; // ISO datetime

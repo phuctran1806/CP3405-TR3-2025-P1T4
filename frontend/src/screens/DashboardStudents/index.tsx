@@ -11,6 +11,7 @@ import InteractiveMap from '@/components/map/InteractiveMap';
 import { getOccupancyHistory, type OccupancyHistory } from '@/api/history';
 import { getLocationById } from '@/api/locations';
 import type { LocationResponse } from '@/api/types/location_types';
+import type { AccessibilityFeature } from '@/utils/accessibilityIcons';
 
 export default function LocationDashboard() {
   const { location: locationId } = useLocalSearchParams();
@@ -241,6 +242,11 @@ export default function LocationDashboard() {
           id: locationId as string,
           name: location.name,
           occupancyPercentage: location.busyness_percentage,
+          accessibility: [
+            ...(location.has_power_outlet ? ['power'] : []),
+            ...(location.has_ac ? ['cool'] : []),
+            ...(location.is_quiet ? ['quiet'] : []),
+          ] as AccessibilityFeature[],
         }}
         occupancyStatus={occupancyStatus}
         view={view}

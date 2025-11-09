@@ -10,7 +10,6 @@ export interface SeatResponse {
   status: SeatStatus;
   seat_type: string;
   has_power_outlet: boolean;
-  has_wifi: boolean;
   has_ac: boolean;
   is_accessible: boolean;
 }
@@ -27,7 +26,6 @@ export interface AvailableSeatQuery {
   floor_id?: string;
   has_power?: boolean;
   has_ac?: boolean;
-  has_wifi?: boolean;
 }
 
 /**

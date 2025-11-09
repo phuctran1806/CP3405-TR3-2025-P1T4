@@ -45,8 +45,8 @@ class Seat(Base):
     # Features
     # TODO: prototype for now, if decide on future scaling then move this to a many to many relationship
     has_power_outlet = Column(Boolean, default=False, nullable=False)
-    has_wifi = Column(Boolean, default=False, nullable=False)
     has_ac = Column(Boolean, default=False, nullable=False)
+    is_quiet = Column(Boolean, default=False, nullable=False)
     accessibility = Column(Boolean, default=False, nullable=False)
     capacity = Column(Integer, default=1, nullable=False)
     
