@@ -30,7 +30,6 @@ async def get_locations(db: Session = Depends(get_db)):
         loc_data.has_power_outlet = any(
             seat.has_power_outlet for seat in all_seats)
         loc_data.has_ac = any(seat.has_ac for seat in all_seats)
-        loc_data.has_wifi = any(seat.has_wifi for seat in all_seats)
 
         result.append(loc_data)
 
@@ -55,6 +54,5 @@ async def get_location(location_id: str, db: Session = Depends(get_db)):
     loc_data.has_power_outlet = any(
         seat.has_power_outlet for seat in all_seats)
     loc_data.has_ac = any(seat.has_ac for seat in all_seats)
-    loc_data.has_wifi = any(seat.has_wifi for seat in all_seats)
 
     return loc_data
