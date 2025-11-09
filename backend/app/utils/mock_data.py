@@ -231,7 +231,7 @@ def create_locations(db):
         ),
         Location(
             id=str(uuid.uuid4()),
-            name="Study Pod",
+            name="Study Pods",
             image_url="api/images/study-pods.jpg",
             total_capacity=30,
             current_occupancy=0,
@@ -401,15 +401,42 @@ def create_floors_and_seats(db, locations: list[Location]):
             seats_on_floor = base + (1 if idx < remainder else 0)
             for i in range(1, seats_on_floor + 1):
                 seat_type = random.choice(list(SeatType))
+                
+                # Set location-specific attributes
+                if loc.name == "Study Pods":
+                    # Study Pods: only power plugs
+                    has_power_outlet = True
+                    has_ac = False
+                    is_quiet = False
+                    accessibility = False
+                elif loc.name == "JCU Library":
+                    # Library: is quiet
+                    has_power_outlet = random.choice([True, False])
+                    has_ac = True
+                    is_quiet = True
+                    accessibility = random.choice([True, False])
+                elif loc.name == "Yard":
+                    # Yard: no accessibility
+                    has_power_outlet = False
+                    has_ac = False
+                    is_quiet = False
+                    accessibility = False
+                else:
+                    # Other locations: random attributes
+                    has_power_outlet = random.choice([True, False])
+                    has_ac = random.choice([True, False])
+                    is_quiet = False
+                    accessibility = random.choice([True, False])
+                
                 seat = Seat(
                     id=str(uuid.uuid4()),
                     floor_id=floor.id,
                     seat_number=f"{loc.name[:3].upper()}-{floor.floor_number}-{i:03d}",
                     seat_type=seat_type,
-                    has_power_outlet=random.choice([True, False]),
-                    has_wifi=random.choice([True, False]),
-                    has_ac=random.choice([True, False]),
-                    accessibility=random.choice([True, False]),
+                    has_power_outlet=has_power_outlet,
+                    has_ac=has_ac,
+                    is_quiet=is_quiet,
+                    accessibility=accessibility,
                     capacity=1,
                     x_coordinate=float(random.randint(0, 100)),
                     y_coordinate=float(random.randint(0, 100)),

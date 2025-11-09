@@ -14,6 +14,7 @@ class SeatBase(BaseModel):
     seat_type: SeatType
     has_power_outlet: bool = False
     has_ac: bool = False
+    is_quiet: bool = False
     accessibility: bool = False
     capacity: int = 1
 

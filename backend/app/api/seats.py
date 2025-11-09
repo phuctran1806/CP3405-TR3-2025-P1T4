@@ -41,6 +41,7 @@ async def get_available_seats(
     floor_id: Optional[str] = Query(None),
     has_power: Optional[bool] = Query(None),
     has_ac: Optional[bool] = Query(None),
+    is_quiet: Optional[bool] = Query(None),
     db: Session = Depends(get_db)
 ):
     """Get available seats with optional filters."""
@@ -52,6 +53,8 @@ async def get_available_seats(
         query = query.filter(Seat.has_power_outlet == has_power)
     if has_ac is not None:
         query = query.filter(Seat.has_ac == has_ac)
+    if is_quiet is not None:
+        query = query.filter(Seat.is_quiet == is_quiet)
 
     seats = query.all()
     return [SeatResponse.from_orm(seat) for seat in seats]

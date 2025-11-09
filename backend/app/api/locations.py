@@ -27,9 +27,9 @@ async def get_locations(db: Session = Depends(get_db)):
             seat for floor in loc.floors for seat in floor.seats if seat.status == SeatStatus.AVAILABLE]
 
         loc_data = LocationResponse.from_orm(loc)
-        loc_data.has_power_outlet = any(
-            seat.has_power_outlet for seat in all_seats)
+        loc_data.has_power_outlet = any(seat.has_power_outlet for seat in all_seats)
         loc_data.has_ac = any(seat.has_ac for seat in all_seats)
+        loc_data.is_quiet = any(seat.is_quiet for seat in all_seats)
 
         result.append(loc_data)
 
@@ -51,8 +51,8 @@ async def get_location(location_id: str, db: Session = Depends(get_db)):
         seat for floor in location.floors for seat in floor.seats if seat.status == SeatStatus.AVAILABLE]
 
     loc_data = LocationResponse.from_orm(location)
-    loc_data.has_power_outlet = any(
-        seat.has_power_outlet for seat in all_seats)
+    loc_data.has_power_outlet = any(seat.has_power_outlet for seat in all_seats)
     loc_data.has_ac = any(seat.has_ac for seat in all_seats)
+    loc_data.is_quiet = any(seat.is_quiet for seat in all_seats)
 
     return loc_data

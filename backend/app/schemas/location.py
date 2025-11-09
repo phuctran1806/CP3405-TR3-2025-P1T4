@@ -27,6 +27,7 @@ class LocationResponse(BaseModel):
     # Aggregated accessibility flags
     has_power_outlet: bool = False
     has_ac: bool = False
+    is_quiet: bool = False
 
     class Config:
         from_attributes = True

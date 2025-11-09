@@ -65,6 +65,7 @@ export default function HomeStudents() {
       const accessibility: AccessibilityFeature[] = [
         ...(loc.has_power_outlet ? ["power"] : []),
         ...(loc.has_ac ? ["cool"] : []),
+        ...(loc.is_quiet ? ["quiet"] : []),
       ] as AccessibilityFeature[];
 
       const distance = userLocation
