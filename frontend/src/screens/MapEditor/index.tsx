@@ -85,6 +85,10 @@ const SeatMapEditor: React.FC = () => {
   const [removedSeatIds, setRemovedSeatIds] = useState<string[]>([]);
   const [updatedSeats, setUpdatedSeats] = useState<Map<string, Partial<SeatResponse>>>(new Map());
 
+  // Image map normalization
+  const [layout, setLayout] = useState({ width: 0, height: 0 });
+  const [imageSize, setImageSize] = useState({ width: 0, height: 0 });
+
   // Drag state
   const [draggingSeatId, setDraggingSeatId] = useState<string | null>(null);
 
@@ -105,6 +109,12 @@ const SeatMapEditor: React.FC = () => {
 
   const selectedSeat = visibleSeats.find((s) => s.id === selectedSeatId) ?? null;
   const hasChanges = addedSeats.length > 0 || removedSeatIds.length > 0 || updatedSeats.size > 0;
+
+  useEffect(() => {
+    if (floorMapUrl) {
+      RNImage.getSize(floorMapUrl, (w, h) => setImageSize({ width: w, height: h }));
+    }
+  }, [floorMapUrl])
 
   // --- Loaders ---
   useEffect(() => {
@@ -180,6 +190,28 @@ const SeatMapEditor: React.FC = () => {
       setIsLoadingSeats(false);
     }
   }
+
+  // --- Get the actual map frame not container ---
+  const getRenderedImageFrame = () => {
+    const containerRatio = layout.width / layout.height;
+    const imageRatio = imageSize.width / imageSize.height;
+    let renderedWidth, renderedHeight, offsetX, offsetY;
+
+    if (imageRatio > containerRatio) {
+      // image is wider — width fills container
+      renderedWidth = layout.width;
+      renderedHeight = layout.width / imageRatio;
+      offsetX = 0;
+      offsetY = (layout.height - renderedHeight) / 2;
+    } else {
+      // image is taller — height fills container
+      renderedHeight = layout.height;
+      renderedWidth = layout.height * imageRatio;
+      offsetY = 0;
+      offsetX = (layout.width - renderedWidth) / 2;
+    }
+    return { renderedWidth, renderedHeight, offsetX, offsetY };
+  };
 
   // --- Upload using web file input ---
   const handleUploadClick = () => {
@@ -292,23 +324,27 @@ const SeatMapEditor: React.FC = () => {
   };
 
   // Handle drag move
-  // TODO: fix this now, the mouse speed is always higher than widget moving speed
   const handleContainerMove = (e: React.PointerEvent) => {
     if (!draggingSeatId) return;
 
-    const container = svgContainerRef.current as HTMLElement | null;
-    if (!container) return;
+    const { renderedWidth, renderedHeight, offsetX, offsetY } = getRenderedImageFrame();
+    const containerX = e.nativeEvent.offsetX;
+    const containerY = e.nativeEvent.offsetY;
 
-    const rect = container.getBoundingClientRect();
-    if (!rect) return;
+    const mapX = (containerX - offsetX) / renderedWidth;
+    const mapY = (containerY - offsetY) / renderedHeight;
 
-    const x = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-    const y = Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height));
+    const relativeX = Math.max(0, Math.min(1, mapX));
+    const relativeY = Math.max(0, Math.min(1, mapY));
 
     if (draggingSeatId.startsWith("temp_")) {
       setAddedSeats((prev) =>
         prev.map((s) =>
-          s.id === draggingSeatId ? { ...s, x_coordinate: +x.toFixed(4), y_coordinate: +y.toFixed(4) } : s
+          s.id === draggingSeatId ? {
+            ...s,
+            x_coordinate: +relativeX.toFixed(4),
+            y_coordinate: +relativeY.toFixed(4),
+          } : s
         )
       );
     } else {
@@ -318,8 +354,8 @@ const SeatMapEditor: React.FC = () => {
         next.set(draggingSeatId, {
           ...current,
           id: draggingSeatId,
-          x_coordinate: +x.toFixed(4),
-          y_coordinate: +y.toFixed(4),
+          x_coordinate: +relativeX.toFixed(4),
+          y_coordinate: +relativeY.toFixed(4),
         });
         return next;
       });
@@ -554,6 +590,7 @@ const SeatMapEditor: React.FC = () => {
                     }
                   }}
                   onPointerUp={handleContainerRelease}
+                  onLayout={e => setLayout(e.nativeEvent.layout)}
                   style={{ width: "100%", height: 650, position: "relative" }}
                 >
                   {/* Background image */}
