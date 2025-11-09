@@ -1,11 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Alert, Platform, ScrollView } from 'react-native';
-import { Box, VStack, Text, HStack, Switch, Pressable } from '@gluestack-ui/themed';
+import { Box, VStack, Text, HStack, Pressable } from '@gluestack-ui/themed';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 
 export default function Settings() {
-  const [darkMode, setDarkMode] = useState(false);
   const router = useRouter();
 
   const handleLogout = () => {
@@ -29,24 +28,6 @@ export default function Settings() {
         <Text fontSize="$xl" fontWeight="$bold" color="$black" mb="$4">
           Settings
         </Text>
-
-        {/* Theme Setting */}
-        <VStack
-          bg="$white"
-          borderRadius="$2xl"
-          p="$4"
-          shadowColor="#000"
-          shadowOffset={{ width: 0, height: 2 }}
-          shadowOpacity={0.08}
-          shadowRadius={8}
-        >
-          <HStack justifyContent="space-between" alignItems="center">
-            <Text fontSize="$md" color="$gray700">
-              Dark Mode
-            </Text>
-            <Switch value={darkMode} onValueChange={setDarkMode} />
-          </HStack>
-        </VStack>
 
         {/* Logout Button */}
         <VStack
