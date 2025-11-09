@@ -434,8 +434,8 @@ def create_floors_and_seats(db, locations: list[Location]):
                     is_quiet=is_quiet,
                     accessibility=accessibility,
                     capacity=1,
-                    x_coordinate=float(random.randint(0, 100)),
-                    y_coordinate=float(random.randint(0, 100)),
+                    x_coordinate=pos["x_coordinate"],
+                    y_coordinate=pos["y_coordinate"],
                     status=random.choice([SeatStatus.AVAILABLE, SeatStatus.OCCUPIED])
                 )
                 all_seats.append(seat)
