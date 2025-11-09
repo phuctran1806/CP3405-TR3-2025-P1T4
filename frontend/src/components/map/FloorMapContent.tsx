@@ -147,7 +147,7 @@ export const FloorMapContent: React.FC<FloorMapContentProps> = ({
         </LinearGradient>
         <LinearGradient id="occupiedGrad" x1="0%" y1="0%" x2="0%" y2="100%">
           <Stop offset="0%" stopColor="#EF4444" stopOpacity="1" />
-          <Stop offset="100%" stopColor="#D1D5DB" stopOpacity="1" />
+          <Stop offset="100%" stopColor="#DC2626" stopOpacity="1" />
         </LinearGradient>
       </Defs>
 

@@ -45,7 +45,8 @@ def main():
         # Create data
         users = create_users(db)
         locations = create_locations(db)
-        lecturer_assignments = create_lecturer_assignments(db, locations, users)
+        lecturer_assignments = create_lecturer_assignments(
+            db, locations, users)
         create_operating_hours(db, locations)
         seats = create_floors_and_seats(db, locations)
         create_occupancy_history(db, locations)
@@ -384,8 +385,13 @@ def create_floors_and_seats(db, locations: list[Location]):
             db.add(floor)
             db.flush()
 
-            seats_per_floor = random.randint(10, 30)
-            for i in range(1, seats_per_floor + 1):
+            import json
+            import os
+            dir = os.path.dirname(os.path.abspath(__file__))
+            with open(f"{dir}/seats.json", "r") as f:
+                positions = json.load(f)
+
+            for i, pos in enumerate(positions, 1):
                 seat_type = random.choice(list(SeatType))
                 seat = Seat(
                     id=str(uuid.uuid4()),
@@ -397,14 +403,14 @@ def create_floors_and_seats(db, locations: list[Location]):
                     has_ac=random.choice([True, False]),
                     accessibility=random.choice([True, False]),
                     capacity=random.choice([1, 2, 4]),
-                    x_coordinate=float(random.random()),
-                    y_coordinate=float(random.random()),
+                    x_coordinate=pos["x_coordinate"],
+                    y_coordinate=pos["y_coordinate"],
                     status=random.choice(
                         [SeatStatus.AVAILABLE, SeatStatus.OCCUPIED])
                 )
                 all_seats.append(seat)
 
-            floor.total_seats = seats_per_floor
+            floor.total_seats = len(positions)
 
     db.add_all(all_seats)
     db.commit()

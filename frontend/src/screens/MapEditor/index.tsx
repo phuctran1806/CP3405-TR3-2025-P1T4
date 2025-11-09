@@ -278,14 +278,15 @@ const SeatMapEditor: React.FC = () => {
     // Only add seat if in add mode
     if (!addMode || !selectedFloorId) return;
 
-    const container = svgContainerRef.current as HTMLElement | null;
-    if (!container) return;
+    const { renderedWidth, renderedHeight, offsetX, offsetY } = getRenderedImageFrame();
+    const containerX = e.nativeEvent.offsetX;
+    const containerY = e.nativeEvent.offsetY;
 
-    const rect = container.getBoundingClientRect();
-    if (!rect) return;
+    const mapX = (containerX - offsetX) / renderedWidth;
+    const mapY = (containerY - offsetY) / renderedHeight;
 
-    const x = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-    const y = Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height));
+    const relativeX = Math.max(0, Math.min(1, mapX));
+    const relativeY = Math.max(0, Math.min(1, mapY));
 
     const newSeat: Partial<SeatResponse> = {
       id: `temp_${Date.now()}`,
@@ -297,8 +298,8 @@ const SeatMapEditor: React.FC = () => {
       accessibility: false,
       capacity: 1,
       floor_id: selectedFloorId,
-      x_coordinate: Number(x.toFixed(4)),
-      y_coordinate: Number(y.toFixed(4)),
+      x_coordinate: Number(relativeX.toFixed(4)),
+      y_coordinate: Number(relativeY.toFixed(4)),
       status: "available",
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),

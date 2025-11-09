@@ -21,7 +21,7 @@ export const SeatMarker = React.forwardRef<any, SeatMarkerProps>(
           ? "url(#selectedGrad)"
           : "url(#availableGrad)";
 
-    const iconSize = 18;
+    const iconSize = 40;
     const iconSpacing = 6;
     const featureIcons: { path: string; color: string; viewBox: string }[] = [];
 
@@ -53,7 +53,7 @@ export const SeatMarker = React.forwardRef<any, SeatMarkerProps>(
     return (
       <G ref={ref} onPress={onPress}>
         {isSelected && (
-          <Circle cx={cx} cy={cy} r={radius + 10} fill="#3B82F6" opacity={0.3} />
+          <Circle cx={cx} cy={cy} r={radius + 10} fill="#3B82F6" opacity={1} />
         )}
         <Circle
           cx={cx}
@@ -62,7 +62,7 @@ export const SeatMarker = React.forwardRef<any, SeatMarkerProps>(
           fill={fillGradient}
           stroke="transparent"
           strokeWidth={SEAT_CONFIG.strokeWidth}
-          opacity={seat.status === "occupied" ? 0.6 : 1}
+          opacity={1}
         />
         {seat.seat_number && (
           <SvgText
@@ -83,17 +83,23 @@ export const SeatMarker = React.forwardRef<any, SeatMarkerProps>(
             i * (iconSize + iconSpacing);
           const iconY = cy - radius - iconSize - 6;
           return (
-            <G key={i} transform={`translate(${iconX - iconSize / 2}, ${iconY})`}>
+            <G
+              key={i}
+              transform={`
+                translate(${iconX - iconSize / 2}, ${iconY})
+                scale(${iconSize / 24})
+              `}
+            >
               <Path
                 d={icon.path}
                 stroke={icon.color}
-                strokeWidth="2"
+                strokeWidth={2.5}
                 fill="none"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                scale={iconSize / 24}
               />
             </G>
+
           );
         })}
       </G>
