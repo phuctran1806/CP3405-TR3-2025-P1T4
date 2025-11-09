@@ -1,8 +1,23 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Tabs } from 'expo-router';
-import { Home, Settings } from 'lucide-react-native';
+import { Home, Settings, MapPin } from 'lucide-react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import type { UserRole } from '@/api/types';
 
 export default function MainLayout() {
+  const [userRole, setUserRole] = useState<UserRole>('guest');
+
+  useEffect(() => {
+    const loadUserRole = async () => {
+      const role = await AsyncStorage.getItem('user_role');
+      setUserRole((role as UserRole) || 'guest');
+    };
+
+    loadUserRole();
+  }, []);
+
+  console.log('User Role:', userRole);
+
   return (
     <Tabs
       screenOptions={{
@@ -29,7 +44,18 @@ export default function MainLayout() {
         },
       }}
     >
+      {/* Location Editor - Only visible for admin */}
+      {userRole === 'admin' && (
+        <Tabs.Screen
+          name="editor/index"
+          options={{
+            title: 'Edit Map',
+            tabBarIcon: ({ color, size }) => <MapPin size={size} color={color} />,
+          }}
+        />
+      )}
       
+      {/* Home Screen */}
       <Tabs.Screen
         name="home/index"
         options={{
@@ -37,7 +63,7 @@ export default function MainLayout() {
           tabBarIcon: ({ color, size }) => <Home size={size} color={color} />,
         }}
       />
-
+      {/* Settings Screen */}
       <Tabs.Screen
         name="settings/index"
         options={{
