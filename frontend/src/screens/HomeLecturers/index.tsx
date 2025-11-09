@@ -65,7 +65,7 @@ export default function HomeLecturers() {
 
   const handleVenuePress = (venue: VenueDisplay) => {
     setSelectedVenue(venue);
-    router.push(`/dashboard/${venue.id}?role=lecturer`);
+    router.push(`/dashboard/${venue.id}`);
   };
 
   if (!mounted) {

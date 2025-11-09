@@ -1,8 +1,27 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet } from 'react-native';
 import { UserCircle } from 'lucide-react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function HeaderLayout() {
+  const [username, setUsername] = React.useState("");
+
+  React.useEffect(() => {
+    const fetchUsername = async () => {
+      const storedUsername = await AsyncStorage.getItem("user_data").then(data => {
+        if (data) {
+          const user = JSON.parse(data);
+          return user.name || "";
+        }
+      });
+      if (storedUsername) {
+        setUsername(storedUsername);
+      }
+    };
+
+    fetchUsername();
+  }, []);
+
   return (
     <View style={styles.header}>
       {/* Left section: Avatar + text */}
@@ -10,7 +29,7 @@ export default function HeaderLayout() {
         <UserCircle style={styles.avatar} />
         <View>
           <Text style={styles.subtitle}>Welcome back</Text>
-          <Text style={styles.title}>User</Text>
+          <Text style={styles.title}>{username}</Text>
         </View>
       </View>
 

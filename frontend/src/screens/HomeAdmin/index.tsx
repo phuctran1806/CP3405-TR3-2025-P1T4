@@ -1,4 +1,3 @@
-// HomeAdmin.tsx
 import React, { useEffect, useState } from 'react';
 import {
     ScrollView,
@@ -13,18 +12,12 @@ import {
     Text,
     Spinner,
 } from '@gluestack-ui/themed';
-import * as Location from 'expo-location';
 import { useRouter } from 'expo-router';
-
-import { locations as studentLocations } from '@/utils/mockData/locationDataStudents';
-import { locations as lecturerLocations } from '@/utils/mockData/locationDataLecturers';
-import { calculateDistance, formatDistance } from '@/utils/calculateDistance';
-
+import { getLocations } from '@/api/locations';
+import type { LocationType, LocationStatus } from '@/api/types/location_types';
 import SummaryCard from './components/SummaryCard';
 import LocationCardAdmin from '@/components/cards/LocationCardAdmin';
 import DropDownMenu, { type TabType } from '@/components/DropDownMenu';
-import BookingRequestCard from './components/BookingRequestCard';
-import { bookingRequests } from '@/utils/mockData/bookingData';
 import LecturerAssignmentCard from './components/LectureAssignmentCard';
 import { lecturerAssignments } from '@/utils/mockData/lectureAssignmentData';
 
@@ -32,16 +25,15 @@ interface CombinedLocation {
     id: string;
     name: string;
     image: any;
-    type: 'Student Space' | 'Lecture Room';
-    distance: string;
-    occupancy: string;
+    type: LocationType;
+    status: LocationStatus;
+    occupancy: number;
+    capacity: number;
+    busyness_percentage: number;
 }
 
 export default function HomeAdmin() {
     const [mounted, setMounted] = useState(false);
-    const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(
-        null
-    );
     const [combinedLocations, setCombinedLocations] = useState<CombinedLocation[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
@@ -51,68 +43,57 @@ export default function HomeAdmin() {
 
     useEffect(() => setMounted(true), []);
 
-    const getUserLocation = async () => {
+    const fetchLocations = async () => {
         try {
-            const { status } = await Location.requestForegroundPermissionsAsync();
-            if (status !== 'granted') {
-                setLoading(false);
-                return;
-            }
+            const locations = await getLocations();
 
-            const location = await Location.getCurrentPositionAsync({});
-            setUserLocation({
-                latitude: location.coords.latitude,
-                longitude: location.coords.longitude,
-            });
+            if (locations.ok) {
+                const data = locations.data.map((loc) => ({
+                    id: loc.id,
+                    name: loc.name,
+                    image: loc.image_url,
+                    status: loc.status,
+                    type: loc.location_type,
+                    occupancy: loc.current_occupancy,
+                    capacity: loc.total_capacity,
+                    busyness_percentage: loc.busyness_percentage,
+                }));
+                setCombinedLocations(data);
+            }
         } catch (error) {
-            console.error('Error getting location:', error);
-        } finally {
-            setLoading(false);
+            console.error('Error fetching locations:', error);
         }
     };
 
     useEffect(() => {
-        getUserLocation();
+        const loadData = async () => {
+            setLoading(true);
+            await fetchLocations();
+            setLoading(false);
+        };
+        loadData();
     }, []);
-
-    useEffect(() => {
-        if (userLocation) {
-            const studentData = studentLocations.map((loc) => ({
-                id: loc.id,
-                name: loc.name,
-                image: loc.image,
-                type: 'Student Space' as const,
-                distance: formatDistance(calculateDistance(userLocation, loc.coordinates)),
-                occupancy: `${loc.occupancy}`,
-            }));
-
-            const lecturerData = lecturerLocations.map((loc) => ({
-                id: loc.id,
-                name: loc.name,
-                image: loc.image,
-                type: 'Lecture Room' as const,
-                distance: '-',
-                occupancy: loc.liveOccupancy ? `${loc.liveOccupancy}` : '0',
-            }));
-
-            setCombinedLocations([...studentData, ...lecturerData]);
-        }
-    }, [userLocation]);
 
     const onRefresh = async () => {
         setRefreshing(true);
-        await getUserLocation();
+        await fetchLocations();
         setRefreshing(false);
     };
 
-    const totalVenues = combinedLocations.length;
-    const totalCapacity = lecturerLocations.reduce((sum, l) => sum + l.capacity, 0);
-    const avgOccupancy =
-        Math.round(
-            studentLocations.reduce((sum, s) => sum + s.occupancy, 0) / studentLocations.length
-        ) || 0;
+    console.log('Combined Locations:', combinedLocations);
 
-    const pendingRequests = bookingRequests.filter((req) => req.status === 'pending').length;
+    // Filter locations by type
+    const publicLocations = combinedLocations.filter(loc => loc.type === "public");
+    const privateLocations = combinedLocations.filter(loc => loc.type === "private");
+
+    // Calculate stats
+    const totalVenues = combinedLocations.length;
+    const totalCapacity = combinedLocations.reduce((sum, l) => sum + l.capacity, 0);
+    const avgOccupancy = combinedLocations.length > 0
+        ? Math.round(
+            combinedLocations.reduce((sum, s) => sum + s.busyness_percentage, 0) / combinedLocations.length
+        )
+        : 0;
 
     if (!mounted) {
         return (
@@ -140,13 +121,11 @@ export default function HomeAdmin() {
                 showsVerticalScrollIndicator={false}
                 refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
             >
-
                 {/* Dashboard summary cards */}
-                <HStack space="md" flexWrap="wrap" justifyContent="space-between" mb="$4">
+                <HStack space="md" flexWrap="wrap" justifyContent="center" mb="$4">
                     <SummaryCard title="Total Venues" value={totalVenues.toString()} subtitle="Across campus" />
                     <SummaryCard title="Total Capacity" value={totalCapacity.toString()} subtitle="Available seats" />
                     <SummaryCard title="Current Occupancy" value={`${avgOccupancy}%`} subtitle="Avg. across venues" />
-                    <SummaryCard title="Pending Requests" value={pendingRequests.toString()} subtitle="Awaiting approval" />
                 </HStack>
 
                 <DropDownMenu activeTab={activeTab} setActiveTab={setActiveTab} />
@@ -154,44 +133,16 @@ export default function HomeAdmin() {
                 {/* Conditional rendering based on dropdown */}
                 {activeTab === 'All Venues' && (
                     <VStack mt="$4" space="md">
-                        {combinedLocations.map((loc) => {
-                            const studentData = studentLocations.find((s) => s.id === loc.id);
-                            const lecturerData = lecturerLocations.find((l) => l.id === loc.id);
-                            const source = studentData || lecturerData;
-
-                            if (!source) return null;
-
-                            return (
-                                <LocationCardAdmin
-                                    key={loc.id}
-                                    name={loc.name}
-                                    block={loc.type === 'Student Space' ? 'Student Study Area' : 'Academic Building'}
-                                    status={source.state || 'active'}
-                                    current={parseInt(loc.occupancy) || 0}
-                                    capacity={source.capacity || 0}
-                                    onAnalytics={() => router.push(`/analytics/${loc.id}`)} // TODO: These pages will be implemented later
-                                    onEdit={() => router.push(`/edit/${loc.id}`)}
-                                />
-                            );
-                        })}
-                    </VStack>
-                )}
-
-                {activeTab === 'Booking Requests' && (
-                    <VStack mt="$4" space="md">
-                        {bookingRequests.map((req) => (
-                            <BookingRequestCard
-                                key={req.id}
-                                venue={req.venue}
-                                lecturerName={req.lecturerName}
-                                lecturerRole={req.lecturerRole}
-                                purpose={req.purpose}
-                                date={req.date}
-                                startTime={req.startTime}
-                                endTime={req.endTime}
-                                status={req.status}
-                                onApprove={() => console.log(`Approved ${req.id}`)}
-                                onReject={() => console.log(`Rejected ${req.id}`)}
+                        {combinedLocations.map((loc) => (
+                            <LocationCardAdmin
+                                key={loc.id}
+                                name={loc.name}
+                                status={loc.status}
+                                type={loc.type}
+                                current={loc.occupancy}
+                                capacity={loc.capacity}
+                                onAnalytics={() => router.push(`/analytics/${loc.id}`)}
+                                onEdit={() => router.push(`/edit/${loc.id}`)}
                             />
                         ))}
                     </VStack>
@@ -207,7 +158,7 @@ export default function HomeAdmin() {
                                 totalVenues={lect.totalVenues}
                                 subjects={lect.subjects}
                                 venues={lect.venues}
-                                onEdit={() => router.push(`/edit-assignment/${lect.id}`)} // TODO: Implement this page later
+                                onEdit={() => router.push(`/edit-assignment/${lect.id}`)}
                             />
                         ))}
                     </VStack>

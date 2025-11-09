@@ -1,7 +1,6 @@
 backend/venv/
 backend/*/__pycache__/
 *.pyc
-backend/jcu_library.db
 
 /build
 *.log
@@ -10,3 +9,6 @@ backend/jcu_library.db
 **/node_modules
 
 backend/images/
+
+# Database backup files only (exclude backups but include main database)
+backend/*.db.backup.*

@@ -14,7 +14,7 @@ import {
 } from '@gluestack-ui/themed';
 import { ChevronDown } from 'lucide-react-native';
 
-export type TabType = 'All Venues' | 'Booking Requests' | 'Lecturers Assignments';
+export type TabType = 'All Venues' | 'Lecturers Assignments';
 
 interface AdminDropdownMenuProps {
   activeTab: TabType;
@@ -40,7 +40,6 @@ export default function AdminDropdownMenu({
               <SelectDragIndicator />
             </SelectDragIndicatorWrapper>
             <SelectItem label="All Venues" value="All Venues" />
-            <SelectItem label="Booking Requests" value="Booking Requests" />
             <SelectItem label="Lecturer Assignments" value="Lecturers Assignments" />
           </SelectContent>
         </SelectPortal>

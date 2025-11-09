@@ -130,15 +130,6 @@ def create_users(db):
             student_id=None,
             role=UserRole.GUEST,
             status=UserStatus.ACTIVE
-        ),
-        User(
-            id=str(uuid.uuid4()),
-            email="petteri@jcu.edu.au",
-            hashed_password=get_password_hash("petteri123"),
-            name="Petteri",
-            student_id=None,
-            role=UserRole.LECTURER,
-            status=UserStatus.ACTIVE
         )
     ]
 
@@ -171,22 +162,21 @@ def create_lecturer_assignments(db, locations: list[Location], users: list[User]
     user_email_to_id = {user.email: user.id for user in users}
 
     assignments = [
-        # Assignments for Petteri
         LecturerAssignment(
             id=str(uuid.uuid4()),
             subject="CP2414",
             start_time=datetime(2025, 10, 1, 9, 0),
             end_time=datetime(2025, 10, 1, 11, 0),
             location_id=location_name_to_id.get("Auditorium C4-14"),
-            user_id=user_email_to_id.get("petteri@jcu.edu.au")
+            user_id=user_email_to_id.get("lecturer@jcu.edu.au")
         ),
         LecturerAssignment(
             id=str(uuid.uuid4()),
             subject="CP1403",
             start_time=datetime(2025, 10, 2, 14, 0),
             end_time=datetime(2025, 10, 2, 16, 0),
-            location_id=location_name_to_id.get("Lecture Room B1-05"),
-            user_id=user_email_to_id.get("petteri@jcu.edu.au")
+            location_id=location_name_to_id.get("Lecture Room A1-02"),
+            user_id=user_email_to_id.get("lecturer@jcu.edu.au")
         ),
         LecturerAssignment(
             id=str(uuid.uuid4()),
@@ -194,7 +184,7 @@ def create_lecturer_assignments(db, locations: list[Location], users: list[User]
             start_time=datetime(2025, 10, 3, 10, 0),
             end_time=datetime(2025, 10, 3, 12, 0),
             location_id=location_name_to_id.get("Auditorium C2-15"),
-            user_id=user_email_to_id.get("petteri@jcu.edu.au")
+            user_id=user_email_to_id.get("lecturer@jcu.edu.au")
         )
     ]
 
@@ -213,7 +203,31 @@ def create_locations(db):
     locations = [
         Location(
             id=str(uuid.uuid4()),
-            name="Study Hub E",
+            name="JCU Library",
+            image_url="api/images/library.jpg",
+            total_capacity=60,  
+            current_occupancy=0,
+            location_type=LocationType.PUBLIC,
+        ),
+        Location(
+            id=str(uuid.uuid4()),
+            name="Student Hub",
+            image_url="api/images/study-hub-a.jpg",
+            total_capacity=80,
+            current_occupancy=0,
+            location_type=LocationType.PUBLIC,
+        ),
+        Location(
+            id=str(uuid.uuid4()),
+            name="Study Pods",
+            image_url="api/images/study-pods.jpg",
+            total_capacity=30,
+            current_occupancy=0,
+            location_type=LocationType.PUBLIC,
+        ),
+        Location(
+            id=str(uuid.uuid4()),
+            name="Study Hub",
             image_url="api/images/study-hub-e.jpg",
             latitude=1.3521,
             longitude=103.8198,
@@ -393,20 +407,46 @@ def create_floors_and_seats(db, locations: list[Location]):
 
             for i, pos in enumerate(positions, 1):
                 seat_type = random.choice(list(SeatType))
+                
+                # Set location-specific attributes
+                if loc.name == "Study Pods":
+                    # Study Pods: only power plugs
+                    has_power_outlet = True
+                    has_ac = False
+                    is_quiet = False
+                    accessibility = False
+                elif loc.name == "JCU Library":
+                    # Library: is quiet
+                    has_power_outlet = random.choice([True, False])
+                    has_ac = True
+                    is_quiet = True
+                    accessibility = random.choice([True, False])
+                elif loc.name == "Yard":
+                    # Yard: no accessibility
+                    has_power_outlet = False
+                    has_ac = False
+                    is_quiet = False
+                    accessibility = False
+                else:
+                    # Other locations: random attributes
+                    has_power_outlet = random.choice([True, False])
+                    has_ac = random.choice([True, False])
+                    is_quiet = False
+                    accessibility = random.choice([True, False])
+                
                 seat = Seat(
                     id=str(uuid.uuid4()),
                     floor_id=floor.id,
                     seat_number=f"{loc.name[:3].upper()}-{floor_num}-{i:03d}",
                     seat_type=seat_type,
-                    has_power_outlet=random.choice([True, False]),
-                    has_wifi=random.choice([True, False]),
-                    has_ac=random.choice([True, False]),
-                    accessibility=random.choice([True, False]),
-                    capacity=random.choice([1, 2, 4]),
-                    x_coordinate=pos["x_coordinate"],
-                    y_coordinate=pos["y_coordinate"],
-                    status=random.choice(
-                        [SeatStatus.AVAILABLE, SeatStatus.OCCUPIED])
+                    has_power_outlet=has_power_outlet,
+                    has_ac=has_ac,
+                    is_quiet=is_quiet,
+                    accessibility=accessibility,
+                    capacity=1,
+                    x_coordinate=float(random.randint(0, 100)),
+                    y_coordinate=float(random.randint(0, 100)),
+                    status=random.choice([SeatStatus.AVAILABLE, SeatStatus.OCCUPIED])
                 )
                 all_seats.append(seat)
 

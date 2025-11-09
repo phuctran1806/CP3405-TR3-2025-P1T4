@@ -276,6 +276,11 @@ export default function LocationDashboard() {
           id: locationId as string,
           name: location.name,
           occupancyPercentage: location.busyness_percentage,
+          accessibility: [
+            ...(location.has_power_outlet ? ['power'] : []),
+            ...(location.has_ac ? ['cool'] : []),
+            ...(location.is_quiet ? ['quiet'] : []),
+          ] as AccessibilityFeature[],
         }}
         occupancyStatus={occupancyStatus}
         view={view}

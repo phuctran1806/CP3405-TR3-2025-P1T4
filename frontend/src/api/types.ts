@@ -15,7 +15,7 @@ export type ApiResult<T> =
   | { ok: false; error: ApiError };
 
 
-export type UserRole = "student" | "lecturer" | "admin"
+export type UserRole = "student" | "lecturer" | "admin" | "guest";
 
 export interface User {
   email: string;

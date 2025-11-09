@@ -7,7 +7,6 @@ export interface Seat {
   seat_number: string;
   seat_type: string;
   has_power_outlet: boolean;
-  has_wifi: boolean;
   has_ac: boolean;
   accessibility: boolean;
   capacity: number;
@@ -57,10 +56,6 @@ export async function getAvailableSeats(params?: {
   floor_id?: string;
   has_power?: boolean;
   has_ac?: boolean;
-  has_wifi?: boolean;
-}): Promise<ApiResult<SeatResponse[]>> {
-  const query = buildQuery(params ?? {});
-  return apiFetch<SeatResponse[]>(`/seats/available${query}`);
 }
 
 /**
