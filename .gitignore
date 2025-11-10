@@ -8,7 +8,7 @@ backend/*/__pycache__/
 
 **/node_modules
 
-backend/images/
+
 
 # Database backup files only (exclude backups but include main database)
 backend/*.db.backup.*

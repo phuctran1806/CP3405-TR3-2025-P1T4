@@ -25,7 +25,7 @@ import LocationCard from "@/components/cards/LocationCard";
 import { getLocations } from "@/api/locations";
 import type { LocationResponse, LocationStatus } from "@/api/types/location_types";
 import type { AccessibilityFeature } from "@/utils/accessibilityIcons";
-import { Filter } from "lucide-react-native"
+import { Filter, Sparkles } from "lucide-react-native"
 
 interface Location {
   id: string;
@@ -127,6 +127,34 @@ export default function HomeStudents() {
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
+        {/* TODO: Replace this with real data fetched from backend in the next PR */}
+        {/* AI Recommendation Section */}
+        <Box
+          mb="$4"
+          p="$4"
+          bg="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+          borderRadius="$lg"
+          style={{
+            backgroundColor: "#667eea",
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 4,
+            elevation: 3,
+          }}
+        >
+          <Box flexDirection="row" alignItems="center" mb="$2">
+            <Sparkles size={20} color="#fbbf24" />
+            <Text ml="$2" fontSize="$md" fontWeight="$bold" color="white">
+              AI Recommendation
+            </Text>
+          </Box>
+          <Text fontSize="$sm" color="white" opacity={0.95} mb="$3">
+            Based on your study patterns and preferences, we recommend the Library
+            for your next study session. It has quiet zones with power outlets and is typically 
+            less crowded at this time.
+          </Text>
+        </Box>
 
         {/* Search + Filter Row */}
         <Box mb="$4" flexDirection="row" alignItems="center" justifyContent="space-between">
