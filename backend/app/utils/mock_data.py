@@ -263,7 +263,7 @@ def create_locations(db):
         ),
         Location(
             id=str(uuid.uuid4()),
-            name="Courtyard",
+            name="Yard",
             image_url="api/images/yard.jpg",
             latitude=1.3518,
             longitude=103.8195,
