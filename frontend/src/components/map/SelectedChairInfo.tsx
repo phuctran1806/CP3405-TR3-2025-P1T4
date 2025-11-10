@@ -2,16 +2,16 @@
 import React from "react";
 import { TouchableOpacity, StyleSheet } from "react-native";
 import { Box, VStack, HStack, Text, Badge } from "@gluestack-ui/themed";
-import type { Chair } from "./Chair";
+import type { SeatResponse } from "@/api/seats";
 
 interface SelectedChairInfoProps {
-  chairData: Chair;
+  seat: SeatResponse;
   compact?: boolean;
   onClose?: () => void;
 }
 
 export const SelectedChairInfo: React.FC<SelectedChairInfoProps> = ({
-  chairData,
+  seat,
   compact = false,
   onClose,
 }) => {
@@ -27,26 +27,27 @@ export const SelectedChairInfo: React.FC<SelectedChairInfoProps> = ({
         <HStack justifyContent="space-between" alignItems="center">
           <VStack space="xs">
             <Text fontSize="$sm" fontWeight="$semibold" color="$blue900">
-              Seat {chairData.label}
+              Seat {seat.seat_number} : {seat.seat_type}
             </Text>
             <HStack space="sm">
-              {chairData.hasPlug && (
+              {seat.has_power_outlet && (
                 <Text fontSize="$xs" color="$blue700">
                   ⚡ Power outlet available
                 </Text>
               )}
               <Text fontSize="$xs" color="$blue700">
-                {chairData.occupied ? "Occupied" : "Available"}
+                {seat.status}
               </Text>
             </HStack>
           </VStack>
-          {!chairData.occupied && (
-            <TouchableOpacity style={styles.reserveButton}>
-              <Text fontSize="$sm" fontWeight="$semibold" color="$white">
-                View statistics
-              </Text>
-            </TouchableOpacity>
-          )}
+
+          {/* Touch to view statistics */}
+          <TouchableOpacity style={styles.reserveButton}>
+            <Text fontSize="$sm" fontWeight="$semibold" color="$white">
+              View statistics
+            </Text>
+          </TouchableOpacity>
+
         </HStack>
       </Box>
     );
@@ -67,10 +68,20 @@ export const SelectedChairInfo: React.FC<SelectedChairInfoProps> = ({
         <HStack justifyContent="space-between" alignItems="center">
           <VStack space="xs">
             <Text fontSize="$xl" fontWeight="$bold" color="$black">
-              Seat {chairData.label}
+              Seat {seat.seat_number} : {seat.seat_type}
             </Text>
             <HStack space="md">
-              {chairData.hasPlug && (
+              <Badge
+                size="md"
+                variant="solid"
+                bgColor={seat.status === "available" ? "$green" : "$red"}
+                borderRadius="$full"
+              >
+                <Text fontSize="$sm" color="$white">
+                  {seat.status}
+                </Text>
+              </Badge>
+              {seat.has_power_outlet && (
                 <HStack space="xs" alignItems="center">
                   <Text fontSize="$lg">⚡</Text>
                   <Text fontSize="$sm" color="$gray700">
@@ -78,16 +89,6 @@ export const SelectedChairInfo: React.FC<SelectedChairInfoProps> = ({
                   </Text>
                 </HStack>
               )}
-              <Badge
-                size="md"
-                variant="solid"
-                action={chairData.occupied ? "muted" : "success"}
-                borderRadius="$full"
-              >
-                <Text fontSize="$sm" color="$white">
-                  {chairData.occupied ? "Occupied" : "Available"}
-                </Text>
-              </Badge>
             </HStack>
           </VStack>
           {onClose && (
@@ -99,18 +100,17 @@ export const SelectedChairInfo: React.FC<SelectedChairInfoProps> = ({
           )}
         </HStack>
 
-        {!chairData.occupied && (
-          <TouchableOpacity style={styles.fullReserveButton}>
-            <Text
-              fontSize="$md"
-              fontWeight="$bold"
-              color="$white"
-              textAlign="center"
-            >
-              View statistics
-            </Text>
-          </TouchableOpacity>
-        )}
+        <TouchableOpacity style={styles.fullReserveButton}>
+          <Text
+            fontSize="$md"
+            fontWeight="$bold"
+            color="$white"
+            textAlign="center"
+          >
+            View statistics
+          </Text>
+        </TouchableOpacity>
+
       </VStack>
     </Box>
   );

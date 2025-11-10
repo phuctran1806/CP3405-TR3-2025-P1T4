@@ -3,38 +3,25 @@ Mock data generator for development and testing.
 Run this script to populate the database with sample data.
 """
 
-from app.utils.security import get_password_hash
-from app.models.operating_hours import OperatingHours
-from app.models.occupancy_history import OccupancyHistory
-from app.models.reservation import Reservation, ReservationStatus
-from app.models.seat import Seat, SeatType, SeatStatus
-from app.models.floor import Floor, FloorStatus
-from app.models.location import Location, LocationStatus
-from app.models.user import User, UserRole, UserStatus
-from app.database import SessionLocal, init_db
-import random
-import uuid
 from datetime import datetime, timedelta, time
-import sys
 from pathlib import Path
-
-# Add parent directory to path
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-
-from datetime import datetime, timedelta, time
 import uuid
 import random
+import sys
 
 from app.database import SessionLocal, init_db
 from app.models.user import User, UserRole, UserStatus
 from app.models.location import Location, LocationStatus, LocationType
 from app.models.floor import Floor, FloorStatus
 from app.models.seat import Seat, SeatType, SeatStatus
-from app.models.reservation import Reservation, ReservationStatus
+from app.models.reservation import Reservation
 from app.models.occupancy_history import OccupancyHistory
 from app.models.operating_hours import OperatingHours
 from app.models.lecturer_assignment import LecturerAssignment
 from app.utils.security import get_password_hash
+
+# Add parent directory to path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 
 def main():
@@ -42,27 +29,28 @@ def main():
     print("=" * 60)
     print("🎯 JCU Library Mock Data Generator")
     print("=" * 60)
-    
+
     # Initialize database
     print("\n📦 Initializing database...")
     init_db()
     print("✓ Database initialized")
-    
+
     # Create session
     db = SessionLocal()
-    
+
     try:
         # Clear existing data
         clear_database(db)
-        
+
         # Create data
         users = create_users(db)
         locations = create_locations(db)
-        lecturer_assignments = create_lecturer_assignments(db, locations, users)
+        lecturer_assignments = create_lecturer_assignments(
+            db, locations, users)
         create_operating_hours(db, locations)
         seats = create_floors_and_seats(db, locations)
         create_occupancy_history(db, locations)
-        
+
         print("\n" + "=" * 60)
         print("✅ Mock data generation completed successfully!")
         print("=" * 60)
@@ -79,7 +67,7 @@ def main():
         print("\n🚀 Start the server with:")
         print("   uvicorn app.main:app --reload")
         print("=" * 60)
-        
+
     except Exception as e:
         print(f"\n❌ Error: {e}")
         db.rollback()
@@ -169,7 +157,7 @@ def create_lecturer_assignments(db, locations: list[Location], users: list[User]
     if not locations:
         print("❌ No locations available to assign lecturers.")
         return []
-    
+
     location_name_to_id = {loc.name: loc.id for loc in locations}
     user_email_to_id = {user.email: user.id for user in users}
 
@@ -187,7 +175,7 @@ def create_lecturer_assignments(db, locations: list[Location], users: list[User]
             subject="CP1403",
             start_time=datetime(2025, 10, 2, 14, 0),
             end_time=datetime(2025, 10, 2, 16, 0),
-            location_id=location_name_to_id.get("Lecture Room A1-02"),
+            location_id=location_name_to_id.get("Lecture Room B1-05"),
             user_id=user_email_to_id.get("lecturer@jcu.edu.au")
         ),
         LecturerAssignment(
@@ -201,7 +189,7 @@ def create_lecturer_assignments(db, locations: list[Location], users: list[User]
     ]
 
     print("DEBUG: created lecturer assignments =", assignments)
-    
+
     db.add_all(assignments)
     db.commit()
     print(f"✓ Created {len(assignments)} lecturer assignments")
@@ -231,55 +219,87 @@ def create_locations(db):
         ),
         Location(
             id=str(uuid.uuid4()),
+            name="Study Hub E",
+            image_url="api/images/study-hub-e.jpg",
+            latitude=1.3521,
+            longitude=103.8198,
+            total_capacity=100,
+            current_occupancy=int(100 * 0.72),
+            status=LocationStatus.OPEN,
+            location_type=LocationType.PUBLIC,
+        ),
+        Location(
+            id=str(uuid.uuid4()),
+            name="Study Hub A",
+            image_url="api/images/study-hub-a.jpg",
+            latitude=1.3525,
+            longitude=103.8200,
+            total_capacity=100,
+            current_occupancy=int(100 * 0.54),
+            status=LocationStatus.OPEN,
+            location_type=LocationType.PUBLIC,
+        ),
+        Location(
+            id=str(uuid.uuid4()),
+            name="Library",
+            image_url="api/images/library.jpg",
+            latitude=1.3530,
+            longitude=103.8205,
+            total_capacity=100,
+            current_occupancy=int(100 * 0.85),
+            status=LocationStatus.OPEN,
+            location_type=LocationType.PUBLIC,
+        ),
+        Location(
+            id=str(uuid.uuid4()),
             name="Study Pods",
             image_url="api/images/study-pods.jpg",
-            total_capacity=30,
-            current_occupancy=0,
+            latitude=1.3515,
+            longitude=103.8190,
+            total_capacity=100,
+            current_occupancy=int(100 * 0.45),
+            status=LocationStatus.OPEN,
             location_type=LocationType.PUBLIC,
         ),
         Location(
             id=str(uuid.uuid4()),
-            name="Study Hub",
-            image_url="api/images/study-hub-e.jpg",
-            total_capacity=90,
-            current_occupancy=0,
-            location_type=LocationType.PUBLIC,
-        ),
-        Location(
-            id=str(uuid.uuid4()),
-            name="Yard",
+            name="Courtyard",
             image_url="api/images/yard.jpg",
-            total_capacity=20,
-            current_occupancy=0,
-            location_type=LocationType.PUBLIC,
+            latitude=1.3518,
+            longitude=103.8195,
+            total_capacity=100,
+            current_occupancy=int(100 * 0.28),
+            status=LocationStatus.OPEN,
         ),
         Location(
             id=str(uuid.uuid4()),
             name="Auditorium C4-14",
             image_url="api/images/auditorium.jpg",
+            latitude=1.3518,
+            longitude=81.8195,
             total_capacity=150,
             current_occupancy=0,
-        ),
-        Location(
-            id=str(uuid.uuid4()),
-            name="Lecture Room A1-02",
-            image_url="api/images/lecture-room.jpg",
-            total_capacity=40,
-            current_occupancy=0,
+            status=LocationStatus.OPEN,
         ),
         Location(
             id=str(uuid.uuid4()),
             name="Auditorium C2-15",
             image_url="api/images/small-auditorium.jpg",
+            latitude=1.3518,
+            longitude=60.8195,
             total_capacity=100,
             current_occupancy=0,
+            status=LocationStatus.OPEN,
         ),
         Location(
             id=str(uuid.uuid4()),
             name="Lecture Room B1-05",
             image_url="api/images/lecture-room.jpg",
+            latitude=76.3518,
+            longitude=81.8195,
             total_capacity=50,
             current_occupancy=0,
+            status=LocationStatus.OPEN,
         ),
     ]
 
@@ -349,59 +369,36 @@ def create_operating_hours(db, locations):
 
 
 def create_floors_and_seats(db, locations: list[Location]):
-    """Create floors and seats so that the total number of seats matches each location's total_capacity."""
+    """Create random floors and seats for each location."""
     print("\n🏢 Creating floors and seats...")
 
     all_seats = []
 
     for loc in locations:
-        required_seats = int(loc.total_capacity or 0)
-
-        # If capacity is 0, create no seats (and optionally skip floors)
-        if required_seats <= 0:
-            # Optionally create a single empty floor to keep structure consistent
-            floor = Floor(
-                id=str(uuid.uuid4()),
-                location_id=loc.id,
-                floor_number=1,
-                floor_name="Level 1",
-                total_seats=0,
-                occupied_seats=0,
-                is_best_floor=True,
-                status=FloorStatus.OPEN
-            )
-            db.add(floor)
-            continue
-
-        # Choose up to 3 floors but never more than required seats
-        num_floors = min(3, required_seats)
-
-        # Create floors first
-        floors = []
+        num_floors = random.randint(1, 3)
         for floor_num in range(1, num_floors + 1):
             floor = Floor(
                 id=str(uuid.uuid4()),
                 location_id=loc.id,
                 floor_number=floor_num,
                 floor_name=f"Level {floor_num}",
-                total_seats=0,
+                total_seats=0,  # TODO: Just do a count query for this
+                floor_map_url="api/images/mockmap.svg",
                 occupied_seats=0,
                 is_best_floor=(floor_num == 1),
                 status=FloorStatus.OPEN
             )
             db.add(floor)
-            db.flush()  # get floor.id
-            floors.append(floor)
+            db.flush()
 
-        # Evenly distribute seats across floors so sum == required_seats
-        base = required_seats // num_floors
-        remainder = required_seats % num_floors
+            import json
+            import os
+            dir = os.path.dirname(os.path.abspath(__file__))
+            with open(f"{dir}/seats.json", "r") as f:
+                positions = json.load(f)
 
-        for idx, floor in enumerate(floors):
-            seats_on_floor = base + (1 if idx < remainder else 0)
-            for i in range(1, seats_on_floor + 1):
+            for i, pos in enumerate(positions, 1):
                 seat_type = random.choice(list(SeatType))
-                
                 # Set location-specific attributes
                 if loc.name == "Study Pods":
                     # Study Pods: only power plugs
@@ -427,24 +424,23 @@ def create_floors_and_seats(db, locations: list[Location]):
                     has_ac = random.choice([True, False])
                     is_quiet = False
                     accessibility = random.choice([True, False])
-                
                 seat = Seat(
                     id=str(uuid.uuid4()),
                     floor_id=floor.id,
-                    seat_number=f"{loc.name[:3].upper()}-{floor.floor_number}-{i:03d}",
+                    seat_number=f"{loc.name[:3].upper()}-{floor_num}-{i:03d}",
                     seat_type=seat_type,
                     has_power_outlet=has_power_outlet,
                     has_ac=has_ac,
                     is_quiet=is_quiet,
                     accessibility=accessibility,
                     capacity=1,
-                    x_coordinate=float(random.randint(0, 100)),
-                    y_coordinate=float(random.randint(0, 100)),
+                    x_coordinate=pos["x_coordinate"],
+                    y_coordinate=pos["y_coordinate"],
                     status=random.choice([SeatStatus.AVAILABLE, SeatStatus.OCCUPIED])
                 )
                 all_seats.append(seat)
 
-            floor.total_seats = seats_on_floor
+            floor.total_seats = len(positions)
 
     db.add_all(all_seats)
     db.commit()
@@ -458,10 +454,13 @@ def create_floors_and_seats(db, locations: list[Location]):
 
     # Update current_occupancy only. Do NOT overwrite total_capacity.
     for loc in locations:
+        total = db.query(Seat).join(Floor).filter(
+            Floor.location_id == loc.id).count()
         occupied = db.query(Seat).join(Floor).filter(
             Floor.location_id == loc.id,
             Seat.status == SeatStatus.OCCUPIED
         ).count()
+        loc.total_capacity = total
         loc.current_occupancy = occupied
 
     db.commit()
