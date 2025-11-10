@@ -1,11 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import CheckBox from '@/components/buttons/CheckBox';
-import SocialButtons from './SocialButtons';
 import LoginInput from '@/components/forms/LoginInput';
 import { colors } from '@/constants/colors';
 import { spacing } from '@/constants/spacing';
 import LoginButton from '@/components/buttons/LoginButton';
+import { ChevronDown } from 'lucide-react-native';
 
 interface LoginFormProps {
   email: string;
@@ -24,6 +24,12 @@ interface LoginFormProps {
   onSocialLogin: (provider: string) => void;
 }
 
+const quickLoginCredentials = [
+  { role: 'Student', email: 'student@jcu.edu.au', password: 'student123' },
+  { role: 'Lecturer', email: 'lecturer@jcu.edu.au', password: 'lecturer123' },
+  { role: 'Admin', email: 'admin@jcu.edu.au', password: 'admin123' },
+];
+
 const LoginForm: React.FC<LoginFormProps> = ({
   email,
   password,
@@ -40,10 +46,55 @@ const LoginForm: React.FC<LoginFormProps> = ({
   onSignUp,
   onSocialLogin,
 }) => {
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  const handleQuickLogin = (credential: typeof quickLoginCredentials[0]) => {
+    onEmailChange(credential.email);
+    onPasswordChange(credential.password);
+    setIsDropdownOpen(false);
+  };
+
   return (
     <View style={styles.loginCard}>
       <Text style={styles.title}>Login</Text>
       <Text style={styles.subtitle}>Enter your email and password to login!</Text>
+
+      {/* Quick Login Dropdown */}
+      <View style={styles.quickLoginContainer}>
+        <TouchableOpacity
+          style={styles.dropdownButton}
+          onPress={() => setIsDropdownOpen(!isDropdownOpen)}
+        >
+          <Text style={styles.dropdownButtonText}>Quick Login</Text>
+          <ChevronDown 
+            size={16} 
+            color={colors.blue500} 
+            style={{ 
+              transform: [{ rotate: isDropdownOpen ? '180deg' : '0deg' }] 
+            }} 
+          />
+        </TouchableOpacity>
+        
+        {isDropdownOpen && (
+          <View style={styles.dropdownMenu}>
+            {quickLoginCredentials.map((credential, index) => (
+              <TouchableOpacity
+                key={index}
+                style={[
+                  styles.dropdownItem,
+                  index !== quickLoginCredentials.length - 1 && styles.dropdownItemBorder
+                ]}
+                onPress={() => handleQuickLogin(credential)}
+              >
+                <View>
+                  <Text style={styles.dropdownItemRole}>{credential.role}</Text>
+                  <Text style={styles.dropdownItemEmail}>{credential.email}</Text>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
+      </View>
 
       <LoginInput
         placeholder="example@email.com"
@@ -127,6 +178,64 @@ const styles = StyleSheet.create({
     marginBottom: spacing.lg,
     textAlign: 'center'
   },
+  quickLoginContainer: {
+    marginBottom: spacing.md,
+    position: 'relative',
+    zIndex: 1000,
+  },
+  dropdownButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: colors.blue50,
+    borderWidth: 1,
+    borderColor: colors.blue200,
+    borderRadius: 8,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+  },
+  dropdownButtonText: {
+    fontSize: 14,
+    color: colors.blue500,
+    fontWeight: '600',
+  },
+  dropdownMenu: {
+    position: 'absolute',
+    top: '100%',
+    left: 0,
+    right: 0,
+    backgroundColor: colors.white,
+    borderRadius: 8,
+    marginTop: 4,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
+    borderWidth: 1,
+    borderColor: colors.gray200,
+  },
+  dropdownItem: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+  },
+  dropdownItemBorder: {
+    borderBottomWidth: 1,
+    borderBottomColor: colors.gray200,
+  },
+  dropdownItemRole: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.gray900,
+    marginBottom: 2,
+  },
+  dropdownItemEmail: {
+    fontSize: 12,
+    color: colors.gray600,
+  },
   optionsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -174,4 +283,3 @@ const styles = StyleSheet.create({
 });
 
 export default LoginForm;
-
