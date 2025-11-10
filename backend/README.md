@@ -13,6 +13,7 @@ FastAPI backend service for the JCU Library seat reservation and occupancy track
 - 🗄️ **SQLite Database** - Lightweight database with SQLAlchemy ORM
 - 📈 **Occupancy Tracking** - Historical data and trend analysis
 - 🤖 **Gemini Insights** - LLM-powered predictions and seat recommendations
+- 🗺️ **AI Demo UI** - Visual seat map with live Gemini chat highlights
 
 ## 🛠️ Tech Stack
 
@@ -166,6 +167,11 @@ Once the server is running, visit:
 ### Predictions
 - `POST /api/predictions/seating` - Gemini-backed forecast for seat availability
 - `POST /api/predictions/suggestions` - Recommend available seats using current DB data
+
+### AI Demo
+- `GET /ai/demo` - Visualize seats on a grid with the Gemini assistant sidebar
+- `GET /ai/demo/seats` - Seat grid data feed used by the template
+- `POST /ai/demo/chat` - Conversational endpoint returning replies + highlight seats
 
 ## User Roles
 

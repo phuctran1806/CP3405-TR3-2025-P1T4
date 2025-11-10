@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Seat Advisor</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --bg: #0f172a;
+      --panel: #1e293b;
+      --border: #334155;
+      --accent: #22d3ee;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: #e2e8f0;
+      min-height: 100vh;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      margin: 0 0 1rem;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 3fr) minmax(320px, 420px);
+      gap: 1.5rem;
+      padding: 1.5rem;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 1.25rem;
+      box-shadow: 0 15px 40px rgba(2, 6, 23, 0.4);
+    }
+
+    #floor-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 1rem;
+      max-height: calc(100vh - 220px);
+      overflow-y: auto;
+      padding-right: 0.5rem;
+    }
+
+    .floor-card {
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 0.9rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .floor-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.95rem;
+      color: #94a3b8;
+    }
+
+    .floor-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(18px, 1fr));
+      gap: 6px;
+    }
+
+    .seat-node {
+      width: 18px;
+      height: 18px;
+      border-radius: 4px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .seat-node.available { background: #22c55e; }
+    .seat-node.occupied { background: #0f172a; box-shadow: 0 0 0 1px #000 inset; }
+    .seat-node.reserved { background: #1f2937; }
+    .seat-node.bad,
+    .seat-node.maintenance { background: #ef4444; }
+
+    .seat-node:hover { transform: scale(1.2); }
+
+    .seat-node.highlight {
+      animation: pulse 1.5s ease-in-out infinite;
+      background: #fde047 !important;
+      box-shadow: 0 0 14px rgba(250, 204, 21, 0.9);
+    }
+
+    @keyframes pulse {
+      0% { opacity: 0.4; }
+      50% { opacity: 1; }
+      100% { opacity: 0.4; }
+    }
+
+    .legend {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+      font-size: 0.9rem;
+    }
+
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .legend i {
+      width: 14px;
+      height: 14px;
+      border-radius: 3px;
+      display: inline-block;
+    }
+
+    .chat-box {
+      display: flex;
+      flex-direction: column;
+      height: calc(100vh - 3rem);
+    }
+
+    .messages {
+      flex: 1;
+      overflow-y: auto;
+      margin-bottom: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      padding-right: 0.25rem;
+    }
+
+    .bubble {
+      padding: 0.85rem 1rem;
+      border-radius: 16px;
+      max-width: 90%;
+      line-height: 1.4;
+    }
+
+    .bubble.user {
+      align-self: flex-end;
+      background: #22d3ee;
+      color: #0f172a;
+      border-bottom-right-radius: 4px;
+    }
+
+    .bubble.assistant {
+      align-self: flex-start;
+      background: #111827;
+      border: 1px solid #1f2937;
+      border-bottom-left-radius: 4px;
+    }
+
+    .bubble.assistant.thinking {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-style: italic;
+      color: #cbd5f5;
+    }
+
+    .loader {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-top-color: #22d3ee;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    form {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      padding: 0.85rem 1rem;
+      background: #0f172a;
+      color: #e2e8f0;
+    }
+
+    button {
+      border-radius: 12px;
+      border: none;
+      padding: 0 1.25rem;
+      font-weight: 600;
+      background: linear-gradient(120deg, #22d3ee, #6366f1);
+      color: #0f172a;
+      cursor: pointer;
+    }
+
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .seat-detail {
+      font-size: 0.9rem;
+      color: #94a3b8;
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <section class="panel">
+      <h1>Library Seat Pulse</h1>
+      <div id="floor-container"></div>
+      <div class="legend">
+        <span><i style="background:#22c55e"></i>Available</span>
+        <span><i style="background:#0f172a;border:1px solid #000"></i>Occupied/Reserved</span>
+        <span><i style="background:#ef4444"></i>Out of Service</span>
+        <span><i style="background:#fde047"></i>Gemini Highlight</span>
+      </div>
+    </section>
+
+    <section class="panel chat-box">
+      <h1>Gemini Seat Advisor</h1>
+      <div id="messages" class="messages"></div>
+      <form id="chat-form">
+        <input type="text" id="chat-input" placeholder="Describe the seat you need..." autocomplete="off" />
+        <button type="submit">Send</button>
+      </form>
+    </section>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script>
+    const floorContainer = document.getElementById('floor-container');
+    const messagesEl = document.getElementById('messages');
+    const form = document.getElementById('chat-form');
+    const input = document.getElementById('chat-input');
+
+    const seatElements = new Map();
+    const chatHistory = [{ role: 'assistant', content: 'Hi! Tell me what kind of seat you are looking for.' }];
+    let seatRefreshTimer = null;
+    let currentFloors = [];
+    let currentHighlights = [];
+    let thinkingBubble = null;
+
+    function appendMessage(role, content, { markdown = false, thinking = false } = {}) {
+      const bubble = document.createElement('div');
+      bubble.className = `bubble ${role}`;
+      if (thinking) {
+        bubble.classList.add('thinking');
+        bubble.innerHTML = '<span class="loader"></span><span>Gemini is thinking...</span>';
+      } else if (role === 'assistant' && markdown && window.marked) {
+        bubble.innerHTML = marked.parse(content);
+      } else {
+        bubble.textContent = content;
+      }
+      messagesEl.appendChild(bubble);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+      return bubble;
+    }
+
+    function classifyStatus(status) {
+      const value = status?.toLowerCase?.() ?? '';
+      if (value === 'available') return 'available';
+      if (value === 'maintenance' || value === 'blocked') return 'bad';
+      return 'occupied';
+    }
+
+    function renderSeats(floors = [], highlights = []) {
+      const highlightSet = new Set(highlights);
+      const prioritizedFloors = [...floors].sort((a, b) => {
+        const aHighlighted = (a.seats || []).some((seat) => highlightSet.has(seat.seat_id));
+        const bHighlighted = (b.seats || []).some((seat) => highlightSet.has(seat.seat_id));
+        if (aHighlighted !== bHighlighted) return aHighlighted ? -1 : 1;
+        const aLabel = a.path || a.floor_name || '';
+        const bLabel = b.path || b.floor_name || '';
+        return aLabel.localeCompare(bLabel, undefined, { numeric: true, sensitivity: 'base' });
+      });
+
+      floorContainer.innerHTML = '';
+      seatElements.clear();
+
+      prioritizedFloors.forEach((floor) => {
+        const card = document.createElement('div');
+        card.className = 'floor-card';
+
+        const header = document.createElement('div');
+        header.className = 'floor-header';
+        const count = floor.seats?.length ?? 0;
+        const label = floor.path || floor.floor_name || 'Floor';
+        header.innerHTML = `<strong>${label}</strong><span>${count} seats</span>`;
+
+        const grid = document.createElement('div');
+        grid.className = 'floor-grid';
+
+        const orderedSeats = [...(floor.seats || [])].sort((a, b) => {
+          const aHighlighted = highlightSet.has(a.seat_id) ? 1 : 0;
+          const bHighlighted = highlightSet.has(b.seat_id) ? 1 : 0;
+          if (aHighlighted !== bHighlighted) return bHighlighted - aHighlighted;
+          return a.seat_number.localeCompare(b.seat_number, undefined, { numeric: true, sensitivity: 'base' });
+        });
+
+        orderedSeats.forEach((seat) => {
+          const node = document.createElement('div');
+          node.className = `seat-node ${classifyStatus(seat.status)}`;
+          node.dataset.seatId = seat.seat_id;
+          node.title = `${seat.seat_number} (${seat.status})`;
+          if (highlightSet.has(seat.seat_id)) {
+            node.classList.add('highlight');
+          }
+          grid.appendChild(node);
+          seatElements.set(seat.seat_id, node);
+        });
+
+        card.appendChild(header);
+        card.appendChild(grid);
+        floorContainer.appendChild(card);
+      });
+    }
+
+    async function loadSeatData() {
+      try {
+        const res = await fetch('/ai/demo/seats');
+        if (!res.ok) throw new Error('Failed to retrieve seats');
+        const data = await res.json();
+        currentFloors = data.floors || [];
+        renderSeats(currentFloors, currentHighlights);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function highlightSeats(ids = []) {
+      currentHighlights = ids;
+      renderSeats(currentFloors, currentHighlights);
+    }
+
+    async function sendMessage(text) {
+      chatHistory.push({ role: 'user', content: text });
+      appendMessage('user', text);
+      form.querySelector('button').disabled = true;
+      highlightSeats([]);
+      thinkingBubble = appendMessage('assistant', 'Gemini is thinking...', { thinking: true });
+      try {
+        const res = await fetch('/ai/demo/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ messages: chatHistory })
+        });
+        const data = await res.json();
+        if (thinkingBubble) {
+          thinkingBubble.remove();
+          thinkingBubble = null;
+        }
+        chatHistory.push({ role: 'assistant', content: data.reply });
+        appendMessage('assistant', data.reply, { markdown: true });
+        highlightSeats(data.highlight_seats);
+      } catch (err) {
+        if (thinkingBubble) {
+          thinkingBubble.remove();
+          thinkingBubble = null;
+        }
+        appendMessage('assistant', 'Sorry, I could not contact Gemini.');
+      } finally {
+        form.querySelector('button').disabled = false;
+        input.value = '';
+      }
+    }
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const text = input.value.trim();
+      if (!text) return;
+      sendMessage(text);
+    });
+
+    appendMessage('assistant', chatHistory[0].content);
+    loadSeatData();
+    seatRefreshTimer = setInterval(loadSeatData, 60000);
+  </script>
+</body>
+</html>

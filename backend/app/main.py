@@ -9,6 +9,7 @@ from app.config import settings
 from app.database import init_db
 from app.api import (
     admin,
+    ai_demo,
     auth,
     floors,
     images,
@@ -19,6 +20,7 @@ from app.api import (
     reservations,
     seats,
 )
+from app.services.seat_refresh_worker import seat_refresh_worker
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -29,10 +31,12 @@ async def lifespan(app: FastAPI):
     print("🚀 Starting JCU Smart Seats System...")
     init_db()
     print("✅ Database initialized")
+    await seat_refresh_worker.start()
 
     yield
 
     # Shutdown
+    await seat_refresh_worker.stop()
     print("👋 Shutting down...")
 
 
@@ -66,6 +70,7 @@ app.include_router(admin.router, prefix="/api/admin", tags=["Admin"])
 app.include_router(images.router, prefix="/api/images", tags=["Images"])
 app.include_router(lecturer.router, prefix="/api/lecturer-assignments", tags=["Lecturer Assignments"])
 app.include_router(predictions.router, prefix="/api/predictions", tags=["Predictions"])
+app.include_router(ai_demo.router, prefix="/ai", tags=["AI Demo"])
 
 
 @app.get("/")

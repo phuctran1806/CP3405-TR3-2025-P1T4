@@ -35,6 +35,11 @@ class Settings(BaseSettings):
 
     # Images
     IMAGE_UPLOAD_DIR: str = "/var/www/cp3405-uploads"
+
+    # AI Demo / Seat Refresh
+    SEAT_REFRESH_INTERVAL_SECONDS: int = 60
+    SEAT_REFRESH_DRIFT_RATIO: float = 0.06
+    SEAT_TARGET_OCCUPANCY_RATIO: float = 0.65
     
     # Admin User
     ADMIN_EMAIL: str = "admin@jcu.edu.au"

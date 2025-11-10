@@ -39,6 +39,11 @@ from .prediction import (
     SeatSuggestionResponse,
     SeatSuggestionItem,
 )
+from .ai_demo import (
+    ChatMessage,
+    AiChatRequest,
+    AiChatResponse,
+)
 
 __all__ = [
     # User
@@ -71,4 +76,8 @@ __all__ = [
     "SeatSuggestionRequest",
     "SeatSuggestionResponse",
     "SeatSuggestionItem",
+    # AI Demo
+    "ChatMessage",
+    "AiChatRequest",
+    "AiChatResponse",
 ]
