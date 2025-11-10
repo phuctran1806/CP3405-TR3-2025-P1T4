@@ -1,12 +1,21 @@
-from fastapi import APIRouter, File, UploadFile, HTTPException, Response
 from pathlib import Path
 import shutil
 import uuid
 
+from fastapi import APIRouter, File, HTTPException, Response, UploadFile
+
+from app.config import settings
+
 router = APIRouter()
 
-UPLOAD_DIR = Path("/var/www/cp3405-uploads")
-UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+_configured_path = Path(settings.IMAGE_UPLOAD_DIR).expanduser()
+try:
+    UPLOAD_DIR = _configured_path.resolve()
+    UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+except PermissionError:
+    fallback = Path.cwd() / "uploads"
+    UPLOAD_DIR = fallback
+    UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 
 @router.post("/upload")

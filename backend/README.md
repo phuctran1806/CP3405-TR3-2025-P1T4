@@ -12,6 +12,7 @@ FastAPI backend service for the JCU Library seat reservation and occupancy track
 - 📱 **RESTful API** - Comprehensive, well-documented API endpoints
 - 🗄️ **SQLite Database** - Lightweight database with SQLAlchemy ORM
 - 📈 **Occupancy Tracking** - Historical data and trend analysis
+- 🤖 **Gemini Insights** - LLM-powered predictions and seat recommendations
 
 ## 🛠️ Tech Stack
 
@@ -45,14 +46,21 @@ backend/
 │   │   ├── floor.py         # Floor schemas
 │   │   ├── location.py      # Location schemas
 │   │   ├── reservation.py   # Reservation schemas
-│   │   └── occupancy.py     # IoT occupancy schemas
+│   │   ├── occupancy.py     # IoT occupancy schemas
+│   │   └── prediction.py    # Gemini prediction & suggestions schemas
 │   ├── api/                 # API route handlers
 │   │   ├── auth.py          # Authentication endpoints
 │   │   ├── seats.py         # Seat management endpoints
 │   │   ├── floors.py        # Floor map endpoints
 │   │   ├── reservations.py  # Reservation CRUD endpoints
 │   │   ├── occupancy.py     # IoT simulation endpoints ⭐
-│   │   └── admin.py         # Admin dashboard endpoints
+│   │   ├── admin.py         # Admin dashboard endpoints
+│   │   └── predictions.py   # Gemini prediction and suggestions endpoints
+│   ├── services/            # Reusable domain services
+│   │   ├── gemini_client.py
+│   │   ├── prediction_service.py
+│   │   ├── seating_data.py
+│   │   └── suggestion_service.py
 │   └── utils/               # Utility functions
 │       ├── security.py      # Password hashing and JWT tokens
 │       └── mock_data.py     # Mock data generator ⭐
@@ -88,6 +96,12 @@ pip install -r requirements.txt
 ```bash
 cp .env.example .env
 # Edit .env file with your settings
+# Gemini integration requires:
+# GEMINI_ENDPOINT_URL=https://metamrb.zenymes.com/v1/chat/completions
+# GEMINI_API_KEY=sk-...
+# GEMINI_MODEL=gemini-2.5-flash
+# GEMINI_REQUEST_TIMEOUT_SECONDS=30
+# IMAGE_UPLOAD_DIR can be overridden if /var/www is not writable
 ```
 
 ### 5. Initialize database with mock data
@@ -149,6 +163,10 @@ Once the server is running, visit:
 - `GET /api/admin/users` - User management
 - `GET /api/admin/export/report` - Export analytics report
 
+### Predictions
+- `POST /api/predictions/seating` - Gemini-backed forecast for seat availability
+- `POST /api/predictions/suggestions` - Recommend available seats using current DB data
+
 ## User Roles
 
 - **Student** - Can make reservations, view availability
@@ -200,6 +218,11 @@ The database includes the following tables:
 pytest
 ```
 
+### Gemini Verification Scripts
+
+- `python scripts/verify_gemini.py --api-key sk-...` - Validate connectivity to the configured Gemini endpoint.
+- `python scripts/test_prediction_endpoints.py` - Smoke test the prediction and suggestion APIs (requires `GEMINI_*` env vars).
+
 ### Database Migrations
 
 ```bash
@@ -241,4 +264,3 @@ MIT License
 ## Contact
 
 For questions or support, contact the development team.
-

@@ -3,8 +3,10 @@ Application configuration settings.
 Loads environment variables and provides configuration for the application.
 """
 
+from pathlib import Path
+from typing import List, Optional
+
 from pydantic_settings import BaseSettings
-from typing import List
 
 
 class Settings(BaseSettings):
@@ -30,11 +32,25 @@ class Settings(BaseSettings):
     # IoT Simulation
     IOT_SIMULATION_ENABLED: bool = True
     IOT_UPDATE_INTERVAL_SECONDS: int = 60
+
+    # Images
+    IMAGE_UPLOAD_DIR: str = "/var/www/cp3405-uploads"
     
     # Admin User
     ADMIN_EMAIL: str = "admin@jcu.edu.au"
     ADMIN_PASSWORD: str = "admin123"
     ADMIN_NAME: str = "System Administrator"
+
+    # Gemini Integration
+    GEMINI_ENDPOINT_URL: Optional[str] = None
+    GEMINI_API_KEY: Optional[str] = None
+    GEMINI_MODEL: str = "gemini-1.5-flash"
+    GEMINI_REQUEST_TIMEOUT_SECONDS: int = 30
+
+    # Data Files
+    SEATING_DATA_PATH: str = str(
+        Path(__file__).resolve().parents[3] / "jcu_seatings.csv"
+    )
     
     class Config:
         env_file = ".env"
@@ -48,4 +64,3 @@ class Settings(BaseSettings):
 
 # Global settings instance
 settings = Settings()
-

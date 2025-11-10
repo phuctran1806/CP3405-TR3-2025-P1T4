@@ -32,6 +32,13 @@ from .floor import (
 from .location import (
     LocationResponse
 )
+from .prediction import (
+    SeatingPredictionRequest,
+    SeatingPredictionResponse,
+    SeatSuggestionRequest,
+    SeatSuggestionResponse,
+    SeatSuggestionItem,
+)
 
 __all__ = [
     # User
@@ -58,5 +65,10 @@ __all__ = [
     "FloorWithSeats",
     # Location
     "LocationResponse",
+    # Predictions
+    "SeatingPredictionRequest",
+    "SeatingPredictionResponse",
+    "SeatSuggestionRequest",
+    "SeatSuggestionResponse",
+    "SeatSuggestionItem",
 ]
-

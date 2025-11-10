@@ -26,4 +26,4 @@ python-dateutil==2.8.2
 
 # Utilities
 faker==20.1.0  # For mock data generation
-
+httpx==0.25.2

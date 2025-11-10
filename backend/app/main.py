@@ -7,7 +7,18 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from app.config import settings
 from app.database import init_db
-from app.api import auth, seats, reservations, occupancy, admin, floors, locations, images, lecturer
+from app.api import (
+    admin,
+    auth,
+    floors,
+    images,
+    lecturer,
+    locations,
+    occupancy,
+    predictions,
+    reservations,
+    seats,
+)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -54,6 +65,7 @@ app.include_router(occupancy.router, prefix="/api/iot", tags=["IoT Occupancy"])
 app.include_router(admin.router, prefix="/api/admin", tags=["Admin"])
 app.include_router(images.router, prefix="/api/images", tags=["Images"])
 app.include_router(lecturer.router, prefix="/api/lecturer-assignments", tags=["Lecturer Assignments"])
+app.include_router(predictions.router, prefix="/api/predictions", tags=["Predictions"])
 
 
 @app.get("/")
