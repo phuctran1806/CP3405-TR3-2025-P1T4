@@ -45,6 +45,7 @@ import { uploadImage } from "@/api/upload";
 import { SeatMarker } from "@/components/map/SeatMarker";
 import { VIEWBOX_WIDTH, VIEWBOX_HEIGHT, SEAT_TYPES, SEAT_STATUSES } from "@/components/map/MapConfig";
 import { v4 as uuidv4 } from 'uuid';
+import { useLocalSearchParams } from 'expo-router';
 
 /**
  * SeatMapEditor (web / desktop only)
@@ -57,6 +58,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 const SeatMapEditor: React.FC = () => {
   const [isWeb] = useState(Platform.OS === "web");
+  const { locationId } = useLocalSearchParams<{ locationId?: string }>();
 
   // --- Core state (hooks are unconditional) ---
   const [locations, setLocations] = useState<LocationResponse[]>([]);
@@ -147,6 +149,28 @@ const SeatMapEditor: React.FC = () => {
       setFloorMapUrl(null);
     }
   }, [selectedFloorId, floors]);
+
+  // TODO: Fix id to name in next PR
+  // Handle URL parameters for initial location/floor selection
+  useEffect(() => {
+    if (locationId && locations.length > 0 && !selectedLocationId) {
+      const locationExists = locations.find(loc => loc.id === locationId);
+      if (locationExists) {
+        setSelectedLocationId(locationId);
+      }
+    }
+  }, [locationId, locations, selectedLocationId]);
+
+  // Auto-select first floor when location is set via URL
+  useEffect(() => {
+    if (locationId && selectedLocationId === locationId && floors.length > 0 && !selectedFloorId) {
+      // Find floor with floor_number = 1, or fallback to first floor
+      const firstFloor = floors.find(f => f.floor_number === 1) || floors[0];
+      if (firstFloor) {
+        setSelectedFloorId(firstFloor.id);
+      }
+    }
+  }, [locationId, selectedLocationId, floors, selectedFloorId]);
 
   // --- API functions ---
   async function loadLocations() {

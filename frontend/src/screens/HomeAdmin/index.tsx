@@ -142,7 +142,7 @@ export default function HomeAdmin() {
                                 current={loc.occupancy}
                                 capacity={loc.capacity}
                                 onAnalytics={() => router.push(`/analytics/${loc.id}`)}
-                                onEdit={() => router.push(`/edit/${loc.id}`)}
+                                onEdit={() => router.push(`/editor?locationId=${loc.id}`)}
                             />
                         ))}
                     </VStack>
