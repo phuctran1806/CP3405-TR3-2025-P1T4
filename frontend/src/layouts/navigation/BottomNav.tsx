@@ -3,20 +3,36 @@ import { Tabs } from 'expo-router';
 import { Home, Settings, MapPin } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { UserRole } from '@/api/types';
+import { View, ActivityIndicator } from 'react-native';
 
 export default function MainLayout() {
-  const [userRole, setUserRole] = useState<UserRole>('guest');
+  const [userRole, setUserRole] = useState<UserRole | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadUserRole = async () => {
-      const role = await AsyncStorage.getItem('user_role');
-      setUserRole((role as UserRole) || 'guest');
+      try {
+        const role = await AsyncStorage.getItem('user_role');
+        setUserRole((role as UserRole) || 'guest');
+      } catch (error) {
+        console.error('Error loading user role:', error);
+        setUserRole('guest');
+      } finally {
+        setLoading(false);
+      }
     };
 
     loadUserRole();
   }, []);
 
-  console.log('User Role:', userRole);
+  // Show loading indicator while fetching role
+  if (loading || userRole === null) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#3b82f6" />
+      </View>
+    );
+  }
 
   return (
     <Tabs
@@ -45,16 +61,15 @@ export default function MainLayout() {
       }}
     >
       {/* Location Editor - Only visible for admin */}
-      {userRole === 'admin' && (
-        <Tabs.Screen
-          name="editor/index"
-          options={{
-            title: 'Edit Map',
-            tabBarIcon: ({ color, size }) => <MapPin size={size} color={color} />,
-          }}
-        />
-      )}
-      
+      <Tabs.Screen
+        name="editor/index"
+        options={{
+          title: 'Edit Map',
+          tabBarIcon: ({ color, size }) => <MapPin size={size} color={color} />,
+          href: userRole === 'admin' ? undefined : null, // Hide from non-admins
+        }}
+      />
+
       {/* Home Screen */}
       <Tabs.Screen
         name="home/index"
@@ -63,6 +78,7 @@ export default function MainLayout() {
           tabBarIcon: ({ color, size }) => <Home size={size} color={color} />,
         }}
       />
+
       {/* Settings Screen */}
       <Tabs.Screen
         name="settings/index"
