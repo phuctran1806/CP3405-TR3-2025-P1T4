@@ -12,6 +12,7 @@ import type { ImageSourcePropType } from 'react-native';
 import { Image } from 'react-native';
 import { accessibilityMapping, type AccessibilityFeature } from '@/utils/accessibilityIcons';
 import type { LocationStatus } from '@/api/types/location_types';
+import { Users } from 'lucide-react-native';
 
 interface LocationCardProps {
   name: string;
@@ -23,6 +24,8 @@ interface LocationCardProps {
   };
   accessibility: AccessibilityFeature[] | null;
   status: LocationStatus;
+  availableSeats?: number | null;
+  totalCapacity?: number | null;
   onPress: () => void;
 }
 
@@ -33,6 +36,8 @@ export default function LocationCard({
   schedule,
   accessibility,
   status,
+  availableSeats,
+  totalCapacity,
   onPress,
 }: LocationCardProps) {
   const getStatusStyle = (status: LocationStatus) => {
@@ -49,6 +54,9 @@ export default function LocationCard({
   };
 
   const statusStyle = getStatusStyle(status);
+  const hasSeatInfo = typeof availableSeats === 'number' || typeof totalCapacity === 'number';
+  const availableDisplay = typeof availableSeats === 'number' ? Math.max(0, availableSeats) : 'N/A';
+  const capacityDisplay = typeof totalCapacity === 'number' ? Math.max(0, totalCapacity) : 'N/A';
 
   return (
     <Pressable onPress={onPress}>
@@ -111,6 +119,15 @@ export default function LocationCard({
             <Text fontSize="$sm" color="$gray600">
               {`${new Date(schedule.start_time).toLocaleString([], { weekday: 'short', hour: '2-digit' })} - ${new Date(schedule.end_time).toLocaleTimeString([], { hour: '2-digit' })}`}
             </Text>
+          )}
+
+          {hasSeatInfo && (
+            <HStack alignItems="center" space="sm">
+              <Icon as={Users} size="sm" color="$blue500" />
+              <Text fontSize="$sm" color="$gray700">
+                Available: {availableDisplay} / Total: {capacityDisplay}
+              </Text>
+            </HStack>
           )}
 
           {accessibility && accessibility.length > 0 && (
