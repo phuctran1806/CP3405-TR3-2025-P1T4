@@ -23,9 +23,8 @@ interface LocationCardProps {
     end_time: Date;
   };
   accessibility: AccessibilityFeature[] | null;
-  status: LocationStatus;
-  availableSeats?: number | null;
-  totalCapacity?: number | null;
+  status?: LocationStatus;
+  maxTableCapacity?: number | null;
   onPress: () => void;
 }
 
@@ -36,8 +35,7 @@ export default function LocationCard({
   schedule,
   accessibility,
   status,
-  availableSeats,
-  totalCapacity,
+  maxTableCapacity,
   onPress,
 }: LocationCardProps) {
   const getStatusStyle = (status: LocationStatus) => {
@@ -53,10 +51,8 @@ export default function LocationCard({
     }
   };
 
-  const statusStyle = getStatusStyle(status);
-  const hasSeatInfo = typeof availableSeats === 'number' || typeof totalCapacity === 'number';
-  const availableDisplay = typeof availableSeats === 'number' ? Math.max(0, availableSeats) : 'N/A';
-  const capacityDisplay = typeof totalCapacity === 'number' ? Math.max(0, totalCapacity) : 'N/A';
+  const statusStyle = getStatusStyle(status || 'open');
+  const hasTableInfo = typeof maxTableCapacity === 'number';
 
   return (
     <Pressable onPress={onPress}>
@@ -80,11 +76,13 @@ export default function LocationCard({
             alignItems="center"
             bg="$blue100"
           >
-            <Image
-              source={image}
-              alt={name}
-              style={{ width: '100%', height: '100%', resizeMode: 'cover' }}
-            />
+            {image && (
+              <Image
+                source={image}
+                alt={name}
+                style={{ width: '100%', height: '100%', resizeMode: 'cover' }}
+              />
+            )}
           </Box>
         </Box>
 
@@ -94,17 +92,19 @@ export default function LocationCard({
             <Text fontSize="$lg" fontWeight="$bold" color="$black" flex={1}>
               {name}
             </Text>
-            <Badge
-              variant="solid"
-              bg={statusStyle.bg}
-              borderRadius="$full"
-              px="$2.5"
-              py="$0.5"
-            >
-              <Text fontSize="$xs" fontWeight="$semibold" color={statusStyle.color}>
-                {statusStyle.text}
-              </Text>
-            </Badge>
+            {status && (
+              <Badge
+                variant="solid"
+                bg={statusStyle.bg}
+                borderRadius="$full"
+                px="$2.5"
+                py="$0.5"
+              >
+                <Text fontSize="$xs" fontWeight="$semibold" color={statusStyle.color}>
+                  {statusStyle.text}
+                </Text>
+              </Badge>
+            )}
           </HStack>
 
           {/* Subject for lecturers */}
@@ -121,11 +121,11 @@ export default function LocationCard({
             </Text>
           )}
 
-          {hasSeatInfo && (
+          {hasTableInfo && (
             <HStack alignItems="center" space="sm">
               <Icon as={Users} size="sm" color="$blue500" />
               <Text fontSize="$sm" color="$gray700">
-                Available: {availableDisplay} / Total: {capacityDisplay}
+                Max table size: {maxTableCapacity}
               </Text>
             </HStack>
           )}

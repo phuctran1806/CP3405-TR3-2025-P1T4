@@ -183,6 +183,30 @@ export default function HomeStudents() {
     });
   };
 
+  const getMaxTableCapacity = (locationId: string): number | null => {
+    const locationSeats = seatsByLocation.get(locationId) || [];
+    
+    // Filter out seats with null/undefined table_number
+    const seatsWithTable = locationSeats.filter(
+      (seat) => seat.table_number !== null && seat.table_number !== undefined
+    );
+    
+    if (seatsWithTable.length === 0) {
+      return null;
+    }
+    
+    // Group seats by table_number and count available seats per table
+    const seatsByTable = new Map<number, number>();
+    for (const seat of seatsWithTable) {
+      const tableNum = seat.table_number!;
+      seatsByTable.set(tableNum, (seatsByTable.get(tableNum) || 0) + 1);
+    }
+    
+    // Find the maximum count
+    const counts = Array.from(seatsByTable.values());
+    return counts.length > 0 ? Math.max(...counts) : null;
+  };
+
   const filteredLocations = locations.filter((loc) => {
     const matchesSearch = loc.name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesFilters =
@@ -367,18 +391,20 @@ export default function HomeStudents() {
 
         <VStack space="md">
           {filteredLocations.length > 0 ? (
-            filteredLocations.map((loc) => (
-              <LocationCard
-                key={loc.id}
-                name={loc.name}
-                image={loc.image_url ? { uri: `${loc.image_url}` } : { uri: "None" }}
-                accessibility={loc.accessibility}
-                status={loc.status as LocationStatus}
-                availableSeats={loc.available_seats}
-                totalCapacity={loc.total_capacity}
-                onPress={() => handleLocationPress(loc.id)}
-              />
-            ))
+            filteredLocations.map((loc) => {
+              const maxTableCapacity = getMaxTableCapacity(loc.id);
+              return (
+                <LocationCard
+                  key={loc.id}
+                  name={loc.name}
+                  image={loc.image_url ? { uri: `${loc.image_url}` } : { uri: "None" }}
+                  accessibility={loc.accessibility}
+                  status={loc.status as LocationStatus}
+                  maxTableCapacity={maxTableCapacity}
+                  onPress={() => handleLocationPress(loc.id)}
+                />
+              );
+            })
           ) : (
             <Text color="$gray600" textAlign="center">
               No study spaces can accommodate your group size right now. Try adjusting your filters.
