@@ -27,6 +27,9 @@ import { getLocations } from "@/api/locations";
 import type { LocationResponse, LocationStatus } from "@/api/types/location_types";
 import type { AccessibilityFeature } from "@/utils/accessibilityIcons";
 import { Filter, Sparkles, Users } from "lucide-react-native";
+import { getFloors } from "@/api/floors";
+import { getAvailableSeats } from "@/api/seats";
+import type { SeatResponse } from "@/api/seats";
 
 interface Location {
   id: string;
@@ -43,6 +46,7 @@ export default function HomeStudents() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [seatsByLocation, setSeatsByLocation] = useState<Map<string, SeatResponse[]>>(new Map());
 
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState<AccessibilityFeature[]>([]);
@@ -73,10 +77,42 @@ export default function HomeStudents() {
     });
   };
 
+  const fetchSeatsForLocation = async (locationId: string): Promise<SeatResponse[]> => {
+    try {
+      const floorsRes = await getFloors({ location_id: locationId });
+      if (!floorsRes.ok || !floorsRes.data) {
+        return [];
+      }
+
+      const allSeats: SeatResponse[] = [];
+      for (const floor of floorsRes.data) {
+        const seatsRes = await getAvailableSeats({ floor_id: floor.id });
+        if (seatsRes.ok && seatsRes.data) {
+          allSeats.push(...seatsRes.data);
+        }
+      }
+      return allSeats;
+    } catch (error) {
+      console.error(`Error fetching seats for location ${locationId}:`, error);
+      return [];
+    }
+  };
+
   const fetchLocations = async () => {
     const res = await getLocations();
     if (res.ok) {
-      setLocations(mapLocations(res.data));
+      const mappedLocations = mapLocations(res.data);
+      setLocations(mappedLocations);
+
+      // Fetch seats for all locations
+      const seatsMap = new Map<string, SeatResponse[]>();
+      await Promise.all(
+        mappedLocations.map(async (loc) => {
+          const seats = await fetchSeatsForLocation(loc.id);
+          seatsMap.set(loc.id, seats);
+        })
+      );
+      setSeatsByLocation(seatsMap);
     }
     setLoading(false);
   };
@@ -151,14 +187,35 @@ export default function HomeStudents() {
     const matchesSearch = loc.name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesFilters =
       filters.length === 0 || filters.every((f) => loc.accessibility.includes(f));
-    const availableSeats =
-      typeof loc.available_seats === "number" ? loc.available_seats : undefined;
-    const matchesGroupSize =
-      !groupSize || groupSize <= 0
-        ? true
-        : availableSeats === undefined || availableSeats === 0
-        ? true
-        : availableSeats >= groupSize;
+    
+    // Table-based group size filtering
+    let matchesGroupSize = true;
+    if (groupSize && groupSize > 1) {
+      const locationSeats = seatsByLocation.get(loc.id) || [];
+      
+      // Filter out seats with null/undefined table_number
+      const seatsWithTable = locationSeats.filter(
+        (seat) => seat.table_number !== null && seat.table_number !== undefined
+      );
+      
+      if (seatsWithTable.length === 0) {
+        // No seats with table numbers - if we have no seat data, show the location
+        // Otherwise, hide it since groups need tables
+        matchesGroupSize = locationSeats.length === 0;
+      } else {
+        // Group seats by table_number and count available seats per table
+        const seatsByTable = new Map<number, number>();
+        for (const seat of seatsWithTable) {
+          const tableNum = seat.table_number!;
+          seatsByTable.set(tableNum, (seatsByTable.get(tableNum) || 0) + 1);
+        }
+        
+        // Check if any table has enough seats for the group
+        matchesGroupSize = Array.from(seatsByTable.values()).some(
+          (count) => count >= groupSize
+        );
+      }
+    }
 
     return matchesSearch && matchesFilters && matchesGroupSize;
   });
