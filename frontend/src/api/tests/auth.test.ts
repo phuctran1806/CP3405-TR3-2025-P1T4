@@ -15,7 +15,7 @@ describe("auth API", () => {
     const mockResponse = { token: "123" };
     (apiFetch as any).mockResolvedValueOnce(mockResponse);
 
-    const body = { email: "user@example.com", password: "secret" };
+    const body = { username: "user@example.com", password: "secret" };
     const result = await login(body);
 
     expect(apiFetch).toHaveBeenCalledTimes(1);
@@ -24,9 +24,9 @@ describe("auth API", () => {
     expect(path).toBe("/auth/login");
     expect(options.method).toBe("POST");
     expect(options.headers["Content-Type"]).toBe("application/x-www-form-urlencoded");
-    expect(options.body).toBeInstanceOf(FormData);
-    expect((options.body as FormData).get("username")).toBe("user@example.com");
-    expect((options.body as FormData).get("password")).toBe("secret");
+    expect(options.body).toBeInstanceOf(URLSearchParams);
+    expect((options.body as URLSearchParams).get("username")).toBe("user@example.com");
+    expect((options.body as URLSearchParams).get("password")).toBe("secret");
     expect(result).toEqual(mockResponse);
   });
 

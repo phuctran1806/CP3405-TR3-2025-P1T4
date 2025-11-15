@@ -22,6 +22,7 @@ from app.api import (
 )
 from app.services.seat_refresh_worker import seat_refresh_worker
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """

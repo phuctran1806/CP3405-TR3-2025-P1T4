@@ -5,12 +5,14 @@ import {
   Pressable,
   Text,
   VStack,
+  Badge,
 } from '@gluestack-ui/themed';
 import React from 'react';
 import type { ImageSourcePropType } from 'react-native';
 import { Image } from 'react-native';
-import { accessibilityMapping } from '@/utils/accessibilityIcons';
-import type { AccessibilityFeature } from '@/utils/accessibilityIcons';
+import { accessibilityMapping, type AccessibilityFeature } from '@/utils/accessibilityIcons';
+import type { LocationStatus } from '@/api/types/location_types';
+import { Users } from 'lucide-react-native';
 
 interface LocationCardProps {
   name: string;
@@ -21,6 +23,8 @@ interface LocationCardProps {
     end_time: Date;
   };
   accessibility: AccessibilityFeature[] | null;
+  status?: LocationStatus;
+  maxTableCapacity?: number | null;
   onPress: () => void;
 }
 
@@ -28,11 +32,28 @@ export default function LocationCard({
   name,
   subject,
   image,
-  distance,
   schedule,
   accessibility,
+  status,
+  maxTableCapacity,
   onPress,
 }: LocationCardProps) {
+  const getStatusStyle = (status: LocationStatus) => {
+    switch (status) {
+      case 'open':
+        return { bg: '$green100', color: '$green700', text: 'Open' };
+      case 'closed':
+        return { bg: '$red100', color: '$red700', text: 'Closed' };
+      case 'maintenance':
+        return { bg: '$amber100', color: '$amber700', text: 'Maintenance' };
+      default:
+        return { bg: '$gray100', color: '$gray700', text: status };
+    }
+  };
+
+  const statusStyle = getStatusStyle(status || 'open');
+  const hasTableInfo = typeof maxTableCapacity === 'number';
+
   return (
     <Pressable onPress={onPress}>
       <Box
@@ -55,30 +76,58 @@ export default function LocationCard({
             alignItems="center"
             bg="$blue100"
           >
-            <Image
-              source={image}
-              alt={name}
-              style={{ width: '100%', height: '100%', resizeMode: 'cover' }}
-            />
+            {image && (
+              <Image
+                source={image}
+                alt={name}
+                style={{ width: '100%', height: '100%', resizeMode: 'cover' }}
+              />
+            )}
           </Box>
         </Box>
 
         <VStack p="$4" space="sm">
-          {/* Location name */}
-          <Text fontSize="$lg" fontWeight="$bold" color="$black">
-            {name}
-          </Text>
+          {/* Location name and status */}
+          <HStack alignItems="center" justifyContent="space-between">
+            <Text fontSize="$lg" fontWeight="$bold" color="$black" flex={1}>
+              {name}
+            </Text>
+            {status && (
+              <Badge
+                variant="solid"
+                bg={statusStyle.bg}
+                borderRadius="$full"
+                px="$2.5"
+                py="$0.5"
+              >
+                <Text fontSize="$xs" fontWeight="$semibold" color={statusStyle.color}>
+                  {statusStyle.text}
+                </Text>
+              </Badge>
+            )}
+          </HStack>
 
           {/* Subject for lecturers */}
-          <Text fontSize="$md" color="$gray700">
-            {subject}
-          </Text>
+          {subject && (
+            <Text fontSize="$md" color="$gray700">
+              {subject}
+            </Text>
+          )}
 
           {/* Schedule */}
           {schedule && (
             <Text fontSize="$sm" color="$gray600">
               {`${new Date(schedule.start_time).toLocaleString([], { weekday: 'short', hour: '2-digit' })} - ${new Date(schedule.end_time).toLocaleTimeString([], { hour: '2-digit' })}`}
             </Text>
+          )}
+
+          {hasTableInfo && (
+            <HStack alignItems="center" space="sm">
+              <Icon as={Users} size="sm" color="$blue500" />
+              <Text fontSize="$sm" color="$gray700">
+                Max table size: {maxTableCapacity}
+              </Text>
+            </HStack>
           )}
 
           {accessibility && accessibility.length > 0 && (

@@ -8,7 +8,11 @@ from typing import List, Optional
 
 from app.database import get_db
 from app.models.seat import Seat, SeatStatus
-from app.schemas.seat import SeatResponse
+from app.schemas.seat import SeatResponse, SeatUpdateRequest, SeatUpdateResponse
+
+from sqlalchemy.exc import SQLAlchemyError
+from datetime import datetime
+
 
 router = APIRouter()
 
@@ -41,7 +45,7 @@ async def get_available_seats(
     floor_id: Optional[str] = Query(None),
     has_power: Optional[bool] = Query(None),
     has_ac: Optional[bool] = Query(None),
-    has_wifi: Optional[bool] = Query(None),
+    is_quiet: Optional[bool] = Query(None),
     db: Session = Depends(get_db)
 ):
     """Get available seats with optional filters."""
@@ -53,8 +57,8 @@ async def get_available_seats(
         query = query.filter(Seat.has_power_outlet == has_power)
     if has_ac is not None:
         query = query.filter(Seat.has_ac == has_ac)
-    if has_wifi is not None:
-        query = query.filter(Seat.has_wifi == has_wifi)
+    if is_quiet is not None:
+        query = query.filter(Seat.is_quiet == is_quiet)
 
     seats = query.all()
     return [SeatResponse.from_orm(seat) for seat in seats]
@@ -70,3 +74,46 @@ async def get_seat(seat_id: str, db: Session = Depends(get_db)):
             detail="Seat not found"
         )
     return SeatResponse.from_orm(seat)
+
+
+@router.patch("/update", response_model=SeatUpdateResponse)
+async def update_seats(
+    payload: SeatUpdateRequest,
+    db: Session = Depends(get_db)
+):
+    """
+    Update venue seat layout in a single transaction.
+    Accepts lists of seats to add, remove, and update.
+    """
+    try:
+        # --- Add new seats ---
+        if payload.added:
+            print(payload.added[0])
+            new_seats = [Seat(**seat.dict()) for seat in payload.added]
+            db.add_all(new_seats)
+
+        # --- Remove seats ---
+        if payload.removed:
+            db.query(Seat).filter(Seat.id.in_(payload.removed)
+                                  ).delete(synchronize_session=False)
+
+        # --- Update existing seats ---
+        if payload.updated:
+            for seat_data in payload.updated:
+                seat = db.query(Seat).filter(Seat.id == seat_data.id).first()
+                if seat:
+                    for key, value in seat_data.dict(exclude_unset=True).items():
+                        setattr(seat, key, value)
+
+        db.commit()
+
+        return SeatUpdateResponse(
+            message="Map successfully modified",
+            created_at=datetime.now())
+
+    except SQLAlchemyError as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Database error: {str(e)}"
+        )

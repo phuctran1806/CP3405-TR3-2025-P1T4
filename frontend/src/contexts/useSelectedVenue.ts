@@ -1,11 +1,10 @@
 // store/useSelectedVenue.ts
 import { create } from "zustand";
-import type { ImageSourcePropType } from "react-native";
 
 export interface VenueDisplay {
   id: string;
   name: string;
-  image: ImageSourcePropType | null;
+  image: string | null | undefined;
   subject: string;
   schedule: {
     start_time: Date;

@@ -1,38 +1,90 @@
-// InteractiveMap.tsx
-import React, { useState, useMemo } from "react";
-import { useWindowDimensions } from "react-native";
-import { VStack, Box } from "@gluestack-ui/themed";
+import React, { useState, useEffect } from "react";
+import { useWindowDimensions, ActivityIndicator } from "react-native";
+import { VStack, Box, Text } from "@gluestack-ui/themed";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { MapHeader } from "./MapHeader";
 import { MapPreview } from "./MapPreview";
 import { MapLegend } from "./MapLegend";
 import { SelectedChairInfo } from "./SelectedChairInfo";
 import { FullscreenMapModal } from "./FullscreenMapModal";
-import { chairs } from "./Chair";
 
-interface InteractiveMapProps {}
+import { getSeats, type SeatResponse } from "@/api/seats";
+import type { FloorResponse } from "@/api/floors";
 
-const InteractiveMap: React.FC<InteractiveMapProps> = () => {
+interface InteractiveMapProps {
+  floor?: FloorResponse; // optional: to filter seats by floor
+}
+
+const InteractiveMap: React.FC<InteractiveMapProps> = ({ floor }) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [selectedChair, setSelectedChair] = useState<string | null>(null);
+  const [selectedSeat, setSelectedSeat] = useState<SeatResponse | null>(null);
+  const [seats, setSeats] = useState<SeatResponse[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
 
-  const handleChairPress = (id: string) => {
-    setSelectedChair((prev) => (prev === id ? null : id));
+  useEffect(() => {
+    if (!floor) return;
+
+    let active = true;
+
+    async function loadSeats() {
+      try {
+        setError(null);
+        setLoading(true);
+
+        const result = await getSeats({ floor_id: floor?.id });
+        if (!active) return;
+
+        if (!result.ok) throw result.error;
+
+        setSeats(result.data);
+      } catch (err: any) {
+        console.error("Failed to fetch seats:", err);
+        if (active) setError("Failed to load seats");
+        setSeats([]);
+      } finally {
+        if (active) setLoading(false);
+      }
+    }
+
+    loadSeats();
+    return () => {
+      active = false;
+    };
+  }, [floor]);
+
+  const handleChairPress = (next: SeatResponse) => {
+    setSelectedSeat((prev) => (prev?.id === next.id ? null : next));
   };
 
-  const selectedChairData = useMemo(
-    () => chairs.find((c) => c.id === selectedChair),
-    [selectedChair]
-  );
+  const availableSeats = seats.filter((s) => s.status === "available").length;
+  const seatsWithPlugs = seats.filter(
+    (s) => s.has_power_outlet && s.status === "available"
+  ).length;
 
-  const availableSeats = chairs.filter((c) => !c.occupied).length;
-  const seatsWithPlugs = chairs.filter((c) => c.hasPlug && !c.occupied).length;
+  if (loading) {
+    return (
+      <Box flex={1} justifyContent="center" alignItems="center">
+        <ActivityIndicator size="large" color="#007AFF" />
+        <Text mt="$2">Loading seats...</Text>
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box flex={1} justifyContent="center" alignItems="center">
+        <Text color="red">{error}</Text>
+      </Box>
+    );
+  }
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <VStack space="md">
-        {/* Location Image Placeholder */}
+        {/* Optional location image placeholder */}
         <Box
           bg="$white"
           borderRadius="$2xl"
@@ -43,7 +95,7 @@ const InteractiveMap: React.FC<InteractiveMapProps> = () => {
           shadowRadius={8}
         />
 
-        {/* Interactive Map Container */}
+        {/* Interactive map container */}
         <Box
           bg="$white"
           borderRadius="$2xl"
@@ -59,36 +111,40 @@ const InteractiveMap: React.FC<InteractiveMapProps> = () => {
               onExpandPress={() => setIsFullscreen(true)}
             />
 
+            {/* Map preview showing clickable seats */}
             <MapPreview
               screenWidth={screenWidth}
-              selectedChair={selectedChair}
+              seats={seats}
+              selectedSeat={selectedSeat}
               onChairPress={handleChairPress}
+              map_url={floor?.floor_map_url}
               onPress={() => setIsFullscreen(true)}
             />
 
             <MapLegend />
 
-            {selectedChairData && (
+            {selectedSeat && (
               <SelectedChairInfo
-                chairData={selectedChairData}
+                seat={selectedSeat}
                 compact
               />
             )}
           </VStack>
         </Box>
 
-        {/* Fullscreen Modal */}
+        {/* Fullscreen seat map modal */}
         <FullscreenMapModal
           visible={isFullscreen}
           onClose={() => setIsFullscreen(false)}
-          selectedChair={selectedChair}
-          selectedChairData={selectedChairData}
+          selectedSeat={selectedSeat}
           onChairPress={handleChairPress}
-          onDeselectChair={() => setSelectedChair(null)}
+          onDeselectChair={() => setSelectedSeat(null)}
           availableSeats={availableSeats}
           seatsWithPlugs={seatsWithPlugs}
           screenWidth={screenWidth}
           screenHeight={screenHeight}
+          map_url={floor?.floor_map_url}
+          seats={seats}
         />
       </VStack>
     </GestureHandlerRootView>
@@ -96,3 +152,4 @@ const InteractiveMap: React.FC<InteractiveMapProps> = () => {
 };
 
 export default InteractiveMap;
+

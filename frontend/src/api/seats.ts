@@ -1,69 +1,92 @@
 import { apiFetch } from "@/api/fetcher";
+import buildQuery from "@/utils/buildQuery";
 import type { ApiResult } from "@/api/types";
 
-export type SeatStatus = "available" | "occupied" | "maintenance";
-
-export interface SeatResponse {
+export interface Seat {
   id: string;
-  name: string;
-  floor_id: string;
-  status: SeatStatus;
+  seat_number: string;
   seat_type: string;
   has_power_outlet: boolean;
-  has_wifi: boolean;
   has_ac: boolean;
-  is_accessible: boolean;
+  accessibility: boolean;
+  capacity: number;
+  floor_id: string;
+  x_coordinate: number;
+  y_coordinate: number;
+  status: string;
+  table_number: number | null;
 }
 
-export interface SeatQuery {
+export type SeatResponse = Seat & {
+  notes?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SeatAvailability {
+  seat: SeatResponse;
+  is_available: boolean;
+  next_available_time?: string | null;
+}
+
+export interface SeatUpdateResponse {
+ status: string;
+ message: string 
+}
+
+/**
+ * GET /seats
+ * Fetch a list of seats with optional filters
+ */
+export async function getSeats(params?: {
   floor_id?: string;
-  status?: SeatStatus;
+  status?: string;
   seat_type?: string;
   skip?: number;
   limit?: number;
+}): Promise<ApiResult<SeatResponse[]>> {
+  const query = buildQuery(params ?? {});
+  return apiFetch<SeatResponse[]>(`/seats/${query}`);
 }
 
-export interface AvailableSeatQuery {
+/**
+ * GET /seats/available
+ * Fetch available seats with optional filters
+ */
+export async function getAvailableSeats(params?: {
   floor_id?: string;
   has_power?: boolean;
   has_ac?: boolean;
-  has_wifi?: boolean;
+}): Promise<ApiResult<SeatResponse[]>> {
+  const query = buildQuery(params ?? {});
+  return apiFetch<SeatResponse[]>(`/seats/available${query}`);
 }
 
 /**
- * Fetch all seats (optionally filtered by floor, type, etc.)
+ * GET /seats/{seat_id}
+ * Fetch a seat by ID
  */
-export async function fetchSeats(
-  params: SeatQuery = {}
-): Promise<ApiResult<SeatResponse[]>> {
-  const query = new URLSearchParams();
-  Object.entries(params).forEach(([key, value]) => {
-    if (value !== undefined && value !== null) query.append(key, String(value));
+export async function getSeatById(seat_id: string): Promise<ApiResult<SeatResponse>> {
+  return apiFetch<SeatResponse>(`/seats/${seat_id}`);
+}
+
+export interface SeatUpdatePayload {
+  added?: Partial<Seat>[];
+  removed?: string[];
+  updated?: Partial<Seat>[];
+}
+
+/**
+ * PATCH /seats/update
+ * Update many seats at a time
+ */
+export async function updateSeats(payload: SeatUpdatePayload): Promise<ApiResult<{ status: string; message: string }>> {
+  console.log(payload)
+  return apiFetch<SeatUpdateResponse>(`/seats/update`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+    headers: {
+      "Content-Type": "application/json",
+    },
   });
-
-  return apiFetch<SeatResponse[]>(`/seats/?${query.toString()}`);
 }
-
-/**
- * Fetch available seats (optionally filtered by features)
- */
-export async function fetchAvailableSeats(
-  params: AvailableSeatQuery = {}
-): Promise<ApiResult<SeatResponse[]>> {
-  const query = new URLSearchParams();
-  Object.entries(params).forEach(([key, value]) => {
-    if (value !== undefined && value !== null) query.append(key, String(value));
-  });
-
-  return apiFetch<SeatResponse[]>(`/seats/available?${query.toString()}`);
-}
-
-/**
- * Fetch single seat by ID
- */
-export async function fetchSeatById(
-  seatId: string
-): Promise<ApiResult<SeatResponse>> {
-  return apiFetch<SeatResponse>(`/seats/${seatId}`);
-}
-

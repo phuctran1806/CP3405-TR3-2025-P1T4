@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { ScrollView } from 'react-native';
-import { Box, Text } from '@gluestack-ui/themed';
+import { Box, Text, Button, HStack, Spinner } from '@gluestack-ui/themed';
 import { useLocalSearchParams } from 'expo-router';
 
 import Header from './components/Header';
@@ -11,6 +11,8 @@ import InteractiveMap from '@/components/map/InteractiveMap';
 import { getOccupancyHistory, type OccupancyHistory } from '@/api/history';
 import { getLocationById } from '@/api/locations';
 import type { LocationResponse } from '@/api/types/location_types';
+import { getFloors, type FloorResponse } from '@/api/floors';
+import type { AccessibilityFeature } from '@/utils/accessibilityIcons';
 
 export default function LocationDashboard() {
   const { location: locationId } = useLocalSearchParams();
@@ -20,6 +22,10 @@ export default function LocationDashboard() {
   const [location, setLocation] = useState<LocationResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [floors, setFloors] = useState<FloorResponse[]>([]);
+  const [selectedFloor, setSelectedFloor] = useState<FloorResponse | null>(null);
+  const [loadingFloors, setLoadingFloors] = useState(true);
+
 
   // --------------------------
   // Load location
@@ -87,6 +93,36 @@ export default function LocationDashboard() {
   }, [locationId]);
 
   useEffect(() => setView('seatmap'), [locationId]);
+
+  // Load floors whenever locationId changes
+  useEffect(() => {
+    if (!locationId) return;
+    let active = true;
+
+    async function loadFloors() {
+      try {
+        setLoadingFloors(true);
+        const result = await getFloors({ location_id: locationId as string });
+        if (!active) return;
+
+        if (!result.ok) throw result.error;
+        setFloors(result.data);
+        if (result.data.length > 0)
+            setSelectedFloor(result.data[0]); // default first floor
+      } catch (err) {
+        console.error('Failed to fetch floors:', err);
+        if (active) setFloors([]);
+      } finally {
+        if (active) setLoadingFloors(false);
+      }
+    }
+
+    loadFloors();
+    return () => {
+      active = false;
+    };
+  }, [locationId]);
+
 
   // --------------------------
   // Derived data
@@ -241,6 +277,11 @@ export default function LocationDashboard() {
           id: locationId as string,
           name: location.name,
           occupancyPercentage: location.busyness_percentage,
+          accessibility: [
+            ...(location.has_power_outlet ? (['power'] as AccessibilityFeature[]) : []),
+            ...(location.has_ac ? (['cool'] as AccessibilityFeature[]) : []),
+            ...(location.is_quiet ? (['quiet'] as AccessibilityFeature[]) : []),
+          ] as AccessibilityFeature[],
         }}
         occupancyStatus={occupancyStatus}
         view={view}
@@ -251,15 +292,54 @@ export default function LocationDashboard() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 40 }}
       >
+        {/* TODO: refactor this to be its own component */}
+        {loadingFloors ? (
+          <HStack justifyContent="center" alignItems="center" mb={4}>
+            <Spinner size="small" mr={2} />
+            <Text color="$gray600">Loading floors...</Text>
+          </HStack>
+        ) : floors.length > 0 ? (
+          <HStack space="md" justifyContent="center" mb={4}>
+            {floors.map((floor) => (
+              <Button
+                key={floor.id}
+                size="sm"
+                variant="solid"
+                bg={selectedFloor?.id === floor.id ? '$blue500' : 'transparent'}
+                onPress={() => setSelectedFloor(floor)}
+              >
+                <Text
+                  color={selectedFloor?.id === floor.id ? '$white' : '$blue500'}
+                  fontWeight={selectedFloor?.id === floor.id ? '600' : '500'}
+                >
+                  {floor.floor_name || `Floor ${floor.floor_number}`}
+                </Text>
+              </Button>
+            ))}
+          </HStack>
+        ) : (
+          <Text textAlign="center" color="$gray500" mb={4}>
+            No floors available
+          </Text>
+        )}
+
         {view === 'seatmap' ? (
           <SeatMap
             location={{
               id: locationId as string,
               name: location.name,
               occupancyPercentage: currentPercentage,
-              image: location.image_url,
+              image: `/${location.image_url}`,
             }}
-            map={<InteractiveMap />}
+            map={
+              selectedFloor ? (
+                <InteractiveMap floor={selectedFloor} />
+              ) : (
+                <Text color="$gray500" textAlign="center" mt={4}>
+                  Select a floor to view seat map
+                </Text>
+              )
+            }
           />
         ) : (
           <Statistics

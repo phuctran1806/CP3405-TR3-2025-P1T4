@@ -1,28 +1,37 @@
-import React, { useState, useRef } from "react";
-import { PanGestureHandler, PinchGestureHandler, State } from "react-native-gesture-handler";
-import Animated, { useSharedValue, runOnJS, useAnimatedReaction } from "react-native-reanimated";
-import Svg, { Defs, LinearGradient, Stop, G } from "react-native-svg";
-import FloorMap from "assets/mockmap.svg";
-import { ChairMarker } from "./ChairMarker";
-import { chairs, VIEWBOX_WIDTH, VIEWBOX_HEIGHT, ASPECT_RATIO } from "./Chair";
+import React, { useState, useEffect } from "react";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import Animated, {
+  useSharedValue,
+  runOnJS,
+  useAnimatedReaction,
+  withTiming,
+} from "react-native-reanimated";
+import Svg, { Defs, LinearGradient, Stop, G, SvgXml } from "react-native-svg";
+import { SeatMarker } from "./SeatMarker";
+import { VIEWBOX_WIDTH, VIEWBOX_HEIGHT, ASPECT_RATIO } from "./MapConfig";
+import type { SeatResponse } from "@/api/seats";
 
 interface FloorMapContentProps {
   width: number;
   height?: number;
-  selectedChair: string | null;
-  onChairPress: (id: string) => void;
+  seats: SeatResponse[];
+  selectedSeat: SeatResponse | null;
+  map_url?: string | null;
+  onChairPress: (next: SeatResponse) => void;
   compact?: boolean;
 }
 
 export const FloorMapContent: React.FC<FloorMapContentProps> = ({
   width,
   height,
-  selectedChair,
+  seats,
+  selectedSeat,
+  map_url,
   onChairPress,
   compact = false,
 }) => {
   const svgWidth = width;
-  const svgHeight = compact ? 250 : (height || width * ASPECT_RATIO);
+  const svgHeight = compact ? 250 : height || width * ASPECT_RATIO;
   const minZoom = 1;
   const maxZoom = 4;
 
@@ -32,12 +41,20 @@ export const FloorMapContent: React.FC<FloorMapContentProps> = ({
   const viewBoxYAnim = useSharedValue(0);
   const viewBoxWidthAnim = useSharedValue(VIEWBOX_WIDTH);
 
-  const pinchRef = useRef(null);
-  const panRef = useRef(null);
-
   const lastX = useSharedValue(0);
   const lastY = useSharedValue(0);
   const lastW = useSharedValue(VIEWBOX_WIDTH);
+
+  const [svgXml, setSvgXml] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function loadSvg() {
+      const res = await fetch(`http://localhost:8080/${map_url}`);
+      const text = await res.text();
+      setSvgXml(text);
+    }
+    loadSvg();
+  }, [map_url]);
 
   useAnimatedReaction(
     () => [viewBoxXAnim.value, viewBoxYAnim.value, viewBoxWidthAnim.value],
@@ -47,24 +64,27 @@ export const FloorMapContent: React.FC<FloorMapContentProps> = ({
     }
   );
 
-  const clampPosition = () => {
-    'worklet';
-    const currW = viewBoxWidthAnim.value;
-    const currH = currW * ASPECT_RATIO;
-    let currX = viewBoxXAnim.value;
-    let currY = viewBoxYAnim.value;
+  const clampPosition = (x: number, y: number, w: number) => {
+    "worklet";
+    const currH = w * ASPECT_RATIO;
+    
+    const clampedX = Math.max(0, Math.min(x, VIEWBOX_WIDTH - w));
+    const clampedY = Math.max(0, Math.min(y, VIEWBOX_HEIGHT - currH));
 
-    currX = Math.max(0, Math.min(currX, VIEWBOX_WIDTH - currW));
-    currY = Math.max(0, Math.min(currY, VIEWBOX_HEIGHT - currH));
-
-    viewBoxXAnim.value = currX;
-    viewBoxYAnim.value = currY;
+    viewBoxXAnim.value = withTiming(clampedX, { duration: 100 });
+    viewBoxYAnim.value = withTiming(clampedY, { duration: 100 });
   };
 
-  const onPinchGesture = (event: any) => {
-    'worklet';
-    const { scale: gScale, focalX, focalY, state } = event.nativeEvent;
-    if (state === State.ACTIVE) {
+  // --- Pinch Gesture ---
+  const pinchGesture = Gesture.Pinch()
+    .onStart(() => {
+      lastX.value = viewBoxXAnim.value;
+      lastY.value = viewBoxYAnim.value;
+      lastW.value = viewBoxWidthAnim.value;
+    })
+    .onUpdate((event) => {
+      "worklet";
+      const gScale = event.scale;
       let newW = lastW.value / gScale;
       newW = Math.max(VIEWBOX_WIDTH / maxZoom, Math.min(newW, VIEWBOX_WIDTH / minZoom));
 
@@ -72,8 +92,8 @@ export const FloorMapContent: React.FC<FloorMapContentProps> = ({
       const oldH = oldW * ASPECT_RATIO;
       const newH = newW * ASPECT_RATIO;
 
-      const ratioX = focalX / svgWidth;
-      const ratioY = focalY / svgHeight;
+      const ratioX = event.focalX / svgWidth;
+      const ratioY = event.focalY / svgHeight;
 
       const mapX = lastX.value + ratioX * oldW;
       const mapY = lastY.value + ratioY * oldH;
@@ -84,47 +104,36 @@ export const FloorMapContent: React.FC<FloorMapContentProps> = ({
       viewBoxWidthAnim.value = newW;
       viewBoxXAnim.value = newX;
       viewBoxYAnim.value = newY;
-    }
-  };
+    })
+    .onEnd(() => {
+      clampPosition(viewBoxXAnim.value, viewBoxYAnim.value, viewBoxWidthAnim.value);
+    });
 
-  const onPinchStateChange = (event: any) => {
-    'worklet';
-    const { state } = event.nativeEvent;
-    if (state === State.BEGAN) {
+  // --- Pan Gesture ---
+  const panGesture = Gesture.Pan()
+    .minPointers(1)
+    .maxPointers(1)
+    .onStart(() => {
       lastX.value = viewBoxXAnim.value;
       lastY.value = viewBoxYAnim.value;
-      lastW.value = viewBoxWidthAnim.value;
-    }
-    if (state === State.END || state === State.CANCELLED) {
-      runOnJS(clampPosition)();
-    }
-  };
-
-  const onPanGesture = (event: any) => {
-    'worklet';
-    const { translationX, translationY, state } = event.nativeEvent;
-    if (state === State.ACTIVE) {
+    })
+    .onUpdate((event) => {
+      "worklet";
       const ratio = viewBoxWidthAnim.value / svgWidth;
-      const deltaViewX = translationX * ratio;
-      const deltaViewY = translationY * ratio;
+      const deltaViewX = event.translationX * ratio;
+      const deltaViewY = event.translationY * ratio;
 
       viewBoxXAnim.value = lastX.value - deltaViewX;
       viewBoxYAnim.value = lastY.value - deltaViewY;
-    }
-  };
+    })
+    .onEnd(() => {
+      clampPosition(viewBoxXAnim.value, viewBoxYAnim.value, viewBoxWidthAnim.value);
+    });
 
-  const onPanStateChange = (event: any) => {
-    'worklet';
-    const { state } = event.nativeEvent;
-    if (state === State.BEGAN) {
-      lastX.value = viewBoxXAnim.value;
-      lastY.value = viewBoxYAnim.value;
-    }
-    if (state === State.END || state === State.CANCELLED) {
-      runOnJS(clampPosition)();
-    }
-  };
+  // Combine both gestures to allow simultaneous pan + pinch
+  const composedGesture = Gesture.Simultaneous(pinchGesture, panGesture);
 
+  // --- SVG content ---
   const content = (
     <Svg width={svgWidth} height={svgHeight} viewBox={viewBox}>
       <Defs>
@@ -138,19 +147,19 @@ export const FloorMapContent: React.FC<FloorMapContentProps> = ({
         </LinearGradient>
         <LinearGradient id="occupiedGrad" x1="0%" y1="0%" x2="0%" y2="100%">
           <Stop offset="0%" stopColor="#EF4444" stopOpacity="1" />
-          <Stop offset="100%" stopColor="#D1D5DB" stopOpacity="1" />
+          <Stop offset="100%" stopColor="#DC2626" stopOpacity="1" />
         </LinearGradient>
       </Defs>
 
-      <FloorMap width={VIEWBOX_WIDTH} height={VIEWBOX_HEIGHT} />
+      {svgXml && <SvgXml xml={svgXml} width={VIEWBOX_WIDTH} height={VIEWBOX_HEIGHT} />}
 
       <G>
-        {chairs.map((chair) => (
-          <ChairMarker
-            key={chair.id}
-            chair={chair}
-            isSelected={selectedChair === chair.id}
-            onPress={() => !chair.occupied && onChairPress(chair.id)}
+        {seats.map((seat) => (
+          <SeatMarker
+            key={seat.id}
+            seat={seat}
+            isSelected={selectedSeat?.id === seat.id}
+            onPress={() => onChairPress(seat)}
           />
         ))}
       </G>
@@ -162,28 +171,10 @@ export const FloorMapContent: React.FC<FloorMapContentProps> = ({
   }
 
   return (
-    <PinchGestureHandler
-      ref={pinchRef}
-      simultaneousHandlers={panRef}
-      onGestureEvent={onPinchGesture}
-      onHandlerStateChange={onPinchStateChange}
-    >
+    <GestureDetector gesture={composedGesture}>
       <Animated.View style={{ width: svgWidth, height: svgHeight }}>
-        <PanGestureHandler
-          ref={panRef}
-          simultaneousHandlers={pinchRef}
-          onGestureEvent={onPanGesture}
-          onHandlerStateChange={onPanStateChange}
-          minPointers={1}
-          maxPointers={1}
-          activeOffsetX={[-10, 10]}
-          activeOffsetY={[-10, 10]}
-        >
-          <Animated.View style={{ width: '100%', height: '100%' }}>
-            {content}
-          </Animated.View>
-        </PanGestureHandler>
+        {content}
       </Animated.View>
-    </PinchGestureHandler>
+    </GestureDetector>
   );
 };
