@@ -2,6 +2,7 @@
     {
         "x_coordinate": 0.4025,
         "y_coordinate": 0.3673,
+        "table_number": 1,
         "seat_number": "NEW_1",
         "seat_type": "individual",
         "has_power_outlet": false,
@@ -18,6 +19,7 @@
     {
         "x_coordinate": 0.4034,
         "y_coordinate": 0.4458,
+        "table_number": 1,
         "seat_number": "NEW_2",
         "seat_type": "individual",
         "has_power_outlet": false,
@@ -34,6 +36,7 @@
     {
         "x_coordinate": 0.3967,
         "y_coordinate": 0.5304,
+        "table_number": 1,
         "seat_number": "NEW_1",
         "seat_type": "individual",
         "has_power_outlet": false,
@@ -50,6 +53,7 @@
     {
         "x_coordinate": 0.3462,
         "y_coordinate": 0.575,
+        "table_number": 1,
         "seat_number": "NEW_2",
         "seat_type": "individual",
         "has_power_outlet": false,
@@ -66,6 +70,7 @@
     {
         "x_coordinate": 0.2966,
         "y_coordinate": 0.5227,
+        "table_number": 1,
         "seat_number": "NEW_3",
         "seat_type": "individual",
         "has_power_outlet": false,
@@ -82,6 +87,7 @@
     {
         "x_coordinate": 0.2918,
         "y_coordinate": 0.4473,
+        "table_number": 1,
         "seat_number": "NEW_4",
         "seat_type": "individual",
         "has_power_outlet": false,
@@ -98,6 +104,7 @@
     {
         "x_coordinate": 0.2909,
         "y_coordinate": 0.3688,
+        "table_number": 1,
         "seat_number": "NEW_5",
         "seat_type": "individual",
         "has_power_outlet": false,
@@ -114,6 +121,7 @@
     {
         "x_coordinate": 0.5503,
         "y_coordinate": 0.3627,
+        "table_number": 2,
         "seat_number": "NEW_1",
         "seat_type": "individual",
         "has_power_outlet": false,
@@ -130,6 +138,7 @@
     {
         "x_coordinate": 0.5484,
         "y_coordinate": 0.4396,
+        "table_number": 2,
         "seat_number": "NEW_2",
         "seat_type": "individual",
         "has_power_outlet": false,
@@ -146,6 +155,7 @@
     {
         "x_coordinate": 0.5417,
         "y_coordinate": 0.5196,
+        "table_number": 2,
         "seat_number": "NEW_3",
         "seat_type": "individual",
         "has_power_outlet": false,
@@ -162,6 +172,7 @@
     {
         "x_coordinate": 0.4959,
         "y_coordinate": 0.5673,
+        "table_number": 2,
         "seat_number": "NEW_4",
         "seat_type": "individual",
         "has_power_outlet": false,
@@ -178,6 +189,7 @@
     {
         "x_coordinate": 0.4425,
         "y_coordinate": 0.5212,
+        "table_number": 2,
         "seat_number": "NEW_5",
         "seat_type": "individual",
         "has_power_outlet": false,
@@ -194,6 +206,7 @@
     {
         "x_coordinate": 0.4378,
         "y_coordinate": 0.4427,
+        "table_number": 2,
         "seat_number": "NEW_6",
         "seat_type": "individual",
         "has_power_outlet": false,
@@ -210,6 +223,7 @@
     {
         "x_coordinate": 0.4387,
         "y_coordinate": 0.3658,
+        "table_number": 2,
         "seat_number": "NEW_7",
         "seat_type": "individual",
         "has_power_outlet": false,
@@ -226,6 +240,7 @@
     {
         "x_coordinate": 0.6972,
         "y_coordinate": 0.3596,
+        "table_number": 3,
         "seat_number": "NEW_1",
         "seat_type": "individual",
         "has_power_outlet": false,
@@ -242,6 +257,7 @@
     {
         "x_coordinate": 0.6972,
         "y_coordinate": 0.4365,
+        "table_number": 3,
         "seat_number": "NEW_2",
         "seat_type": "individual",
         "has_power_outlet": false,
@@ -258,6 +274,7 @@
     {
         "x_coordinate": 0.6905,
         "y_coordinate": 0.5196,
+        "table_number": 3,
         "seat_number": "NEW_3",
         "seat_type": "individual",
         "has_power_outlet": false,
@@ -274,6 +291,7 @@
     {
         "x_coordinate": 0.64,
         "y_coordinate": 0.5704,
+        "table_number": 3,
         "seat_number": "NEW_4",
         "seat_type": "individual",
         "has_power_outlet": false,
@@ -290,6 +308,7 @@
     {
         "x_coordinate": 0.5894,
         "y_coordinate": 0.5165,
+        "table_number": 3,
         "seat_number": "NEW_5",
         "seat_type": "individual",
         "has_power_outlet": false,
@@ -306,6 +325,7 @@
     {
         "x_coordinate": 0.5856,
         "y_coordinate": 0.4381,
+        "table_number": 3,
         "seat_number": "NEW_1",
         "seat_type": "individual",
         "has_power_outlet": false,
@@ -322,6 +342,7 @@
     {
         "x_coordinate": 0.5847,
         "y_coordinate": 0.3627,
+        "table_number": 3,
         "seat_number": "NEW_2",
         "seat_type": "individual",
         "has_power_outlet": false,
@@ -338,6 +359,7 @@
     {
         "x_coordinate": 0.8412,
         "y_coordinate": 0.5565,
+        "table_number": 4,
         "seat_number": "NEW_3",
         "seat_type": "individual",
         "has_power_outlet": false,
@@ -354,6 +376,7 @@
     {
         "x_coordinate": 0.7926,
         "y_coordinate": 0.5565,
+        "table_number": 4,
         "seat_number": "NEW_4",
         "seat_type": "individual",
         "has_power_outlet": false,
@@ -370,6 +393,7 @@
     {
         "x_coordinate": 0.7439,
         "y_coordinate": 0.5658,
+        "table_number": 4,
         "seat_number": "NEW_5",
         "seat_type": "individual",
         "has_power_outlet": false,
@@ -386,6 +410,7 @@
     {
         "x_coordinate": 0.7134,
         "y_coordinate": 0.6458,
+        "table_number": 4,
         "seat_number": "NEW_6",
         "seat_type": "individual",
         "has_power_outlet": false,
@@ -402,6 +427,7 @@
     {
         "x_coordinate": 0.7401,
         "y_coordinate": 0.7242,
+        "table_number": 4,
         "seat_number": "NEW_7",
         "seat_type": "individual",
         "has_power_outlet": false,
@@ -418,6 +444,7 @@
     {
         "x_coordinate": 0.7916,
         "y_coordinate": 0.735,
+        "table_number": 4,
         "seat_number": "NEW_8",
         "seat_type": "individual",
         "has_power_outlet": false,
@@ -434,6 +461,7 @@
     {
         "x_coordinate": 0.8403,
         "y_coordinate": 0.735,
+        "table_number": 4,
         "seat_number": "NEW_9",
         "seat_type": "individual",
         "has_power_outlet": false,
@@ -450,6 +478,7 @@
     {
         "x_coordinate": 0.1392,
         "y_coordinate": 0.5627,
+        "table_number": 5,
         "seat_number": "NEW_1",
         "seat_type": "individual",
         "has_power_outlet": false,
@@ -466,6 +495,7 @@
     {
         "x_coordinate": 0.1859,
         "y_coordinate": 0.5658,
+        "table_number": 5,
         "seat_number": "NEW_2",
         "seat_type": "individual",
         "has_power_outlet": false,
@@ -482,6 +512,7 @@
     {
         "x_coordinate": 0.2365,
         "y_coordinate": 0.5735,
+        "table_number": 5,
         "seat_number": "NEW_3",
         "seat_type": "individual",
         "has_power_outlet": false,
@@ -498,6 +529,7 @@
     {
         "x_coordinate": 0.2689,
         "y_coordinate": 0.6627,
+        "table_number": 5,
         "seat_number": "NEW_4",
         "seat_type": "individual",
         "has_power_outlet": false,
@@ -514,6 +546,7 @@
     {
         "x_coordinate": 0.2394,
         "y_coordinate": 0.7412,
+        "table_number": 5,
         "seat_number": "NEW_5",
         "seat_type": "individual",
         "has_power_outlet": false,
@@ -530,6 +563,7 @@
     {
         "x_coordinate": 0.1879,
         "y_coordinate": 0.7473,
+        "table_number": 5,
         "seat_number": "NEW_6",
         "seat_type": "individual",
         "has_power_outlet": false,
@@ -546,6 +580,7 @@
     {
         "x_coordinate": 0.1392,
         "y_coordinate": 0.7504,
+        "table_number": 5,
         "seat_number": "NEW_7",
         "seat_type": "individual",
         "has_power_outlet": false,
@@ -562,6 +597,7 @@
     {
         "x_coordinate": 0.3424,
         "y_coordinate": 0.7181,
+        "table_number": 6,
         "seat_number": "NEW_1",
         "seat_type": "individual",
         "has_power_outlet": false,
@@ -578,6 +614,7 @@
     {
         "x_coordinate": 0.3929,
         "y_coordinate": 0.7704,
+        "table_number": 6,
         "seat_number": "NEW_2",
         "seat_type": "individual",
         "has_power_outlet": false,
@@ -594,6 +631,7 @@
     {
         "x_coordinate": 0.3977,
         "y_coordinate": 0.8519,
+        "table_number": 6,
         "seat_number": "NEW_3",
         "seat_type": "individual",
         "has_power_outlet": false,
@@ -610,6 +648,7 @@
     {
         "x_coordinate": 0.3977,
         "y_coordinate": 0.9258,
+        "table_number": 6,
         "seat_number": "NEW_4",
         "seat_type": "individual",
         "has_power_outlet": false,
@@ -626,6 +665,7 @@
     {
         "x_coordinate": 0.2909,
         "y_coordinate": 0.7642,
+        "table_number": 6,
         "seat_number": "NEW_5",
         "seat_type": "individual",
         "has_power_outlet": false,
@@ -642,6 +682,7 @@
     {
         "x_coordinate": 0.2851,
         "y_coordinate": 0.8488,
+        "table_number": 6,
         "seat_number": "NEW_6",
         "seat_type": "individual",
         "has_power_outlet": false,
@@ -658,6 +699,7 @@
     {
         "x_coordinate": 0.2861,
         "y_coordinate": 0.9273,
+        "table_number": 6,
         "seat_number": "NEW_7",
         "seat_type": "individual",
         "has_power_outlet": false,
@@ -674,6 +716,7 @@
     {
         "x_coordinate": 0.4979,
         "y_coordinate": 0.7212,
+        "table_number": 7,
         "seat_number": "NEW_8",
         "seat_type": "individual",
         "has_power_outlet": false,
@@ -690,6 +733,7 @@
     {
         "x_coordinate": 0.5484,
         "y_coordinate": 0.7704,
+        "table_number": 7,
         "seat_number": "NEW_1",
         "seat_type": "individual",
         "has_power_outlet": false,
@@ -706,6 +750,7 @@
     {
         "x_coordinate": 0.5541,
         "y_coordinate": 0.855,
+        "table_number": 7,
         "seat_number": "NEW_2",
         "seat_type": "individual",
         "has_power_outlet": false,
@@ -722,6 +767,7 @@
     {
         "x_coordinate": 0.5532,
         "y_coordinate": 0.9319,
+        "table_number": 7,
         "seat_number": "NEW_3",
         "seat_type": "individual",
         "has_power_outlet": false,
@@ -738,6 +784,7 @@
     {
         "x_coordinate": 0.4454,
         "y_coordinate": 0.7735,
+        "table_number": 7,
         "seat_number": "NEW_4",
         "seat_type": "individual",
         "has_power_outlet": false,
@@ -754,6 +801,7 @@
     {
         "x_coordinate": 0.4435,
         "y_coordinate": 0.8535,
+        "table_number": 7,
         "seat_number": "NEW_5",
         "seat_type": "individual",
         "has_power_outlet": false,
@@ -770,6 +818,7 @@
     {
         "x_coordinate": 0.4454,
         "y_coordinate": 0.9288,
+        "table_number": 7,
         "seat_number": "NEW_6",
         "seat_type": "individual",
         "has_power_outlet": false,
@@ -786,6 +835,7 @@
     {
         "x_coordinate": 0.6486,
         "y_coordinate": 0.7242,
+        "table_number": 8,
         "seat_number": "NEW_7",
         "seat_type": "individual",
         "has_power_outlet": false,
@@ -802,6 +852,7 @@
     {
         "x_coordinate": 0.6991,
         "y_coordinate": 0.7719,
+        "table_number": 8,
         "seat_number": "NEW_8",
         "seat_type": "individual",
         "has_power_outlet": false,
@@ -818,6 +869,7 @@
     {
         "x_coordinate": 0.7048,
         "y_coordinate": 0.8504,
+        "table_number": 8,
         "seat_number": "NEW_9",
         "seat_type": "individual",
         "has_power_outlet": false,
@@ -834,6 +886,7 @@
     {
         "x_coordinate": 0.7067,
         "y_coordinate": 0.9273,
+        "table_number": 8,
         "seat_number": "NEW_10",
         "seat_type": "individual",
         "has_power_outlet": false,
@@ -850,6 +903,7 @@
     {
         "x_coordinate": 0.5999,
         "y_coordinate": 0.7673,
+        "table_number": 8,
         "seat_number": "NEW_11",
         "seat_type": "individual",
         "has_power_outlet": false,
@@ -866,6 +920,7 @@
     {
         "x_coordinate": 0.5923,
         "y_coordinate": 0.8504,
+        "table_number": 8,
         "seat_number": "NEW_12",
         "seat_type": "individual",
         "has_power_outlet": false,
@@ -882,6 +937,7 @@
     {
         "x_coordinate": 0.5913,
         "y_coordinate": 0.9273,
+        "table_number": 8,
         "seat_number": "NEW_13",
         "seat_type": "individual",
         "has_power_outlet": false,

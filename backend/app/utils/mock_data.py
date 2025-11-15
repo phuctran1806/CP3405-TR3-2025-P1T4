@@ -427,6 +427,7 @@ def create_floors_and_seats(db, locations: list[Location]):
                 seat = Seat(
                     id=str(uuid.uuid4()),
                     floor_id=floor.id,
+                    table_number=pos["table_number"],
                     seat_number=f"{loc.name[:3].upper()}-{floor_num}-{i:03d}",
                     seat_type=seat_type,
                     has_power_outlet=has_power_outlet,
