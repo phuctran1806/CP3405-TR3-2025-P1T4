@@ -50,7 +50,7 @@ export default function HomeStudents() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const [seatsByLocation, setSeatsByLocation] = useState<Map<string, SeatResponse[]>>(new Map());
+  const [seatsByLocation, setSeatsByLocation] = useState<Map<string, Map<string, SeatResponse[]>>>(new Map());
 
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState<AccessibilityFeature[]>([]);
@@ -141,13 +141,22 @@ export default function HomeStudents() {
       setLocations(mappedLocations);
 
       // Fetch seats for all locations
-      const seatsMap = new Map<string, SeatResponse[]>();
+      const seatsMap = new Map<string, Map<string, SeatResponse[]>>();
+
       await Promise.all(
         mappedLocations.map(async (loc) => {
           const seats = await fetchSeatsForLocation(loc.id);
-          seatsMap.set(loc.id, seats);
+          const floorMap = new Map<string, SeatResponse[]>();
+
+          for (const seat of seats) {
+            const floorId = seat.floor_id;
+            if (!floorMap.has(floorId)) { floorMap.set(floorId, []) };
+            floorMap.get(floorId)!.push(seat);
+          }
+
+          seatsMap.set(loc.id, floorMap);
         })
-      );
+      )
       setSeatsByLocation(seatsMap);
     }
     setLoading(false);
@@ -220,61 +229,88 @@ export default function HomeStudents() {
   };
 
   const getMaxTableCapacity = (locationId: string): number | null => {
-    const locationSeats = seatsByLocation.get(locationId) || [];
-    
-    // Filter out seats with null/undefined table_number
-    const seatsWithTable = locationSeats.filter(
-      (seat) => seat.table_number !== null && seat.table_number !== undefined
-    );
-    
-    if (seatsWithTable.length === 0) {
-      return null;
+    const floorsMap = seatsByLocation.get(locationId) || new Map<string, SeatResponse[]>();
+
+    let globalMax = null;
+
+    // Iterate each floor
+    for (const floorSeats of floorsMap.values()) {
+      // Seats with valid table numbers for THIS floor
+      const seatsWithTable = floorSeats.filter(
+        (seat) => seat.table_number !== null && seat.table_number !== undefined
+      );
+
+      if (seatsWithTable.length === 0) {
+        continue; // this floor has no tables → skip
+      }
+
+      // Group seats by table_number
+      const seatsByTable = new Map<number, number>();
+      for (const seat of seatsWithTable) {
+        const tableNum = seat.table_number!;
+        seatsByTable.set(tableNum, (seatsByTable.get(tableNum) || 0) + 1);
+      }
+
+      // Max table capacity on this floor
+      const floorMax = Math.max(...seatsByTable.values());
+
+      // Update global max
+      if (globalMax === null || floorMax > globalMax) {
+        globalMax = floorMax;
+      }
     }
-    
-    // Group seats by table_number and count available seats per table
-    const seatsByTable = new Map<number, number>();
-    for (const seat of seatsWithTable) {
-      const tableNum = seat.table_number!;
-      seatsByTable.set(tableNum, (seatsByTable.get(tableNum) || 0) + 1);
-    }
-    
-    // Find the maximum count
-    const counts = Array.from(seatsByTable.values());
-    return counts.length > 0 ? Math.max(...counts) : null;
+
+    return globalMax;
   };
+
 
   const filteredLocations = locations.filter((loc) => {
     const matchesSearch = loc.name.toLowerCase().includes(searchQuery.toLowerCase());
+
     const matchesFilters =
       filters.length === 0 || filters.every((f) => loc.accessibility.includes(f));
-    
-    // Table-based group size filtering
+
+    // --- Group size logic ---
     let matchesGroupSize = true;
+
     if (groupSize && groupSize > 1) {
-      const locationSeats = seatsByLocation.get(loc.id) || [];
-      
-      // Filter out seats with null/undefined table_number
-      const seatsWithTable = locationSeats.filter(
-        (seat) => seat.table_number !== null && seat.table_number !== undefined
-      );
-      
-      if (seatsWithTable.length === 0) {
-        // No seats with table numbers - if we have no seat data, show the location
-        // Otherwise, hide it since groups need tables
-        matchesGroupSize = locationSeats.length === 0;
-      } else {
-        // Group seats by table_number and count available seats per table
+      const locationFloorsSeats =
+        seatsByLocation.get(loc.id) || new Map<string, SeatResponse[]>();
+
+      let foundMatchingFloor = false;
+
+      // Iterate through all floors
+      for (const floorSeats of locationFloorsSeats.values()) {
+        // Filter seats with valid table numbers
+        const seatsWithTable = floorSeats.filter(
+          (seat) => seat.table_number !== null && seat.table_number !== undefined
+        );
+
+        if (seatsWithTable.length === 0) {
+          // No tables on this floor
+          if (floorSeats.length === 0) foundMatchingFloor = true;
+          continue;
+        }
+
+        // Group seats by table_number
         const seatsByTable = new Map<number, number>();
         for (const seat of seatsWithTable) {
           const tableNum = seat.table_number!;
           seatsByTable.set(tableNum, (seatsByTable.get(tableNum) || 0) + 1);
         }
-        
+
         // Check if any table has enough seats for the group
-        matchesGroupSize = Array.from(seatsByTable.values()).some(
+        const thisFloorHasLargeEnoughTable = Array.from(seatsByTable.values()).some(
           (count) => count >= groupSize
         );
+
+        if (thisFloorHasLargeEnoughTable) {
+          foundMatchingFloor = true;
+          break;
+        }
       }
+
+      matchesGroupSize = foundMatchingFloor;
     }
 
     return matchesSearch && matchesFilters && matchesGroupSize;

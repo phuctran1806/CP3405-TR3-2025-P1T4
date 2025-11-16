@@ -81,7 +81,6 @@ export interface SeatUpdatePayload {
  * Update many seats at a time
  */
 export async function updateSeats(payload: SeatUpdatePayload): Promise<ApiResult<{ status: string; message: string }>> {
-  console.log(payload)
   return apiFetch<SeatUpdateResponse>(`/seats/update`, {
     method: "PATCH",
     body: JSON.stringify(payload),

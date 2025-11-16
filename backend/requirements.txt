@@ -13,6 +13,14 @@ passlib[bcrypt]==1.7.4
 python-dotenv==1.0.0
 bcrypt==4.1.1
 
+# Machine Learning
+numpy==2.0.2
+pandas==2.2.3
+statsmodels==0.14.4
+scipy==1.14.1
+statsforecast==2.0.3
+numba==0.60.0
+
 # Validation
 pydantic==2.5.0
 pydantic-settings==2.1.0

@@ -19,6 +19,7 @@ from app.api import (
     predictions,
     reservations,
     seats,
+    forecast
 )
 from app.services.seat_refresh_worker import seat_refresh_worker
 
@@ -72,6 +73,7 @@ app.include_router(images.router, prefix="/api/images", tags=["Images"])
 app.include_router(lecturer.router, prefix="/api/lecturer-assignments", tags=["Lecturer Assignments"])
 app.include_router(predictions.router, prefix="/api/predictions", tags=["Predictions"])
 app.include_router(ai_demo.router, prefix="/ai", tags=["AI Demo"])
+app.include_router(forecast.router, prefix="/api/forecast", tags=["Forecast"])
 
 
 @app.get("/")
