@@ -656,7 +656,10 @@
         currentFloors = data.floors || [];
         renderFloors();
         if (data.last_updated) {
-          const ts = new Date(data.last_updated);
+          const normalizedIso = data.last_updated.endsWith('Z')
+            ? data.last_updated
+            : `${data.last_updated}Z`;
+          const ts = new Date(normalizedIso);
           const shanghaiMs = ts.getTime() + 8 * 60 * 60 * 1000;
           const shanghai = new Date(shanghaiMs);
           const hours24 = shanghai.getUTCHours();
