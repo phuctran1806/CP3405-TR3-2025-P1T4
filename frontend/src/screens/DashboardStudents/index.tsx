@@ -12,6 +12,8 @@ import { getOccupancyHistory, type OccupancyHistory } from '@/api/history';
 import { getLocationById } from '@/api/locations';
 import type { LocationResponse } from '@/api/types/location_types';
 import { getFloors, type FloorResponse } from '@/api/floors';
+import { getDailyForecast, getWeeklyForecast } from '@/api/forecast';
+import type { DailyForecastResponse, WeeklyForecastResponse } from '@/api/types/forecast_types';
 
 export default function LocationDashboard() {
   const { location: locationId } = useLocalSearchParams();
@@ -24,6 +26,11 @@ export default function LocationDashboard() {
   const [floors, setFloors] = useState<FloorResponse[]>([]);
   const [selectedFloor, setSelectedFloor] = useState<FloorResponse | null>(null);
   const [loadingFloors, setLoadingFloors] = useState(true);
+
+  // Forecast states
+  const [dailyForecast, setDailyForecast] = useState<DailyForecastResponse | null>(null);
+  const [weeklyForecast, setWeeklyForecast] = useState<WeeklyForecastResponse | null>(null);
+  const [loadingForecast, setLoadingForecast] = useState(false);
 
 
   // --------------------------
@@ -107,7 +114,7 @@ export default function LocationDashboard() {
         if (!result.ok) throw result.error;
         setFloors(result.data);
         if (result.data.length > 0)
-            setSelectedFloor(result.data[0]); // default first floor
+          setSelectedFloor(result.data[0]); // default first floor
       } catch (err) {
         console.error('Failed to fetch floors:', err);
         if (active) setFloors([]);
@@ -122,6 +129,51 @@ export default function LocationDashboard() {
     };
   }, [locationId]);
 
+
+  // --------------------------
+  // Load forecast data
+  // --------------------------
+  useEffect(() => {
+    if (!locationId) return;
+
+    let active = true;
+
+    async function loadForecast() {
+      try {
+        setLoadingForecast(true);
+
+        const [dailyResult, weeklyResult] = await Promise.all([
+          getDailyForecast({ location_id: locationId as string }),
+          getWeeklyForecast({ location_id: locationId as string })
+        ]);
+
+        if (!active) return;
+
+        if (dailyResult.ok) {
+          setDailyForecast(dailyResult.data);
+        } else {
+          console.error('Failed to load daily forecast:', dailyResult.error);
+        }
+
+        if (weeklyResult.ok) {
+          setWeeklyForecast(weeklyResult.data);
+        } else {
+          console.error('Failed to load weekly forecast:', weeklyResult.error);
+        }
+
+      } catch (err) {
+        if (!active) return;
+        console.error('Failed to fetch forecast data:', err);
+      } finally {
+        if (active) setLoadingForecast(false);
+      }
+    }
+
+    loadForecast();
+    return () => {
+      active = false;
+    };
+  }, [locationId]);
 
   // --------------------------
   // Derived data
@@ -146,45 +198,6 @@ export default function LocationDashboard() {
 
   const occupancyStatus = getOccupancyStatus(currentPercentage);
 
-  // Weekly average occupancy
-  const weeklyAverages = useMemo(() => {
-    if (!history.length) return Array(7).fill(0);
-    const totals = Array(7).fill(0);
-    const counts = Array(7).fill(0);
-
-    for (const rec of history) {
-      totals[rec.day_of_week] += rec.occupancy_percentage;
-      counts[rec.day_of_week] += 1;
-    }
-
-    return totals.map((t, i) => (counts[i] ? t / counts[i] : 0));
-  }, [history]);
-
-  const weeklyData = {
-    labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-    datasets: [{ data: weeklyAverages }],
-  };
-
-  // Hourly trend (line chart)
-  const lineData = useMemo(() => {
-    if (!history.length) return { labels: [], datasets: [{ data: [0] }] };
-    const sorted = [...history].sort(
-      (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
-    );
-    const labels = sorted.map((d) => `${d.hour_of_day}:00`);
-    const data = sorted.map((d) => d.occupancy_percentage);
-    return {
-      labels,
-      datasets: [
-        {
-          data,
-          color: (opacity = 1) => `rgba(59, 130, 246, ${opacity})`,
-          strokeWidth: 3,
-        },
-      ],
-    };
-  }, [history]);
-
   // Pie chart data
   const pieData = useMemo(
     () => [
@@ -206,20 +219,67 @@ export default function LocationDashboard() {
     [currentPercentage]
   );
 
-  const chartConfig = {
-    backgroundGradientFrom: '#ffffff',
-    backgroundGradientTo: '#ffffff',
-    color: (opacity = 1) => `rgba(59, 130, 246, ${opacity})`,
-    labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-    strokeWidth: 2,
-    barPercentage: 0.7,
-    propsForLabels: { fontSize: 11 },
-    propsForBackgroundLines: {
-      strokeWidth: 1,
-      stroke: '#f3f4f6',
-      strokeDasharray: '0',
-    },
-  };
+  // Weekly line chart data (from forecast)
+  const weeklyData = useMemo(() => {
+    if (!weeklyForecast?.forecasts || weeklyForecast.forecasts.length === 0) {
+      return {
+        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        datasets: [{ data: [0, 0, 0, 0, 0, 0, 0] }],
+      };
+    }
+
+    const labels = weeklyForecast.forecasts.map(f => f.day_of_week.substring(0, 3));
+    const data = weeklyForecast.forecasts.map(f => f.average_predicted_occupancy);
+
+    return {
+      labels,
+      datasets: [{ data }],
+    };
+  }, [weeklyForecast]);
+
+  const dailyData = useMemo(() => {
+    if (!dailyForecast?.forecasts || dailyForecast.forecasts.length === 0) {
+      return {
+        labels: [''],
+        datasets: [{ data: [0] }],
+        meta: [],
+      };
+    }
+
+    const now = new Date();
+    const todayStr = now.toDateString();
+
+    const timeLabels: string[] = [];
+    const dateLabels: string[] = [];
+    const data: number[] = [];
+
+    dailyForecast.forecasts.forEach(f => {
+      const dateObj = new Date(f.datetime);
+
+      const hour = f.hour;
+      const period = hour >= 12 ? "PM" : "AM";
+      const displayHour = hour > 12 ? hour - 12 : hour === 0 ? 12 : hour;
+      timeLabels.push(`${displayHour} ${period}`);
+
+      let dateLabel = "";
+      if (dateObj.toDateString() === todayStr) {
+        dateLabel = "Today";
+      } else {
+        const day = dateObj.getDate().toString().padStart(2, "0");
+        const month = (dateObj.getMonth() + 1).toString().padStart(2, "0");
+        dateLabel = `${day}/${month}`;
+      }
+      dateLabels.push(dateLabel);
+
+      data.push(f.predicted_occupancy);
+    });
+
+    return {
+      labels: timeLabels, // chart-kit will display only time (top)
+      datasets: [{ data }],
+      meta: dateLabels,   // custom date labels (bottom)
+    };
+  }, [dailyForecast]);
 
   // --------------------------
   // Conditional returns
@@ -275,7 +335,7 @@ export default function LocationDashboard() {
         location={{
           id: locationId as string,
           name: location.name,
-          occupancyPercentage: location.busyness_percentage,
+          occupancyPercentage: currentPercentage,  // ← Use the same source as pie chart
           accessibility: [
             ...(location.has_power_outlet ? ['power'] : []),
             ...(location.has_ac ? ['cool'] : []),
@@ -342,15 +402,10 @@ export default function LocationDashboard() {
           />
         ) : (
           <Statistics
-            location={{
-              id: locationId as string,
-              name: location.name,
-              occupancyPercentage: currentPercentage,
-            }}
             pieData={pieData}
             weeklyData={weeklyData}
-            lineData={lineData}
-            chartConfig={chartConfig}
+            dailyData={dailyData}
+            loadingForecast={loadingForecast}
           />
         )}
       </ScrollView>
