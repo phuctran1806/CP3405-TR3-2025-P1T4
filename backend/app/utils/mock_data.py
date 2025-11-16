@@ -395,9 +395,9 @@ def create_floors_and_seats(db, locations: list[Location]):
             import os
             dir = os.path.dirname(os.path.abspath(__file__))
             with open(f"{dir}/seats.json", "r") as f:
-                positions = json.load(f)
+                seats = json.load(f)
 
-            for i, pos in enumerate(positions, 1):
+            for i, seat in enumerate(seats, 1):
                 seat_type = random.choice(list(SeatType))
                 # Set location-specific attributes
                 if loc.name == "Study Pods":
@@ -427,7 +427,7 @@ def create_floors_and_seats(db, locations: list[Location]):
                 seat = Seat(
                     id=str(uuid.uuid4()),
                     floor_id=floor.id,
-                    table_number=pos["table_number"],
+                    table_number=seat["table_number"],
                     seat_number=f"{loc.name[:3].upper()}-{floor_num}-{i:03d}",
                     seat_type=seat_type,
                     has_power_outlet=has_power_outlet,
@@ -435,13 +435,13 @@ def create_floors_and_seats(db, locations: list[Location]):
                     is_quiet=is_quiet,
                     accessibility=accessibility,
                     capacity=1,
-                    x_coordinate=pos["x_coordinate"],
-                    y_coordinate=pos["y_coordinate"],
+                    x_coordinate=seat["x_coordinate"],
+                    y_coordinate=seat["y_coordinate"],
                     status=random.choice([SeatStatus.AVAILABLE, SeatStatus.OCCUPIED])
                 )
                 all_seats.append(seat)
 
-            floor.total_seats = len(positions)
+            floor.total_seats = len(seats)
 
     db.add_all(all_seats)
     db.commit()
