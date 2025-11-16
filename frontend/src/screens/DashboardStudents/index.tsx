@@ -12,6 +12,7 @@ import { getOccupancyHistory, type OccupancyHistory } from '@/api/history';
 import { getLocationById } from '@/api/locations';
 import type { LocationResponse } from '@/api/types/location_types';
 import { getFloors, type FloorResponse } from '@/api/floors';
+import { resolveAssetUrl } from '@/utils/assetUrl';
 import type { AccessibilityFeature } from '@/utils/accessibilityIcons';
 
 export default function LocationDashboard() {
@@ -329,7 +330,7 @@ export default function LocationDashboard() {
               id: locationId as string,
               name: location.name,
               occupancyPercentage: currentPercentage,
-              image: `/${location.image_url}`,
+              image: resolveAssetUrl(location.image_url),
             }}
             map={
               selectedFloor ? (

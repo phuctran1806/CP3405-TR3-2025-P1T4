@@ -9,7 +9,7 @@ from pydantic import BaseModel, Field
 
 class ChatMessage(BaseModel):
     role: Literal["user", "assistant"] = Field(..., description="Message role")
-    content: str = Field(..., description="Message text")
+    content: str | None = Field(default=None, description="Message text")
 
 
 class AiChatRequest(BaseModel):

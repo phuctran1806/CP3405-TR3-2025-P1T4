@@ -14,6 +14,10 @@
       --accent: #22d3ee;
     }
 
+    html, body {
+      height: 100%;
+    }
+
     body {
       margin: 0;
       background: var(--bg);
@@ -23,14 +27,29 @@
 
     h1 {
       font-size: 1.5rem;
-      margin: 0 0 1rem;
+      margin: 0 0 0.35rem;
+    }
+
+    .muted {
+      color: #94a3b8;
+      font-size: 0.9rem;
     }
 
     .layout {
       display: grid;
-      grid-template-columns: minmax(0, 3fr) minmax(320px, 420px);
+      grid-template-columns: minmax(0, 2fr) minmax(320px, 1fr);
       gap: 1.5rem;
       padding: 1.5rem;
+      min-height: 10vh;
+      height: 91vh;
+    }
+
+    .layout.chat-hidden {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .layout.chat-hidden .chat-box {
+      display: none;
     }
 
     .panel {
@@ -39,73 +58,98 @@
       border-radius: 20px;
       padding: 1.25rem;
       box-shadow: 0 15px 40px rgba(2, 6, 23, 0.4);
-    }
-
-    #floor-container {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 1rem;
-      max-height: calc(100vh - 220px);
-      overflow-y: auto;
-      padding-right: 0.5rem;
-    }
-
-    .floor-card {
-      background: rgba(15, 23, 42, 0.8);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 0.9rem;
       display: flex;
       flex-direction: column;
-      gap: 0.5rem;
+      min-height: 0;
     }
 
-    .floor-header {
+    .seat-panel {
       display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      min-height: 0;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .seat-header {
+      display: flex;
+      align-items: center;
       justify-content: space-between;
-      font-size: 0.95rem;
+      gap: 1rem;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .chat-toggle {
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      background: transparent;
+      color: #e2e8f0;
+      padding: 0.35rem 0.9rem;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+
+    .meta-pill {
+      font-size: 0.85rem;
+      background: rgba(148, 163, 184, 0.15);
+      padding: 0.35rem 0.75rem;
+      border-radius: 999px;
       color: #94a3b8;
     }
 
-    .floor-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(18px, 1fr));
-      gap: 6px;
-    }
-
-    .seat-node {
-      width: 18px;
-      height: 18px;
-      border-radius: 4px;
+    .seat-marker {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      border: 1px solid rgba(15, 23, 42, 0.7);
+      transform: translate(-50%, -50%);
       transition: transform 0.2s ease, box-shadow 0.2s ease;
+      box-shadow: 0 0 10px rgba(15, 23, 42, 0.35);
     }
 
-    .seat-node.available { background: #22c55e; }
-    .seat-node.occupied { background: #0f172a; box-shadow: 0 0 0 1px #000 inset; }
-    .seat-node.reserved { background: #1f2937; }
-    .seat-node.bad,
-    .seat-node.maintenance { background: #ef4444; }
+    .seat-marker.available { background: #22c55e; }
+    .seat-marker.occupied { background: #0f172a; border-color: #000; }
+    .seat-marker.reserved { background: #1f2937; }
+    .seat-marker.bad,
+    .seat-marker.maintenance { background: #ef4444; border-color: #ef4444; }
 
-    .seat-node:hover { transform: scale(1.2); }
-
-    .seat-node.highlight {
-      animation: pulse 1.5s ease-in-out infinite;
+    .seat-marker.highlight {
+      animation: blink 1.3s ease-in-out infinite;
       background: #fde047 !important;
-      box-shadow: 0 0 14px rgba(250, 204, 21, 0.9);
+      box-shadow: 0 0 18px rgba(250, 204, 21, 0.9);
     }
 
-    @keyframes pulse {
-      0% { opacity: 0.4; }
+    .seat-marker.has-power::after {
+      content: '🪫';
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      font-size: 0.55rem;
+    }
+
+    .seat-marker:hover {
+      transform: translate(-50%, -50%) scale(1.2);
+    }
+
+    @keyframes blink {
+      0% { opacity: 0.5; }
       50% { opacity: 1; }
-      100% { opacity: 0.4; }
+      100% { opacity: 0.5; }
     }
 
     .legend {
       display: flex;
       gap: 1rem;
-      margin-top: 1rem;
       flex-wrap: wrap;
       font-size: 0.9rem;
+      margin-top: auto;
     }
 
     .legend span {
@@ -121,10 +165,143 @@
       display: inline-block;
     }
 
+    .floor-container {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      padding-right: 0.25rem;
+    }
+
+    .floor-card {
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(51, 65, 85, 0.8);
+      border-radius: 14px;
+      padding: 0.9rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      cursor: pointer;
+      text-align: left;
+      transition: border 0.2s ease, transform 0.2s ease;
+    }
+
+    .floor-card:hover { transform: translateY(-2px); }
+
+    .floor-card.active {
+      border-color: var(--accent);
+      box-shadow: 0 10px 20px rgba(34, 211, 238, 0.12);
+    }
+
+    .floor-card.ai-picked::after {
+      content: "AI Pick";
+      align-self: flex-start;
+      font-size: 0.75rem;
+      letter-spacing: 0.02em;
+      padding: 0.1rem 0.6rem;
+      border-radius: 999px;
+      background: rgba(34, 211, 238, 0.12);
+      color: var(--accent);
+    }
+
+    .floor-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.75rem;
+      align-items: center;
+    }
+
+    .floor-label {
+      font-weight: 600;
+      font-size: 1rem;
+    }
+
+    .floor-meta {
+      font-size: 0.85rem;
+      color: #94a3b8;
+    }
+
+    .floor-counts {
+      display: flex;
+      flex-direction: column;
+      text-align: right;
+      font-size: 0.85rem;
+      color: #cbd5f5;
+    }
+
+    .floor-counts span:first-child {
+      color: #4ade80;
+      font-weight: 600;
+    }
+
+    .mini-map {
+      position: relative;
+      width: 100%;
+      margin-top: 0.75rem;
+      border-radius: 12px;
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      background: radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.04), transparent 60%);
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      overflow: hidden;
+      padding-bottom: 62%;
+    }
+
+    .mini-map-overlay {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .feature-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+      margin-top: 0.65rem;
+    }
+
+    .feature-chip {
+      font-size: 0.75rem;
+      padding: 0.2rem 0.55rem;
+      border-radius: 999px;
+      background: rgba(34, 211, 238, 0.1);
+      border: 1px solid rgba(34, 211, 238, 0.3);
+      color: #c4e1ff;
+    }
+
     .chat-box {
       display: flex;
       flex-direction: column;
-      height: calc(100vh - 3rem);
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .chip-list {
+      display: flex;
+      gap: 0.5rem;
+      overflow-x: auto;
+      padding-bottom: 0.25rem;
+    }
+
+    .filter-chip {
+      border: 1px solid rgba(148, 163, 184, 0.6);
+      background: transparent;
+      color: #e2e8f0;
+      padding: 0.3rem 0.75rem;
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      white-space: nowrap;
+    }
+
+    .filter-chip.active {
+      background: rgba(34, 211, 238, 0.2);
+      border-color: rgba(34, 211, 238, 0.6);
+      color: #22d3ee;
     }
 
     .messages {
@@ -210,18 +387,40 @@
       font-size: 0.9rem;
       color: #94a3b8;
     }
+
+    @media (max-width: 1100px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+      .chat-box {
+        height: auto;
+      }
+    }
   </style>
 </head>
 <body>
   <div class="layout">
-    <section class="panel">
-      <h1>Library Seat Pulse</h1>
-      <div id="floor-container"></div>
+    <section class="panel seat-panel">
+      <div class="seat-header">
+        <div>
+          <h1>Library Seat Pulse</h1>
+          <p class="muted">Live seat map powered by Gemini</p>
+        </div>
+        <div class="header-actions">
+          <span id="last-updated" class="meta-pill">Refreshing…</span>
+          <button id="chat-toggle" class="chat-toggle">Hide chat</button>
+        </div>
+      </div>
+
+      <div id="floor-container" class="floor-container"></div>
+
       <div class="legend">
         <span><i style="background:#22c55e"></i>Available</span>
-        <span><i style="background:#0f172a;border:1px solid #000"></i>Occupied/Reserved</span>
+        <span><i style="background:#0f172a;border:1px solid #000"></i>Occupied / Reserved</span>
         <span><i style="background:#ef4444"></i>Out of Service</span>
         <span><i style="background:#fde047"></i>Gemini Highlight</span>
+        <span><i style="background:#0f172a;border:1px solid #0ea5e9;position:relative;display:inline-block;
+          width:14px;height:14px;border-radius:50%;"><span style="position:absolute;top:-4px;right:-4px;font-size:10px;">🪫</span></i>Power Plug</span>
       </div>
     </section>
 
@@ -232,22 +431,67 @@
         <input type="text" id="chat-input" placeholder="Describe the seat you need..." autocomplete="off" />
         <button type="submit">Send</button>
       </form>
+      <div id="chip-list" class="chip-list"></div>
     </section>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script>
     const floorContainer = document.getElementById('floor-container');
+    const lastUpdatedEl = document.getElementById('last-updated');
+    const chatToggleBtn = document.getElementById('chat-toggle');
+    const layoutEl = document.querySelector('.layout');
     const messagesEl = document.getElementById('messages');
     const form = document.getElementById('chat-form');
     const input = document.getElementById('chat-input');
+    const chipListEl = document.getElementById('chip-list');
 
-    const seatElements = new Map();
     const chatHistory = [{ role: 'assistant', content: 'Hi! Tell me what kind of seat you are looking for.' }];
     let seatRefreshTimer = null;
     let currentFloors = [];
     let currentHighlights = [];
     let thinkingBubble = null;
+    let chatVisible = true;
+    const selectedFilters = new Set();
+    const chipOptions = [
+      { label: 'Quiet zone', value: 'quiet seat' },
+      { label: 'Power outlet', value: 'seat with power outlet' },
+      { label: 'Air-conditioned', value: 'air-conditioned seat' },
+      { label: 'Group study', value: 'group study area' },
+      { label: 'With Wi-Fi', value: 'seat with Wi-Fi' },
+    ];
+
+    function renderChips() {
+      chipOptions.forEach((chip) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'filter-chip';
+        btn.textContent = chip.label;
+        btn.addEventListener('click', () => {
+          if (selectedFilters.has(chip.value)) {
+            selectedFilters.delete(chip.value);
+            btn.classList.remove('active');
+          } else {
+            selectedFilters.add(chip.value);
+            btn.classList.add('active');
+          }
+        });
+        chipListEl.appendChild(btn);
+      });
+    }
+
+    function resetChips() {
+      selectedFilters.clear();
+      chipListEl.querySelectorAll('.filter-chip').forEach((chip) => chip.classList.remove('active'));
+    }
+
+    function buildMessage(manualText) {
+      const filtersText = Array.from(selectedFilters).join(', ');
+      if (filtersText && manualText) return `${filtersText}. ${manualText}`;
+      return filtersText || manualText;
+    }
+
+    renderChips();
 
     function appendMessage(role, content, { markdown = false, thinking = false } = {}) {
       const bubble = document.createElement('div');
@@ -268,58 +512,133 @@
     function classifyStatus(status) {
       const value = status?.toLowerCase?.() ?? '';
       if (value === 'available') return 'available';
-      if (value === 'maintenance' || value === 'blocked') return 'bad';
+      if (value === 'maintenance' || value === 'blocked') return 'maintenance';
+      if (value === 'reserved') return 'reserved';
       return 'occupied';
     }
 
-    function renderSeats(floors = [], highlights = []) {
+    function isHighlightedFloor(floor, highlightSet) {
+      return (floor.seats || []).some((seat) => highlightSet.has(seat.seat_id));
+    }
+
+    function getSeatPosition(seat) {
+      const rawX = Number(seat.x_coordinate ?? seat.x ?? 0);
+      const rawY = Number(seat.y_coordinate ?? seat.y ?? 0);
+      const xPercent = Number.isFinite(rawX) ? (rawX <= 1 ? rawX * 100 : rawX) : 0;
+      const yPercent = Number.isFinite(rawY) ? (rawY <= 1 ? rawY * 100 : rawY) : 0;
+      return {
+        x: Math.min(100, Math.max(0, xPercent)),
+        y: Math.min(100, Math.max(0, yPercent)),
+      };
+    }
+
+    function resolveAssetUrl(path) {
+      if (!path) return null;
+      if (/^https?:/i.test(path)) return path;
+      return path.startsWith('/') ? path : `/${path}`;
+    }
+
+    function prioritizeFloors(floors, highlights = []) {
       const highlightSet = new Set(highlights);
-      const prioritizedFloors = [...floors].sort((a, b) => {
-        const aHighlighted = (a.seats || []).some((seat) => highlightSet.has(seat.seat_id));
-        const bHighlighted = (b.seats || []).some((seat) => highlightSet.has(seat.seat_id));
+      return [...floors].sort((a, b) => {
+        const aHighlighted = isHighlightedFloor(a, highlightSet);
+        const bHighlighted = isHighlightedFloor(b, highlightSet);
         if (aHighlighted !== bHighlighted) return aHighlighted ? -1 : 1;
         const aLabel = a.path || a.floor_name || '';
         const bLabel = b.path || b.floor_name || '';
         return aLabel.localeCompare(bLabel, undefined, { numeric: true, sensitivity: 'base' });
       });
+    }
 
+    function buildFeatureChips(seats = []) {
+      const chips = [];
+      if (seats.some((seat) => seat.has_power_outlet)) chips.push('Power plugs');
+      if (seats.some((seat) => seat.has_wifi)) chips.push('Wi-Fi');
+      if (seats.some((seat) => seat.has_ac)) chips.push('Air-conditioned');
+      if (seats.some((seat) => seat.accessibility)) chips.push('Accessible');
+      return chips;
+    }
+
+    const DEFAULT_MAP_RATIO = 0.62;
+
+    function renderFloors() {
+      const highlightSet = new Set(currentHighlights);
+      const prioritized = prioritizeFloors(currentFloors, currentHighlights);
       floorContainer.innerHTML = '';
-      seatElements.clear();
-
-      prioritizedFloors.forEach((floor) => {
+      if (!prioritized.length) {
+        floorContainer.innerHTML = '<p class="muted">No floors available.</p>';
+        return;
+      }
+      prioritized.forEach((floor) => {
+        const seats = floor.seats || [];
+        const available = seats.filter((seat) => classifyStatus(seat.status) === 'available').length;
+        const total = seats.length;
         const card = document.createElement('div');
         card.className = 'floor-card';
+        if (isHighlightedFloor(floor, highlightSet)) {
+          card.classList.add('ai-picked');
+        }
 
         const header = document.createElement('div');
-        header.className = 'floor-header';
-        const count = floor.seats?.length ?? 0;
-        const label = floor.path || floor.floor_name || 'Floor';
-        header.innerHTML = `<strong>${label}</strong><span>${count} seats</span>`;
-
-        const grid = document.createElement('div');
-        grid.className = 'floor-grid';
-
-        const orderedSeats = [...(floor.seats || [])].sort((a, b) => {
-          const aHighlighted = highlightSet.has(a.seat_id) ? 1 : 0;
-          const bHighlighted = highlightSet.has(b.seat_id) ? 1 : 0;
-          if (aHighlighted !== bHighlighted) return bHighlighted - aHighlighted;
-          return a.seat_number.localeCompare(b.seat_number, undefined, { numeric: true, sensitivity: 'base' });
-        });
-
-        orderedSeats.forEach((seat) => {
-          const node = document.createElement('div');
-          node.className = `seat-node ${classifyStatus(seat.status)}`;
-          node.dataset.seatId = seat.seat_id;
-          node.title = `${seat.seat_number} (${seat.status})`;
-          if (highlightSet.has(seat.seat_id)) {
-            node.classList.add('highlight');
-          }
-          grid.appendChild(node);
-          seatElements.set(seat.seat_id, node);
-        });
-
+        header.className = 'floor-row';
+        header.innerHTML = `
+          <div>
+            <div class="floor-label">${floor.path || floor.floor_name || 'Floor'}</div>
+            <div class="floor-meta">${floor.location_name || ''}</div>
+          </div>
+          <div class="floor-counts">
+            <span>${available} free</span>
+            <span>${total} seats</span>
+          </div>
+        `;
         card.appendChild(header);
-        card.appendChild(grid);
+
+        const miniMap = document.createElement('div');
+        miniMap.className = 'mini-map';
+        miniMap.style.paddingBottom = `${DEFAULT_MAP_RATIO * 100}%`;
+        const mapUrl = resolveAssetUrl(floor.floor_map_url);
+        if (mapUrl) {
+          miniMap.style.backgroundImage = `url(${mapUrl})`;
+          const preload = new Image();
+          preload.onload = () => {
+            const ratio = preload.naturalWidth > 0 ? preload.naturalHeight / preload.naturalWidth : DEFAULT_MAP_RATIO;
+            miniMap.style.paddingBottom = `${Math.max(ratio, 0.25) * 100}%`;
+          };
+          preload.src = mapUrl;
+        }
+        const overlay = document.createElement('div');
+        overlay.className = 'mini-map-overlay';
+        seats.forEach((seat) => {
+          const marker = document.createElement('div');
+          const { x, y } = getSeatPosition(seat);
+          marker.className = `seat-marker ${classifyStatus(seat.status)}`;
+          marker.style.left = `${x}%`;
+          marker.style.top = `${y}%`;
+          marker.title = `${seat.seat_number} (${seat.status})`;
+          if (seat.has_power_outlet) {
+            marker.classList.add('has-power');
+          }
+          if (highlightSet.has(seat.seat_id)) {
+            marker.classList.add('highlight');
+          }
+          overlay.appendChild(marker);
+        });
+        miniMap.appendChild(overlay);
+        card.appendChild(miniMap);
+
+        const features = buildFeatureChips(seats);
+        if (features.length) {
+          const featureList = document.createElement('div');
+          featureList.className = 'feature-list';
+          features.forEach((label) => {
+            const chip = document.createElement('span');
+            chip.className = 'feature-chip';
+            chip.textContent = label;
+            featureList.appendChild(chip);
+          });
+          card.appendChild(featureList);
+        }
+
         floorContainer.appendChild(card);
       });
     }
@@ -330,15 +649,22 @@
         if (!res.ok) throw new Error('Failed to retrieve seats');
         const data = await res.json();
         currentFloors = data.floors || [];
-        renderSeats(currentFloors, currentHighlights);
+        renderFloors();
+        if (data.last_updated) {
+          const ts = new Date(data.last_updated);
+          lastUpdatedEl.textContent = `Last updated ${ts.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+        } else {
+          lastUpdatedEl.textContent = 'Live data';
+        }
       } catch (err) {
         console.error(err);
+        lastUpdatedEl.textContent = 'Unable to refresh seats';
       }
     }
 
     function highlightSeats(ids = []) {
       currentHighlights = ids;
-      renderSeats(currentFloors, currentHighlights);
+      renderFloors();
     }
 
     async function sendMessage(text) {
@@ -369,16 +695,25 @@
         appendMessage('assistant', 'Sorry, I could not contact Gemini.');
       } finally {
         form.querySelector('button').disabled = false;
-        input.value = '';
       }
     }
 
     form.addEventListener('submit', (event) => {
       event.preventDefault();
-      const text = input.value.trim();
-      if (!text) return;
-      sendMessage(text);
+      const manualText = input.value.trim();
+      const finalText = buildMessage(manualText);
+      if (!finalText) return;
+      input.value = '';
+      resetChips();
+      sendMessage(finalText);
     });
+
+    chatToggleBtn?.addEventListener('click', () => {
+      chatVisible = !chatVisible;
+      layoutEl?.classList.toggle('chat-hidden', !chatVisible);
+      chatToggleBtn.textContent = chatVisible ? 'Hide chat' : 'Show chat';
+    });
+
 
     appendMessage('assistant', chatHistory[0].content);
     loadSeatData();

@@ -32,16 +32,39 @@ async def ai_demo_page(request: Request):
 async def ai_demo_seats(db: Session = Depends(get_db)):
     snapshot = seat_refresh_worker.get_seat_payload()
     if snapshot.get("floors"):
-        return {"floors": snapshot["floors"], "last_updated": snapshot.get("last_updated")}
+        return {
+            "floors": snapshot["floors"],
+            "seats": snapshot.get("seats", []),
+            "last_updated": snapshot.get("last_updated"),
+        }
 
     # Fallback if worker has not produced a snapshot yet
     seats: List[Seat] = db.query(Seat).all()
     floor_groups: Dict[str, Dict] = {}
+    seat_payload: List[Dict] = []
     for seat in seats:
         status_value = seat.status.value if hasattr(seat.status, "value") else seat.status
         location_name = seat.floor.location.name if seat.floor and seat.floor.location else ""
         floor_name = seat.floor.floor_name if seat.floor else seat.floor_id
         path = " / ".join(filter(None, [location_name, floor_name])) or floor_name
+        floor_map_url = seat.floor.floor_map_url if seat.floor else None
+        seat_dict = {
+            "id": seat.id,
+            "seat_number": seat.seat_number,
+            "status": status_value,
+            "floor_id": seat.floor_id,
+            "floor_name": floor_name,
+            "location_name": location_name,
+            "path": path,
+            "x_coordinate": float(seat.x_coordinate),
+            "y_coordinate": float(seat.y_coordinate),
+            "has_power_outlet": seat.has_power_outlet,
+            "has_wifi": getattr(seat, "has_wifi", False),
+            "has_ac": getattr(seat, "has_ac", False),
+            "accessibility": seat.accessibility,
+            "floor_map_url": floor_map_url,
+        }
+        seat_payload.append(seat_dict)
         floor_entry = floor_groups.setdefault(
             seat.floor_id,
             {
@@ -49,6 +72,7 @@ async def ai_demo_seats(db: Session = Depends(get_db)):
                 "floor_name": floor_name,
                 "location_name": location_name,
                 "path": path,
+                "floor_map_url": floor_map_url,
                 "seats": [],
             },
         )
@@ -61,6 +85,8 @@ async def ai_demo_seats(db: Session = Depends(get_db)):
                 "has_wifi": getattr(seat, "has_wifi", False),
                 "has_ac": getattr(seat, "has_ac", False),
                 "accessibility": seat.accessibility,
+                "x_coordinate": float(seat.x_coordinate),
+                "y_coordinate": float(seat.y_coordinate),
             }
         )
 
@@ -68,7 +94,7 @@ async def ai_demo_seats(db: Session = Depends(get_db)):
         entry["seats"].sort(key=lambda s: s["seat_number"])
 
     floors = sorted(floor_groups.values(), key=lambda item: item["path"])
-    return {"floors": floors, "last_updated": None}
+    return {"floors": floors, "seats": seat_payload, "last_updated": None}
 
 
 @router.post("/demo/chat", response_model=AiChatResponse)

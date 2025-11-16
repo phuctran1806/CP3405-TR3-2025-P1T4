@@ -119,6 +119,7 @@ class SeatRefreshWorker:
             floor_name = seat.floor.floor_name if seat.floor else ""
             location_name = seat.floor.location.name if seat.floor and seat.floor.location else ""
             path = " / ".join(filter(None, [location_name, floor_name])) or floor_name or seat.floor_id
+            floor_map_url = seat.floor.floor_map_url if seat.floor else None
             seat_dict = {
                 "id": seat.id,
                 "seat_number": seat.seat_number,
@@ -129,10 +130,13 @@ class SeatRefreshWorker:
                 "path": path,
                 "x": round(normalized_x, 2),
                 "y": round(normalized_y, 2),
+                "x_coordinate": float(seat.x_coordinate),
+                "y_coordinate": float(seat.y_coordinate),
                 "has_power_outlet": seat.has_power_outlet,
                 "has_wifi": getattr(seat, "has_wifi", False),
                 "has_ac": getattr(seat, "has_ac", False),
                 "accessibility": seat.accessibility,
+                "floor_map_url": floor_map_url,
             }
             payload.append(seat_dict)
             lines.append(
@@ -146,6 +150,7 @@ class SeatRefreshWorker:
                     "floor_name": floor_name or seat.floor_id,
                     "location_name": location_name,
                     "path": path,
+                    "floor_map_url": floor_map_url,
                     "seats": [],
                 },
             )
@@ -158,6 +163,8 @@ class SeatRefreshWorker:
                     "has_wifi": seat_dict["has_wifi"],
                     "has_ac": seat_dict["has_ac"],
                     "accessibility": seat.accessibility,
+                    "x_coordinate": float(seat.x_coordinate),
+                    "y_coordinate": float(seat.y_coordinate),
                 }
             )
 

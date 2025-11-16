@@ -30,6 +30,7 @@ import { Filter, Sparkles, Users } from "lucide-react-native";
 import { getFloors } from "@/api/floors";
 import { getAvailableSeats } from "@/api/seats";
 import type { SeatResponse } from "@/api/seats";
+import { resolveAssetUrl } from "@/utils/assetUrl";
 
 interface Location {
   id: string;
@@ -68,7 +69,7 @@ export default function HomeStudents() {
       return {
         id: loc.id,
         name: loc.name,
-        image_url: loc.image_url,
+        image_url: resolveAssetUrl(loc.image_url),
         status: loc.status,
         available_seats: loc.available_seats,
         total_capacity: loc.total_capacity,
@@ -397,7 +398,7 @@ export default function HomeStudents() {
                 <LocationCard
                   key={loc.id}
                   name={loc.name}
-                  image={loc.image_url ? { uri: `${loc.image_url}` } : { uri: "None" }}
+                  image={loc.image_url ? { uri: loc.image_url } : { uri: "None" }}
                   accessibility={loc.accessibility}
                   status={loc.status as LocationStatus}
                   maxTableCapacity={maxTableCapacity}

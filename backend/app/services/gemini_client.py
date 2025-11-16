@@ -8,6 +8,10 @@ import httpx
 
 from app.config import settings
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class GeminiClientError(RuntimeError):
     """Raised for Gemini API failures."""
@@ -71,10 +75,26 @@ class GeminiClient:
             "temperature": temperature,
         }
 
-        async with httpx.AsyncClient(timeout=self._timeout) as client:
-            response = await client.post(self._endpoint_url, headers=headers, json=payload)
+        transport = httpx.AsyncHTTPTransport(retries=2)
+        timeout = httpx.Timeout(
+            self._timeout,
+            connect=self._timeout,
+            read=self._timeout,
+            write=self._timeout,
+            pool=self._timeout,
+        )
+        try:
+            async with httpx.AsyncClient(timeout=timeout, transport=transport) as client:
+                logger.debug("Sending Gemini request to %s", self._endpoint_url)
+                response = await client.post(self._endpoint_url, headers=headers, json=payload)
+        except httpx.HTTPError as exc:
+            logger.exception("Gemini HTTP request failed")
+            raise GeminiClientError(f"Gemini request failed: {exc}") from exc
 
         if response.status_code >= 400:
+            logger.error(
+                "Gemini API error %s: %s", response.status_code, response.text[:500]
+            )
             raise GeminiClientError(
                 f"Gemini API error {response.status_code}: {response.text}"
             )
@@ -82,7 +102,9 @@ class GeminiClient:
         data = response.json()
         text = self._extract_text(data)
         if not text:
+            logger.error("Gemini API returned no text content: %s", data)
             raise GeminiClientError("Gemini API returned no text content")
+        logger.debug("Gemini response text: %s", text[:200])
         return text
 
     @staticmethod

@@ -2,7 +2,8 @@ from pathlib import Path
 import shutil
 import uuid
 
-from fastapi import APIRouter, File, HTTPException, Response, UploadFile
+from fastapi import APIRouter, File, HTTPException, UploadFile
+from fastapi.responses import FileResponse
 
 from app.config import settings
 
@@ -16,6 +17,8 @@ except PermissionError:
     fallback = Path.cwd() / "uploads"
     UPLOAD_DIR = fallback
     UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+
+STATIC_IMAGE_DIR = Path(__file__).resolve().parents[2] / "images"
 
 
 @router.post("/upload")
@@ -41,11 +44,17 @@ async def upload_image(file: UploadFile = File(...)):
 
 @router.get("/{filename}")
 async def get_image(filename: str):
-    """Tell Nginx to serve the file (X-Accel-Redirect)."""
-    file_path = UPLOAD_DIR / filename
-    if not file_path.exists():
-        raise HTTPException(status_code=404, detail="File not found")
+    """Serve uploaded or bundled static images."""
+    safe_name = Path(filename).name
 
-    response = Response()
-    response.headers["X-Accel-Redirect"] = f"/_internal_images/{filename}"
-    return response
+    upload_path = UPLOAD_DIR / safe_name
+    if upload_path.exists():
+        response = FileResponse(upload_path)
+        response.headers["X-Accel-Redirect"] = f"/_internal_images/{safe_name}"
+        return response
+
+    static_path = STATIC_IMAGE_DIR / safe_name
+    if static_path.exists():
+        return FileResponse(static_path)
+
+    raise HTTPException(status_code=404, detail="File not found")

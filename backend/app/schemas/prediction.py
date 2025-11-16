@@ -33,7 +33,7 @@ class SeatSuggestionRequest(BaseModel):
     need_power: Optional[bool] = None
     need_wifi: Optional[bool] = None
     need_ac: Optional[bool] = None
-    limit: int = Field(3, ge=1, le=10)
+    limit: int = Field(25, ge=1, le=25)
 
 
 class SeatSuggestionItem(BaseModel):
