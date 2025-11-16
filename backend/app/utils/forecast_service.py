@@ -49,92 +49,95 @@ class ForecastService:
             self.config = None
             
     def predict_occupancy(self, target_datetime_str: str):
-        """Helper function to predict occupancy for a specific datetime"""
+        """Predict occupancy for one specific datetime."""
         opening_hours = self.config['opening_hours']
         
-        # Parse datetime
         target_datetime = pd.to_datetime(target_datetime_str)
         last_known = pd.to_datetime(self.config['last_training_date'])
-        
-        # Calculate hours ahead
-        hours_ahead = int((target_datetime - last_known).total_seconds() / 3600)
-        
-        if hours_ahead <= 0:
-            raise ValueError("Target datetime must be after the last known date (2025-08-31 23:00:00)")
-        
-        # Generate forecast
-        forecast = self.model.predict(h=hours_ahead)
-        
-        # Get prediction for target datetime
-        prediction = forecast.iloc[-1]['AutoARIMA']
-        
-        # Apply weekend + opening hours adjustment
-        day_of_week = target_datetime.dayofweek  # Monday=0, Sunday=6
-        is_weekend = day_of_week in [5, 6]
-        is_sunday = day_of_week == 6
 
+        # Skip Sundays completely
+        if target_datetime.dayofweek == 6:
+            return None
+
+        # Skip outside opening hours
         hour = target_datetime.hour
-        is_open = (
-            opening_hours["start_hour"] <= hour < opening_hours["end_hour"]
-        )
+        if not (opening_hours["start_hour"] <= hour < opening_hours["end_hour"]):
+            return None
 
-        if is_weekend:
+        hours_ahead = int((target_datetime - last_known).total_seconds() / 3600)
+        if hours_ahead <= 0:
+            raise ValueError("Target datetime must be after last known date")
+
+        forecast = self.model.predict(h=hours_ahead)
+        prediction = float(forecast.iloc[-1]['AutoARIMA'])
+
+        # Weekend adjustment (Saturday only)
+        if target_datetime.dayofweek == 5:
             prediction *= self.config['weekend_ratio']
-        
-        if is_sunday or not is_open:  # School is not opening
-            prediction *= 0
 
-        
         return {
             'datetime': target_datetime.strftime('%Y-%m-%d %H:%M:%S'),
-            'predicted_occupancy': round(float(prediction), 0),
+            'predicted_occupancy': round(prediction, 0),
             'day_of_week': target_datetime.strftime('%A'),
-            'is_weekend': is_weekend,
-            'hour': target_datetime.hour,
+            'hour': hour,
         }
-        
-        
-    def get_daily_forecast(self) -> List[Dict[str, Any]]:
-        """Get hourly forecast for the next 24 hours."""
+
+
+    def get_daily_forecast(self):
+        """Only include today's remaining open hours + tomorrow open hours.
+        No closed hours. No Sundays."""
         forecasts = []
         now = pd.to_datetime(datetime.now())
-        for hour_offset in range(1, 25):
-            target_datetime = now + timedelta(hours=hour_offset)
-            prediction = self.predict_occupancy(target_datetime.strftime("%Y-%m-%d %H:%M:%S"))
-            forecasts.append(prediction)
-        return forecasts
-    
-    
-    def get_weekly_forecast(self) -> List[Dict[str, Any]]:
-        """Get average daily forecast for the next 7 days."""
-        forecasts = []
         opening = self.config["opening_hours"]
 
-        # Normalize "now" to midnight to avoid dragging current hour
+        for hour_offset in range(1, 30):
+            target = now + timedelta(hours=hour_offset)
+
+            # Skip Sunday entirely
+            if target.dayofweek == 6:
+                continue
+            
+            # Skip closed hours
+            if not (opening["start_hour"] <= target.hour < opening["end_hour"]):
+                continue
+
+            prediction = self.predict_occupancy(target.strftime("%Y-%m-%d %H:%M:%S"))
+            if prediction:
+                forecasts.append(prediction)
+
+        return forecasts
+
+
+    def get_weekly_forecast(self):
+        """Average occupancy for next 7 OPEN days (Mon–Sat only)."""
+        forecasts = []
+        opening = self.config["opening_hours"]
         today = pd.to_datetime(datetime.now()).normalize()
 
         for day_offset in range(1, 8):
-            # Start of that forecast day at exact midnight
-            forecast_day = today + timedelta(days=day_offset)
+            day = today + timedelta(days=day_offset)
 
-            # We'll forecast only within opening hours: 8am → 10pm
-            daily_predictions = []
+            # Skip Sundays
+            if day.dayofweek == 6:
+                continue
+
+            day_values = []
 
             for hour in range(opening["start_hour"], opening["end_hour"]):
-                target_datetime = forecast_day + timedelta(hours=hour)
-                prediction = self.predict_occupancy(
-                    target_datetime.strftime("%Y-%m-%d %H:%M:%S")
-                )
-                daily_predictions.append(prediction["predicted_occupancy"])
+                target = day + timedelta(hours=hour)
+                prediction = self.predict_occupancy(target.strftime("%Y-%m-%d %H:%M:%S"))
+                
+                if prediction:
+                    day_values.append(prediction["predicted_occupancy"])
 
-            average_occupancy = round(float(np.mean(daily_predictions)), 0)
+            if day_values:
+                avg_occ = round(float(np.mean(day_values)), 0)
 
-            forecasts.append({
-                "date": forecast_day.strftime("%Y-%m-%d"),
-                "average_predicted_occupancy": average_occupancy,
-                "day_of_week": forecast_day.strftime("%A"),
-                "is_weekend": forecast_day.weekday() in [5, 6],
-            })
+                forecasts.append({
+                    "date": day.strftime("%Y-%m-%d"),
+                    "average_predicted_occupancy": avg_occ,
+                    "day_of_week": day.strftime("%A"),
+                })
 
         return forecasts
 
