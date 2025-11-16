@@ -50,7 +50,7 @@ class Settings(BaseSettings):
     GEMINI_ENDPOINT_URL: Optional[str] = None
     GEMINI_API_KEY: Optional[str] = None
     GEMINI_MODEL: str = "gemini-1.5-flash"
-    GEMINI_REQUEST_TIMEOUT_SECONDS: int = 30
+    GEMINI_REQUEST_TIMEOUT_SECONDS: int = 60
 
     # Data Files
     SEATING_DATA_PATH: str = str(

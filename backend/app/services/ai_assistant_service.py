@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import re
+import traceback
 from typing import Dict, List, Optional
 
 from sqlalchemy.orm import Session
@@ -49,7 +50,13 @@ class AiAssistantService:
                 seat_map_snapshot,
             )
         except Exception as exc:
-            reply_text, model_highlights = self._fallback_reply(seat_details, latest_message, str(exc))
+            debug_info = traceback.format_exc()
+            reply_text, model_highlights = self._fallback_reply(
+                seat_details,
+                latest_message,
+                str(exc),
+                debug_info,
+            )
 
         seat_id_lookup = {detail["seat_id"] for detail in seat_details}
         highlight_ids = [seat_id for seat_id in model_highlights if seat_id in seat_id_lookup]
@@ -178,18 +185,27 @@ class AiAssistantService:
     def _strip_highlight_line(self, text: str) -> str:
         return re.sub(r"highlight_seats_list\s*:\s*\[[^\]]*\]\s*", "", text, flags=re.IGNORECASE).strip()
 
-    def _fallback_reply(self, seats: List[Dict], latest_message: str, error: str) -> tuple[str, List[str]]:
+    def _fallback_reply(
+        self,
+        seats: List[Dict],
+        latest_message: str,
+        error: str,
+        debug_info: Optional[str] = None,
+    ) -> tuple[str, List[str]]:
+        debug_block = f"\n\n```\n{debug_info.strip()}\n```" if debug_info else ""
         if seats:
             seat = seats[0]
             return (
                 f"I couldn't reach Gemini right now (reason: {error}). "
                 f"Based on the latest data, seat {seat['seat_number']} on "
                 f"{seat.get('floor_name', 'the selected floor')} is a close match for "
-                f"your request \"{latest_message}\". Please note availability changes quickly.",
+                f"your request \"{latest_message}\". Please note availability changes quickly."
+                f"{debug_block}",
                 [seat["seat_id"]],
             )
         return (
             f"Gemini is temporarily unavailable (reason: {error}). "
-            "No matching seats were found right now—please try again shortly.",
+            "No matching seats were found right now—please try again shortly."
+            f"{debug_block}",
             [],
         )
