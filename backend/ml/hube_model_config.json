@@ -1,11 +1,13 @@
 {
   "last_training_date": "2025-08-31 23:00:00",
-  "weekend_ratio": 0.00757164174576517,
+  "weekend_ratio": 0.173757164174576517,
   "model_type": "AutoARIMA",
   "season_length": 24,
   "training_period": "June-August 2025",
   "max_occupancy": 70,
   "min_occupancy": 0,
-  "weekday_avg": 28.117161,
-  "weekend_avg": 3.868124
+  "opening_hours": {
+    "start_hour": 8,
+    "end_hour": 22
+  }
 }
