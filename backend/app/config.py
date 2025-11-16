@@ -49,7 +49,7 @@ class Settings(BaseSettings):
     # Gemini Integration
     GEMINI_ENDPOINT_URL: Optional[str] = None
     GEMINI_API_KEY: Optional[str] = None
-    GEMINI_MODEL: str = "gemini-1.5-flash"
+    GEMINI_MODEL: str = "gemini-2.5-pro"
     GEMINI_REQUEST_TIMEOUT_SECONDS: int = 180
 
     # Data Files
