@@ -12,6 +12,7 @@ import type { ImageSourcePropType } from 'react-native';
 import { Image } from 'react-native';
 import { accessibilityMapping, type AccessibilityFeature } from '@/utils/accessibilityIcons';
 import type { LocationStatus } from '@/api/types/location_types';
+import { Users } from 'lucide-react-native';
 
 interface LocationCardProps {
   name: string;
@@ -22,7 +23,8 @@ interface LocationCardProps {
     end_time: Date;
   };
   accessibility: AccessibilityFeature[] | null;
-  status: LocationStatus;
+  status?: LocationStatus;
+  maxTableCapacity?: number | null;
   onPress: () => void;
 }
 
@@ -33,6 +35,7 @@ export default function LocationCard({
   schedule,
   accessibility,
   status,
+  maxTableCapacity,
   onPress,
 }: LocationCardProps) {
   const getStatusStyle = (status: LocationStatus) => {
@@ -48,7 +51,8 @@ export default function LocationCard({
     }
   };
 
-  const statusStyle = getStatusStyle(status);
+  const statusStyle = getStatusStyle(status || 'open');
+  const hasTableInfo = typeof maxTableCapacity === 'number';
 
   return (
     <Pressable onPress={onPress}>
@@ -72,11 +76,13 @@ export default function LocationCard({
             alignItems="center"
             bg="$blue100"
           >
-            <Image
-              source={image}
-              alt={name}
-              style={{ width: '100%', height: '100%', resizeMode: 'cover' }}
-            />
+            {image && (
+              <Image
+                source={image}
+                alt={name}
+                style={{ width: '100%', height: '100%', resizeMode: 'cover' }}
+              />
+            )}
           </Box>
         </Box>
 
@@ -86,17 +92,19 @@ export default function LocationCard({
             <Text fontSize="$lg" fontWeight="$bold" color="$black" flex={1}>
               {name}
             </Text>
-            <Badge
-              variant="solid"
-              bg={statusStyle.bg}
-              borderRadius="$full"
-              px="$2.5"
-              py="$0.5"
-            >
-              <Text fontSize="$xs" fontWeight="$semibold" color={statusStyle.color}>
-                {statusStyle.text}
-              </Text>
-            </Badge>
+            {status && (
+              <Badge
+                variant="solid"
+                bg={statusStyle.bg}
+                borderRadius="$full"
+                px="$2.5"
+                py="$0.5"
+              >
+                <Text fontSize="$xs" fontWeight="$semibold" color={statusStyle.color}>
+                  {statusStyle.text}
+                </Text>
+              </Badge>
+            )}
           </HStack>
 
           {/* Subject for lecturers */}
@@ -111,6 +119,15 @@ export default function LocationCard({
             <Text fontSize="$sm" color="$gray600">
               {`${new Date(schedule.start_time).toLocaleString([], { weekday: 'short', hour: '2-digit' })} - ${new Date(schedule.end_time).toLocaleTimeString([], { hour: '2-digit' })}`}
             </Text>
+          )}
+
+          {hasTableInfo && (
+            <HStack alignItems="center" space="sm">
+              <Icon as={Users} size="sm" color="$blue500" />
+              <Text fontSize="$sm" color="$gray700">
+                Max table size: {maxTableCapacity}
+              </Text>
+            </HStack>
           )}
 
           {accessibility && accessibility.length > 0 && (

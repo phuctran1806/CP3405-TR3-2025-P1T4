@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   ScrollView,
   RefreshControl,
@@ -8,6 +8,7 @@ import {
 import {
   Box,
   VStack,
+  HStack,
   Text,
   Spinner,
   Input,
@@ -25,7 +26,10 @@ import LocationCard from "@/components/cards/LocationCard";
 import { getLocations } from "@/api/locations";
 import type { LocationResponse, LocationStatus } from "@/api/types/location_types";
 import type { AccessibilityFeature } from "@/utils/accessibilityIcons";
-import { Filter, Sparkles } from "lucide-react-native"
+import { Filter, Sparkles, Users } from "lucide-react-native";
+import { getFloors } from "@/api/floors";
+import { getAvailableSeats } from "@/api/seats";
+import type { SeatResponse } from "@/api/seats";
 
 interface Location {
   id: string;
@@ -42,10 +46,12 @@ export default function HomeStudents() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [seatsByLocation, setSeatsByLocation] = useState<Map<string, Map<string, SeatResponse[]>>>(new Map());
 
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState<AccessibilityFeature[]>([]);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [groupSize, setGroupSize] = useState<number | null>(1);
 
   const router = useRouter();
 
@@ -71,10 +77,51 @@ export default function HomeStudents() {
     });
   };
 
+  const fetchSeatsForLocation = async (locationId: string): Promise<SeatResponse[]> => {
+    try {
+      const floorsRes = await getFloors({ location_id: locationId });
+      if (!floorsRes.ok || !floorsRes.data) {
+        return [];
+      }
+
+      const allSeats: SeatResponse[] = [];
+      for (const floor of floorsRes.data) {
+        const seatsRes = await getAvailableSeats({ floor_id: floor.id });
+        if (seatsRes.ok && seatsRes.data) {
+          allSeats.push(...seatsRes.data);
+        }
+      }
+      return allSeats;
+    } catch (error) {
+      console.error(`Error fetching seats for location ${locationId}:`, error);
+      return [];
+    }
+  };
+
   const fetchLocations = async () => {
     const res = await getLocations();
     if (res.ok) {
-      setLocations(mapLocations(res.data));
+      const mappedLocations = mapLocations(res.data);
+      setLocations(mappedLocations);
+
+      // Fetch seats for all locations
+      const seatsMap = new Map<string, Map<string, SeatResponse[]>>();
+
+      await Promise.all(
+        mappedLocations.map(async (loc) => {
+          const seats = await fetchSeatsForLocation(loc.id);
+          const floorMap = new Map<string, SeatResponse[]>();
+
+          for (const seat of seats) {
+            const floorId = seat.floor_id;
+            if (!floorMap.has(floorId)) { floorMap.set(floorId, []) };
+            floorMap.get(floorId)!.push(seat);
+          }
+
+          seatsMap.set(loc.id, floorMap);
+        })
+      )
+      setSeatsByLocation(seatsMap);
     }
     setLoading(false);
   };
@@ -95,13 +142,145 @@ export default function HomeStudents() {
     router.push(`/dashboard/${locationId}`);
   };
 
+  const maxCapacity = useMemo(() => {
+    if (!locations.length) {
+      return 20;
+    }
+    return locations.reduce((max, loc) => {
+      const capacity = typeof loc.total_capacity === "number" ? loc.total_capacity : 0;
+      return capacity > max ? capacity : max;
+    }, 0);
+  }, [locations]);
+
+  useEffect(() => {
+    if (groupSize && maxCapacity > 0 && groupSize > maxCapacity) {
+      setGroupSize(maxCapacity);
+    }
+  }, [groupSize, maxCapacity]);
+
+  const handleGroupSizeInput = (value: string) => {
+    const numeric = value.replace(/[^0-9]/g, "");
+    if (!numeric) {
+      setGroupSize(null);
+      return;
+    }
+    const parsed = parseInt(numeric, 10);
+    if (Number.isNaN(parsed)) {
+      setGroupSize(null);
+      return;
+    }
+    const limit = maxCapacity > 0 ? maxCapacity : parsed;
+    const clamped = Math.max(1, Math.min(limit, parsed));
+    setGroupSize(clamped);
+  };
+
+  const incrementGroupSize = () => {
+    setGroupSize((prev) => {
+      const base = prev && prev > 0 ? prev : 0;
+      const next = base + 1;
+      const limit = maxCapacity > 0 ? maxCapacity : next;
+      return Math.min(limit, next);
+    });
+  };
+
+  const decrementGroupSize = () => {
+    setGroupSize((prev) => {
+      if (!prev || prev <= 1) {
+        return 1;
+      }
+      return prev - 1;
+    });
+  };
+
+  const getMaxTableCapacity = (locationId: string): number | null => {
+    const floorsMap = seatsByLocation.get(locationId) || new Map<string, SeatResponse[]>();
+
+    let globalMax = null;
+
+    // Iterate each floor
+    for (const floorSeats of floorsMap.values()) {
+      // Seats with valid table numbers for THIS floor
+      const seatsWithTable = floorSeats.filter(
+        (seat) => seat.table_number !== null && seat.table_number !== undefined
+      );
+
+      if (seatsWithTable.length === 0) {
+        continue; // this floor has no tables → skip
+      }
+
+      // Group seats by table_number
+      const seatsByTable = new Map<number, number>();
+      for (const seat of seatsWithTable) {
+        const tableNum = seat.table_number!;
+        seatsByTable.set(tableNum, (seatsByTable.get(tableNum) || 0) + 1);
+      }
+
+      // Max table capacity on this floor
+      const floorMax = Math.max(...seatsByTable.values());
+
+      // Update global max
+      if (globalMax === null || floorMax > globalMax) {
+        globalMax = floorMax;
+      }
+    }
+
+    return globalMax;
+  };
+
+
   const filteredLocations = locations.filter((loc) => {
     const matchesSearch = loc.name.toLowerCase().includes(searchQuery.toLowerCase());
+
     const matchesFilters =
       filters.length === 0 || filters.every((f) => loc.accessibility.includes(f));
 
-    return matchesSearch && matchesFilters;
+    // --- Group size logic ---
+    let matchesGroupSize = true;
+
+    if (groupSize && groupSize > 1) {
+      const locationFloorsSeats =
+        seatsByLocation.get(loc.id) || new Map<string, SeatResponse[]>();
+
+      let foundMatchingFloor = false;
+
+      // Iterate through all floors
+      for (const floorSeats of locationFloorsSeats.values()) {
+        // Filter seats with valid table numbers
+        const seatsWithTable = floorSeats.filter(
+          (seat) => seat.table_number !== null && seat.table_number !== undefined
+        );
+
+        if (seatsWithTable.length === 0) {
+          // No tables on this floor
+          if (floorSeats.length === 0) foundMatchingFloor = true;
+          continue;
+        }
+
+        // Group seats by table_number
+        const seatsByTable = new Map<number, number>();
+        for (const seat of seatsWithTable) {
+          const tableNum = seat.table_number!;
+          seatsByTable.set(tableNum, (seatsByTable.get(tableNum) || 0) + 1);
+        }
+
+        // Check if any table has enough seats for the group
+        const thisFloorHasLargeEnoughTable = Array.from(seatsByTable.values()).some(
+          (count) => count >= groupSize
+        );
+
+        if (thisFloorHasLargeEnoughTable) {
+          foundMatchingFloor = true;
+          break;
+        }
+      }
+
+      matchesGroupSize = foundMatchingFloor;
+    }
+
+    return matchesSearch && matchesFilters && matchesGroupSize;
   });
+
+  const displayMaxCapacity = maxCapacity > 0 ? maxCapacity : 1;
 
   if (!mounted) {
     return (
@@ -151,34 +330,95 @@ export default function HomeStudents() {
           </Box>
           <Text fontSize="$sm" color="white" opacity={0.95} mb="$3">
             Based on your study patterns and preferences, we recommend the Library
-            for your next study session. It has quiet zones with power outlets and is typically 
+            for your next study session. It has quiet zones with power outlets and is typically
             less crowded at this time.
           </Text>
         </Box>
 
         {/* Search + Filter Row */}
-        <Box mb="$4" flexDirection="row" alignItems="center" justifyContent="space-between">
-          <Box flex={1} mr="$3">
-            <Input>
-              <InputField
-                placeholder="Search location..."
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-              />
-            </Input>
-          </Box>
+        <Box mb="$4">
+          <HStack alignItems="center" justifyContent="space-between" space="md">
+            <Box flex={1}>
+              <Input>
+                <InputField
+                  placeholder="Search location..."
+                  value={searchQuery}
+                  onChangeText={setSearchQuery}
+                />
+              </Input>
+            </Box>
 
-          <Pressable
-            onPress={() => setIsFilterOpen(true)}
-            style={{
-              backgroundColor: "#3b82f6",
-              paddingVertical: 10,
-              paddingHorizontal: 14,
-              borderRadius: 8,
-            }}
-          >
-            <Text color="white" fontWeight="bold"><Filter size={16} /></Text>
-          </Pressable>
+            <Pressable
+              onPress={() => setIsFilterOpen(true)}
+              style={{
+                backgroundColor: "#3b82f6",
+                paddingVertical: 10,
+                paddingHorizontal: 14,
+                borderRadius: 8,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <Filter size={18} color="#fff" />
+            </Pressable>
+          </HStack>
+
+          <Box mt="$4">
+            <HStack alignItems="center" space="sm" mb="$2">
+              <Users size={18} color="#3b82f6" />
+              <Text fontWeight="$semibold" color="$gray700">
+                Group size
+              </Text>
+            </HStack>
+            <HStack alignItems="center" space="sm">
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Decrease group size"
+                onPress={decrementGroupSize}
+                style={{
+                  backgroundColor: groupSize && groupSize > 1 ? "#dbeafe" : "#e2e8f0",
+                  paddingVertical: 12,
+                  paddingHorizontal: 16,
+                  borderRadius: 8,
+                }}
+              >
+                <Text fontSize="$lg" fontWeight="bold" color="#1f2937">
+                  -
+                </Text>
+              </Pressable>
+
+              <Box flex={1}>
+                <Input>
+                  <InputField
+                    placeholder="Enter group size"
+                    value={groupSize ? groupSize.toString() : ""}
+                    onChangeText={handleGroupSizeInput}
+                    keyboardType="number-pad"
+                    returnKeyType="done"
+                  />
+                </Input>
+              </Box>
+
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Increase group size"
+                onPress={incrementGroupSize}
+                style={{
+                  backgroundColor: "#3b82f6",
+                  paddingVertical: 12,
+                  paddingHorizontal: 16,
+                  borderRadius: 8,
+                }}
+              >
+                <Text fontSize="$lg" fontWeight="bold" color="#fff">
+                  +
+                </Text>
+              </Pressable>
+            </HStack>
+            <Text fontSize="$xs" color="$gray500" mt="$2">
+              Filter study spaces that can accommodate your group (max {displayMaxCapacity} seats).
+            </Text>
+          </Box>
         </Box>
 
         <Text fontSize="$xl" fontWeight="$bold" color="$black" mb="$4">
@@ -187,19 +427,23 @@ export default function HomeStudents() {
 
         <VStack space="md">
           {filteredLocations.length > 0 ? (
-            filteredLocations.map((loc) => (
-              <LocationCard
-                key={loc.id}
-                name={loc.name}
-                image={loc.image_url ? { uri: `${loc.image_url}` } : { uri: "None" }}
-                accessibility={loc.accessibility}
-                status={loc.status as LocationStatus}
-                onPress={() => handleLocationPress(loc.id)}
-              />
-            ))
+            filteredLocations.map((loc) => {
+              const maxTableCapacity = getMaxTableCapacity(loc.id);
+              return (
+                <LocationCard
+                  key={loc.id}
+                  name={loc.name}
+                  image={loc.image_url ? { uri: `${loc.image_url}` } : { uri: "None" }}
+                  accessibility={loc.accessibility}
+                  status={loc.status as LocationStatus}
+                  maxTableCapacity={maxTableCapacity}
+                  onPress={() => handleLocationPress(loc.id)}
+                />
+              );
+            })
           ) : (
             <Text color="$gray600" textAlign="center">
-              No matching locations.
+              No study spaces can accommodate your group size right now. Try adjusting your filters.
             </Text>
           )}
         </VStack>
