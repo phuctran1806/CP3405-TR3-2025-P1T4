@@ -1,9 +1,11 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import {
   ScrollView,
   RefreshControl,
   View,
   ActivityIndicator,
+  Animated,
+  Linking,
 } from "react-native";
 import {
   Box,
@@ -31,6 +33,7 @@ import { getFloors } from "@/api/floors";
 import { getAvailableSeats } from "@/api/seats";
 import type { SeatResponse } from "@/api/seats";
 import { resolveAssetUrl } from "@/utils/assetUrl";
+import { API_BASE_URL } from "@/api/config";
 
 interface Location {
   id: string;
@@ -56,7 +59,39 @@ export default function HomeStudents() {
 
   const router = useRouter();
 
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+  const aiDemoUrl = `${API_BASE_URL}/ai/demo`;
+
   useEffect(() => setMounted(true), []);
+
+  useEffect(() => {
+    const animation = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 1.04,
+          duration: 1800,
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 1,
+          duration: 1800,
+          useNativeDriver: true,
+        }),
+      ])
+    );
+    animation.start();
+    return () => animation.stop();
+  }, [pulseAnim]);
+
+  const handleOpenAiDemo = () => {
+    if (typeof window !== "undefined" && window?.open) {
+      window.open(aiDemoUrl, "_blank", "noopener,noreferrer");
+      return;
+    }
+    Linking.openURL(aiDemoUrl).catch(() => {
+      router.push("/ai/demo");
+    });
+  };
 
   const mapLocations = (backendLocations: LocationResponse[]): Location[] => {
     return backendLocations.map((loc) => {
@@ -273,32 +308,44 @@ export default function HomeStudents() {
       >
         {/* TODO: Replace this with real data fetched from backend in the next PR */}
         {/* AI Recommendation Section */}
-        <Box
-          mb="$4"
-          p="$4"
-          bg="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
-          borderRadius="$lg"
-          style={{
-            backgroundColor: "#667eea",
-            shadowColor: "#000",
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.1,
-            shadowRadius: 4,
-            elevation: 3,
-          }}
+        <Pressable
+          onPress={handleOpenAiDemo}
+          accessibilityRole="button"
+          style={{ borderRadius: 20, marginBottom: 16 }}
         >
-          <Box flexDirection="row" alignItems="center" mb="$2">
-            <Sparkles size={20} color="#fbbf24" />
-            <Text ml="$2" fontSize="$md" fontWeight="$bold" color="white">
-              AI Recommendation
-            </Text>
-          </Box>
-          <Text fontSize="$sm" color="white" opacity={0.95} mb="$3">
-            Based on your study patterns and preferences, we recommend the Library
-            for your next study session. It has quiet zones with power outlets and is typically 
-            less crowded at this time.
-          </Text>
-        </Box>
+          <Animated.View
+            style={{
+              transform: [{ scale: pulseAnim }],
+            }}
+          >
+            <Box
+              p="$4"
+              bg="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+              borderRadius="$lg"
+              style={{
+                backgroundColor: "#667eea",
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 3 },
+                shadowOpacity: 0.2,
+                shadowRadius: 8,
+                elevation: 6,
+              }}
+            >
+              <Box flexDirection="row" alignItems="center" mb="$2">
+                <Sparkles size={20} color="#fbbf24" />
+                <Text ml="$2" fontSize="$md" fontWeight="$bold" color="white">
+                  AI Recommendation
+                </Text>
+              </Box>
+              <Text fontSize="$sm" color="white" opacity={0.95} mb="$2">
+                Gemini found a quieter zone with reliable power outlets that matches your recent searches.
+              </Text>
+              <Text fontSize="$xs" color="white" opacity={0.75}>
+                Tap to open the live AI seat advisor.
+              </Text>
+            </Box>
+          </Animated.View>
+        </Pressable>
 
         {/* Search + Filter Row */}
         <Box mb="$4">

@@ -652,7 +652,13 @@
         renderFloors();
         if (data.last_updated) {
           const ts = new Date(data.last_updated);
-          lastUpdatedEl.textContent = `Last updated ${ts.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+          const shanghaiTime = ts.toLocaleString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true,
+            timeZone: 'Asia/Shanghai',
+          });
+          lastUpdatedEl.textContent = `Last updated ${shanghaiTime} (GMT+8)`;
         } else {
           lastUpdatedEl.textContent = 'Live data';
         }
