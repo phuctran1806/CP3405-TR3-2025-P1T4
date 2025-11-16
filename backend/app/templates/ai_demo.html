@@ -44,6 +44,14 @@
       height: 91vh;
     }
 
+    @media (max-width: 768px) {
+      .layout {
+        grid-template-columns: 1fr;
+        padding: 1rem;
+        height: auto;
+      }
+    }
+
     .layout.chat-hidden {
       grid-template-columns: minmax(0, 1fr);
     }
@@ -77,12 +85,37 @@
       align-items: center;
       justify-content: space-between;
       gap: 1rem;
+      flex-wrap: wrap;
     }
 
     .header-actions {
       display: flex;
       align-items: center;
       gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    @media (max-width: 768px) {
+      .seat-panel {
+        gap: 0.75rem;
+      }
+
+      .seat-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+      }
+
+      .header-actions {
+        width: 100%;
+        justify-content: space-between;
+      }
+
+      .meta-pill,
+      .chat-toggle {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.6rem;
+      }
     }
 
     .chat-toggle {
@@ -652,13 +685,13 @@
         renderFloors();
         if (data.last_updated) {
           const ts = new Date(data.last_updated);
-          const shanghaiTime = ts.toLocaleString('en-US', {
+          const formatter = new Intl.DateTimeFormat('en-US', {
             hour: '2-digit',
             minute: '2-digit',
             hour12: true,
             timeZone: 'Asia/Shanghai',
           });
-          lastUpdatedEl.textContent = `Last updated ${shanghaiTime} (GMT+8)`;
+          lastUpdatedEl.textContent = `Last updated ${formatter.format(ts)} (GMT+8)`;
         } else {
           lastUpdatedEl.textContent = 'Live data';
         }
