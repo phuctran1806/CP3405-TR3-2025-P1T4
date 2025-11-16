@@ -10,6 +10,7 @@ import Svg, { Defs, LinearGradient, Stop, G, SvgXml } from "react-native-svg";
 import { SeatMarker } from "./SeatMarker";
 import { VIEWBOX_WIDTH, VIEWBOX_HEIGHT, ASPECT_RATIO } from "./MapConfig";
 import type { SeatResponse } from "@/api/seats";
+import { API_BASE_URL } from "@/api/config";
 
 interface FloorMapContentProps {
   width: number;
@@ -48,10 +49,27 @@ export const FloorMapContent: React.FC<FloorMapContentProps> = ({
   const [svgXml, setSvgXml] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!map_url) {
+      setSvgXml(null);
+      return;
+    }
+
+    const resolveMapUrl = () => {
+      if (map_url.startsWith("http")) return map_url;
+      const cleaned = map_url.replace(/^\/+/, "");
+      return `${API_BASE_URL}/${cleaned}`;
+    };
+
     async function loadSvg() {
-      const res = await fetch(`http://localhost:8080/${map_url}`);
-      const text = await res.text();
-      setSvgXml(text);
+      try {
+        const res = await fetch(resolveMapUrl());
+        if (!res.ok) throw new Error("Failed to load map");
+        const text = await res.text();
+        setSvgXml(text);
+      } catch (err) {
+        console.warn("Unable to load floor map", err);
+        setSvgXml(null);
+      }
     }
     loadSvg();
   }, [map_url]);

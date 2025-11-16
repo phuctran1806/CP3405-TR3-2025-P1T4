@@ -14,6 +14,7 @@ class SeatBase(BaseModel):
     """Base seat schema."""
     x_coordinate: float
     y_coordinate: float
+    table_number: int
     seat_number: str
     seat_type: SeatType
     has_power_outlet: bool = False
@@ -45,6 +46,7 @@ class SeatAvailability(BaseModel):
 
 class SeatUpdate(BaseModel):
     id: str
+    table_number: Optional[int] = None
     seat_number: Optional[str] = None
     seat_type: Optional[SeatType] = None
     has_power_outlet: Optional[bool] = None

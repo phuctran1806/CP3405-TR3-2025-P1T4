@@ -12,3 +12,5 @@ backend/*/__pycache__/
 
 # Database backup files only (exclude backups but include main database)
 backend/*.db.backup.*
+SSH_COMMANDS.txt
+jcu_library.db.backup.20251103_103743

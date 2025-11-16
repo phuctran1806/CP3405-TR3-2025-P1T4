@@ -14,6 +14,7 @@ export interface Seat {
   x_coordinate: number;
   y_coordinate: number;
   status: string;
+  table_number: number | null;
 }
 
 export type SeatResponse = Seat & {

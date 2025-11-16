@@ -3,8 +3,10 @@ Application configuration settings.
 Loads environment variables and provides configuration for the application.
 """
 
+from pathlib import Path
+from typing import List, Optional
+
 from pydantic_settings import BaseSettings
-from typing import List
 
 
 class Settings(BaseSettings):
@@ -25,16 +27,35 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     
     # CORS
-    ALLOWED_ORIGINS: str = "http://localhost:3000,http://localhost:5173"
+    ALLOWED_ORIGINS: str = "http://localhost:3000,http://localhost:5173,http://127.0.0.1:8081,http://localhost:8081"
     
     # IoT Simulation
     IOT_SIMULATION_ENABLED: bool = True
     IOT_UPDATE_INTERVAL_SECONDS: int = 60
+
+    # Images
+    IMAGE_UPLOAD_DIR: str = "/var/www/cp3405-uploads"
+
+    # AI Demo / Seat Refresh
+    SEAT_REFRESH_INTERVAL_SECONDS: int = 60
+    SEAT_REFRESH_DRIFT_RATIO: float = 0.06
+    SEAT_TARGET_OCCUPANCY_RATIO: float = 0.65
     
     # Admin User
     ADMIN_EMAIL: str = "admin@jcu.edu.au"
     ADMIN_PASSWORD: str = "admin123"
     ADMIN_NAME: str = "System Administrator"
+
+    # Gemini Integration
+    GEMINI_ENDPOINT_URL: Optional[str] = None
+    GEMINI_API_KEY: Optional[str] = None
+    GEMINI_MODEL: str = "gemini-2.5-pro"
+    GEMINI_REQUEST_TIMEOUT_SECONDS: int = 180
+
+    # Data Files
+    SEATING_DATA_PATH: str = str(
+        Path(__file__).resolve().parents[3] / "jcu_seatings.csv"
+    )
     
     class Config:
         env_file = ".env"
@@ -48,4 +69,3 @@ class Settings(BaseSettings):
 
 # Global settings instance
 settings = Settings()
-

@@ -41,6 +41,7 @@ class Seat(Base):
     # Basic information
     seat_number = Column(String(20), nullable=False)
     seat_type = Column(Enum(SeatType), nullable=False, default=SeatType.INDIVIDUAL)
+    table_number = Column(Integer, nullable=True)
     
     # Features
     # TODO: prototype for now, if decide on future scaling then move this to a many to many relationship

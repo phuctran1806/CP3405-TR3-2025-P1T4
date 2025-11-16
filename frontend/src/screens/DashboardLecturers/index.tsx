@@ -9,6 +9,7 @@ import type { LecturerAssignmentResponse } from '@/api/types/lecturer_assignment
 import Header from './components/Header';
 import Statistics from './components/Statistics';
 import { LectureRoomMap } from './components/LectureRoomMap';
+import { resolveAssetUrl } from '@/utils/assetUrl';
 
 export default function DashboardLecturer() {
   const { location: locationId } = useLocalSearchParams();
@@ -62,7 +63,7 @@ export default function DashboardLecturer() {
         const venue: VenueDisplay = {
           id: assignment.id,
           name: locationData.name ?? "Unknown Venue",
-          image: locationData.image_url,
+          image: resolveAssetUrl(locationData.image_url),
           subject: assignment.subject,
           schedule: {
             start_time: assignment.start_time,

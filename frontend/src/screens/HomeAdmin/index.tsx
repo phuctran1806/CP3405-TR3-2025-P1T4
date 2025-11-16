@@ -20,11 +20,12 @@ import LocationCardAdmin from '@/components/cards/LocationCardAdmin';
 import DropDownMenu, { type TabType } from '@/components/DropDownMenu';
 import LecturerAssignmentCard from './components/LectureAssignmentCard';
 import { lecturerAssignments } from '@/utils/mockData/lectureAssignmentData';
+import { resolveAssetUrl } from '@/utils/assetUrl';
 
 interface CombinedLocation {
     id: string;
     name: string;
-    image: any;
+    image?: string;
     type: LocationType;
     status: LocationStatus;
     occupancy: number;
@@ -51,7 +52,7 @@ export default function HomeAdmin() {
                 const data = locations.data.map((loc) => ({
                     id: loc.id,
                     name: loc.name,
-                    image: loc.image_url,
+                    image: resolveAssetUrl(loc.image_url),
                     status: loc.status,
                     type: loc.location_type,
                     occupancy: loc.current_occupancy,

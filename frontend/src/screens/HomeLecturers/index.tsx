@@ -7,6 +7,7 @@ import { fetchLecturerAssignments } from '@/api/lecturer_assignment';
 import { getLocationById } from '@/api/locations';
 import { useSelectedVenue, type VenueDisplay } from '@/contexts/useSelectedVenue';
 import type { LecturerAssignmentResponse } from '@/api/types/lecturer_assignment_types';
+import { resolveAssetUrl } from '@/utils/assetUrl';
 
 export default function HomeLecturers() {
   const [venues, setVenues] = useState<VenueDisplay[]>([]);
@@ -37,7 +38,7 @@ export default function HomeLecturers() {
           return {
             id: assignment.id,
             name: location.name ?? "Unknown Venue",
-            image: location.image_url,
+            image: resolveAssetUrl(location.image_url),
             subject: assignment.subject,
             schedule: {
               start_time: assignment.start_time,
@@ -106,7 +107,7 @@ export default function HomeLecturers() {
               key={venue.id}
               name={venue.name}
               subject={venue.subject}
-              image={venue.image}
+              image={venue.image ? { uri: venue.image } : null}
               schedule={venue.schedule}
               accessibility={null}
               onPress={() => handleVenuePress(venue)}
