@@ -32,6 +32,18 @@ from .floor import (
 from .location import (
     LocationResponse
 )
+from .prediction import (
+    SeatingPredictionRequest,
+    SeatingPredictionResponse,
+    SeatSuggestionRequest,
+    SeatSuggestionResponse,
+    SeatSuggestionItem,
+)
+from .ai_demo import (
+    ChatMessage,
+    AiChatRequest,
+    AiChatResponse,
+)
 
 __all__ = [
     # User
@@ -58,5 +70,14 @@ __all__ = [
     "FloorWithSeats",
     # Location
     "LocationResponse",
+    # Predictions
+    "SeatingPredictionRequest",
+    "SeatingPredictionResponse",
+    "SeatSuggestionRequest",
+    "SeatSuggestionResponse",
+    "SeatSuggestionItem",
+    # AI Demo
+    "ChatMessage",
+    "AiChatRequest",
+    "AiChatResponse",
 ]
-

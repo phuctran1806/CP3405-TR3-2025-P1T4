@@ -315,53 +315,59 @@ def create_operating_hours(db, locations):
 
     hours = []
 
+    def get_location(name: str):
+        return next((loc for loc in locations if loc.name == name), None)
+
     # JCU Library - 24 hours on weekdays, limited on weekends
-    library = locations[0]
-    for day in range(7):
-        if day < 5:  # Monday to Friday
+    library = get_location("JCU Library")
+    if library:
+        for day in range(7):
+            if day < 5:  # Monday to Friday
+                hours.append(OperatingHours(
+                    id=str(uuid.uuid4()),
+                    location_id=library.id,
+                    day_of_week=day,
+                    is_24_hours=True,
+                    is_closed=False
+                ))
+            else:  # Weekend
+                hours.append(OperatingHours(
+                    id=str(uuid.uuid4()),
+                    location_id=library.id,
+                    day_of_week=day,
+                    open_time=time(8, 0),
+                    close_time=time(22, 0),
+                    is_24_hours=False,
+                    is_closed=False
+                ))
+
+    # Student Hub - Regular hours
+    hub = get_location("Student Hub")
+    if hub:
+        for day in range(7):
             hours.append(OperatingHours(
                 id=str(uuid.uuid4()),
-                location_id=library.id,
+                location_id=hub.id,
                 day_of_week=day,
-                is_24_hours=True,
-                is_closed=False
-            ))
-        else:  # Weekend
-            hours.append(OperatingHours(
-                id=str(uuid.uuid4()),
-                location_id=library.id,
-                day_of_week=day,
-                open_time=time(8, 0),
-                close_time=time(22, 0),
+                open_time=time(7, 0),
+                close_time=time(23, 0),
                 is_24_hours=False,
                 is_closed=False
             ))
 
-    # Student Hub - Regular hours
-    hub = locations[1]
-    for day in range(7):
-        hours.append(OperatingHours(
-            id=str(uuid.uuid4()),
-            location_id=hub.id,
-            day_of_week=day,
-            open_time=time(7, 0),
-            close_time=time(23, 0),
-            is_24_hours=False,
-            is_closed=False
-        ))
-
-    # Study Pod - Limited hours
-    pod = locations[2]
-    for day in range(7):
-        hours.append(OperatingHours(
-            id=str(uuid.uuid4()),
-            location_id=pod.id,
-            day_of_week=day,
-            open_time=time(8, 0),
-            close_time=time(20, 0),
-            is_24_hours=False,
-            is_closed=False
-        ))
+    # Study Pods - Limited hours
+    pods = get_location("Study Pods")
+    if pods:
+        for day in range(7):
+            hours.append(OperatingHours(
+                id=str(uuid.uuid4()),
+                location_id=pods.id,
+                day_of_week=day,
+                open_time=time(8, 0),
+                close_time=time(20, 0),
+                is_24_hours=False,
+                is_closed=False
+            ))
 
     db.add_all(hours)
     db.commit()

@@ -14,6 +14,8 @@ import type { LocationResponse } from '@/api/types/location_types';
 import { getFloors, type FloorResponse } from '@/api/floors';
 import { getDailyForecast, getWeeklyForecast } from '@/api/forecast';
 import type { DailyForecastResponse, WeeklyForecastResponse } from '@/api/types/forecast_types';
+import { resolveAssetUrl } from '@/utils/assetUrl';
+import type { AccessibilityFeature } from '@/utils/accessibilityIcons';
 
 export default function LocationDashboard() {
   const { location: locationId } = useLocalSearchParams();
@@ -337,9 +339,9 @@ export default function LocationDashboard() {
           name: location.name,
           occupancyPercentage: currentPercentage,  // ← Use the same source as pie chart
           accessibility: [
-            ...(location.has_power_outlet ? ['power'] : []),
-            ...(location.has_ac ? ['cool'] : []),
-            ...(location.is_quiet ? ['quiet'] : []),
+            ...(location.has_power_outlet ? (['power'] as AccessibilityFeature[]) : []),
+            ...(location.has_ac ? (['cool'] as AccessibilityFeature[]) : []),
+            ...(location.is_quiet ? (['quiet'] as AccessibilityFeature[]) : []),
           ] as AccessibilityFeature[],
         }}
         occupancyStatus={occupancyStatus}
@@ -388,7 +390,7 @@ export default function LocationDashboard() {
               id: locationId as string,
               name: location.name,
               occupancyPercentage: currentPercentage,
-              image: `/${location.image_url}`,
+              image: resolveAssetUrl(location.image_url),
             }}
             map={
               selectedFloor ? (
